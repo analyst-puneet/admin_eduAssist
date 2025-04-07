@@ -1,48 +1,76 @@
 const navigations = [
-  { name: "Dashboard", path: "/dashboard/default", icon: "dashboard" },
-  { label: "PAGES", type: "label" },
   {
-    name: "Session/Auth",
-    icon: "security",
-    children: [
-      { name: "Sign in", iconText: "SI", path: "/session/signin" },
-      { name: "Sign up", iconText: "SU", path: "/session/signup" },
-      { name: "Forgot Password", iconText: "FP", path: "/session/forgot-password" },
-      { name: "Error", iconText: "404", path: "/session/404" }
-    ]
+    name: "Dashboard",
+    path: "/dashboard/default",
+    icon: "dashboard"
   },
-  { label: "Components", type: "label" },
+
+  // Just a heading like "Dashboard", no children
   {
-    name: "Components",
-    icon: "favorite",
-    badge: { value: "30+", color: "secondary" },
+    name: "Quick Links",
+    icon: "apps"
+  },
+
+  {
+    name: "Front Office",
+    icon: "support_agent",
     children: [
-      { name: "Auto Complete", path: "/material/autocomplete", iconText: "A" },
-      { name: "Buttons", path: "/material/buttons", iconText: "B" },
-      { name: "Checkbox", path: "/material/checkbox", iconText: "C" },
-      { name: "Dialog", path: "/material/dialog", iconText: "D" },
-      { name: "Expansion Panel", path: "/material/expansion-panel", iconText: "E" },
-      { name: "Form", path: "/material/form", iconText: "F" },
-      { name: "Icons", path: "/material/icons", iconText: "I" },
-      { name: "Menu", path: "/material/menu", iconText: "M" },
-      { name: "Progress", path: "/material/progress", iconText: "P" },
-      { name: "Radio", path: "/material/radio", iconText: "R" },
-      { name: "Switch", path: "/material/switch", iconText: "S" },
-      { name: "Slider", path: "/material/slider", iconText: "S" },
-      { name: "Snackbar", path: "/material/snackbar", iconText: "S" },
-      { name: "Table", path: "/material/table", iconText: "T" }
+      { name: "Admission Enquiry", path: "/front-office/admission-enquiry", iconText: "AE" },
+      { name: "Visitor Book", path: "/front-office/visitor-book", iconText: "VB" }
     ]
   },
   {
-    name: "Charts",
-    icon: "trending_up",
-    children: [{ name: "Echarts", path: "/charts/echarts", iconText: "E" }]
+    name: "Student Information",
+    icon: "person",
+    children: [
+      { name: "Student Details", path: "/student/details", iconText: "SD" },
+      { name: "Attendance", path: "/student/attendance", iconText: "AT" }
+    ]
   },
   {
-    name: "Documentation",
-    icon: "launch",
-    type: "extLink",
-    path: "http://demos.ui-lib.com/matx-react-doc/"
+    name: "Fees Collection",
+    icon: "attach_money",
+    children: [
+      { name: "Collect Fees", path: "/fees/collect", iconText: "CF" },
+      { name: "Fees Reports", path: "/fees/reports", iconText: "FR" }
+    ]
+  },
+  {
+    name: "Online Course",
+    icon: "cast_for_education",
+    children: [
+      { name: "Course List", path: "/online-course/list", iconText: "CL" },
+      { name: "Assignments", path: "/online-course/assignments", iconText: "AS" }
+    ]
+  },
+  {
+    name: "Multi Branch",
+    icon: "account_tree",
+    children: [{ name: "Manage Branches", path: "/multi-branch/manage", iconText: "MB" }]
+  },
+  {
+    name: "Gmeet Live Classes",
+    icon: "videocam",
+    children: [
+      { name: "Schedule Class", path: "/gmeet/schedule", iconText: "SC" },
+      { name: "Join Class", path: "/gmeet/join", iconText: "JC" }
+    ]
+  },
+  {
+    name: "Zoom Live Classes",
+    icon: "video_call",
+    children: [
+      { name: "Schedule Zoom", path: "/zoom/schedule", iconText: "SZ" },
+      { name: "Join Zoom", path: "/zoom/join", iconText: "JZ" }
+    ]
+  },
+  {
+    name: "Behaviour Records",
+    icon: "fact_check",
+    children: [
+      { name: "Add Record", path: "/behaviour/add", iconText: "AR" },
+      { name: "Record List", path: "/behaviour/list", iconText: "RL" }
+    ]
   }
 ];
 
