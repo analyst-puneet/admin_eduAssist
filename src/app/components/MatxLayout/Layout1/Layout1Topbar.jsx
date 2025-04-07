@@ -26,6 +26,7 @@ import { MatxMenu, MatxSearchBox } from "app/components";
 import { NotificationBar } from "app/components/NotificationBar";
 import { themeShadows } from "app/components/MatxTheme/themeColors";
 import { topBarHeight } from "app/utils/constant";
+import { MdDarkMode } from "react-icons/md";
 
 // STYLED COMPONENTS
 const StyledIconButton = styled(IconButton)(({ theme }) => ({
@@ -104,11 +105,18 @@ const Layout1Topbar = () => {
   return (
     <TopbarRoot>
       <TopbarContainer>
-        <Box display="flex">
-          <StyledIconButton onClick={handleSidebarToggle}>
+        <Box display="flex" alignItems="center" gap={1}>
+          <StyledIconButton onClick={handleSidebarToggle} sx={{ paddingRight: 0 }}>
             <Menu />
           </StyledIconButton>
+          <Box component="span" sx={{ fontWeight: 600, fontSize: "1.1rem", color: "black" }}>
+            Mount Carnel School
+          </Box>
+        </Box>
+        <Box display="flex" alignItems="center">
+          <MatxSearchBox />
 
+          {/* Moved icon box to right side after search */}
           <IconBox>
             <StyledIconButton>
               <MailOutline />
@@ -119,19 +127,14 @@ const Layout1Topbar = () => {
             </StyledIconButton>
 
             <StyledIconButton>
-              <StarOutline />
+              {/* <StarOutline /> */}
+              <MdDarkMode />
             </StyledIconButton>
           </IconBox>
-        </Box>
 
-        <Box display="flex" alignItems="center">
-          <MatxSearchBox />
+          <NotificationProvider>{/* <NotificationBar /> */}</NotificationProvider>
 
-          <NotificationProvider>
-            <NotificationBar />
-          </NotificationProvider>
-
-          <ShoppingCart />
+          {/* <ShoppingCart /> */}
 
           <MatxMenu
             menuButton={
@@ -142,7 +145,8 @@ const Layout1Topbar = () => {
 
                 <Avatar src={user.avatar} sx={{ cursor: "pointer" }} />
               </UserMenu>
-            }>
+            }
+          >
             <StyledItem>
               <Link to="/">
                 <Home />
