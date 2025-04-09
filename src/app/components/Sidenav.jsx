@@ -1,12 +1,13 @@
-import { Fragment } from "react";
+// src/app/components/Sidenav.jsx
+import { Fragment, useState } from "react";
 import Scrollbar from "react-perfect-scrollbar";
 import styled from "@mui/material/styles/styled";
 
 import { MatxVerticalNav } from "app/components";
 import useSettings from "app/hooks/useSettings";
 import navigations from "app/navigations";
+import QuickLinks from "./QuickLinks"; // 👈 import it
 
-// STYLED COMPONENTS
 const StyledScrollBar = styled(Scrollbar)(() => ({
   paddingLeft: "1rem",
   paddingRight: "1rem",
@@ -26,6 +27,7 @@ const SideNavMobile = styled("div")(({ theme }) => ({
 }));
 
 export default function Sidenav({ children }) {
+  const [showQuickLinks, setShowQuickLinks] = useState(false);
   const { settings, updateSettings } = useSettings();
 
   const updateSidebarMode = (sidebarSettings) => {
@@ -41,14 +43,32 @@ export default function Sidenav({ children }) {
     });
   };
 
+  // src/app/components/Sidenav.jsx
+  const customNavs = navigations.map((nav) => {
+    if (nav.name === "Quick Links") {
+      return {
+        ...nav,
+        type: "label",
+        onClick: (e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          setShowQuickLinks(true);
+        }
+      };
+    }
+    return nav;
+  });
+
   return (
     <Fragment>
       <StyledScrollBar options={{ suppressScrollX: true }}>
         {children}
-        <MatxVerticalNav items={navigations} />
+        <MatxVerticalNav items={customNavs} />
       </StyledScrollBar>
 
-      <SideNavMobile onClick={() => updateSidebarMode({ mode: "close" })} />
+      {!showQuickLinks && <SideNavMobile onClick={() => updateSidebarMode({ mode: "close" })} />}
+
+      <QuickLinks open={showQuickLinks} onClose={() => setShowQuickLinks(false)} />
     </Fragment>
   );
 }

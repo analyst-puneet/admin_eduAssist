@@ -85,12 +85,31 @@ export default function MatxVerticalNav({ items }) {
 
   const renderLevels = (data) => {
     return data.map((item, index) => {
-      if (item.type === "label")
+      if (item.type === "label") {
         return (
-          <ListLabel key={index} mode={mode} className="sidenavHoverShow">
-            {item.label}
-          </ListLabel>
+          <Box
+            key={index}
+            onClick={item.onClick}
+            sx={{
+              px: 2,
+              py: 1,
+              cursor: "pointer",
+              color: "text.secondary",
+              fontWeight: 600,
+              display: "flex",
+              alignItems: "center",
+              gap: 1,
+              textTransform: "uppercase",
+              "&:hover": {
+                backgroundColor: "action.hover"
+              }
+            }}
+          >
+            <Icon fontSize="small">{item.icon}</Icon>
+            <span>{item.name}</span>
+          </Box>
         );
+      }
 
       if (item.children) {
         return (
@@ -98,58 +117,60 @@ export default function MatxVerticalNav({ items }) {
             {renderLevels(item.children)}
           </MatxVerticalNavExpansionPanel>
         );
-      } else if (item.type === "extLink") {
-        return (
-          <ExternalLink
-            key={index}
-            href={item.path}
-            className={`${mode === "compact" && "compactNavItem"}`}
-            rel="noopener noreferrer"
-            target="_blank">
-            <ButtonBase key={item.name} name="child" sx={{ width: "100%" }}>
-              {(() => {
-                if (item.icon) {
-                  return <Icon className="icon">{item.icon}</Icon>;
-                } else {
-                  return <span className="item-icon icon-text">{item.iconText}</span>;
-                }
-              })()}
+      }
+
+      return (
+        <InternalLink key={index}>
+          {item.onClick ? (
+            <ButtonBase onClick={item.onClick} sx={{ width: "100%" }}>
+              {item.icon ? (
+                <Icon className="icon" sx={{ width: 36 }}>
+                  {item.icon}
+                </Icon>
+              ) : (
+                <Fragment>
+                  <BulletIcon sx={{ display: mode === "compact" && "none" }} />
+                  <Box
+                    sx={{
+                      ml: "20px",
+                      fontSize: "11px",
+                      display: mode !== "compact" && "none"
+                    }}
+                  >
+                    {item.iconText}
+                  </Box>
+                </Fragment>
+              )}
               <StyledText mode={mode} className="sidenavHoverShow">
                 {item.name}
               </StyledText>
-              <Box mx="auto"></Box>
+              <Box mx="auto" />
               {item.badge && <BadgeValue>{item.badge.value}</BadgeValue>}
             </ButtonBase>
-          </ExternalLink>
-        );
-      } else {
-        return (
-          <InternalLink key={index}>
+          ) : (
             <NavLink
               to={item.path}
               className={({ isActive }) =>
                 isActive
                   ? `navItemActive ${mode === "compact" && "compactNavItem"}`
                   : `${mode === "compact" && "compactNavItem"}`
-              }>
-              <ButtonBase key={item.name} name="child" sx={{ width: "100%" }}>
-                {item?.icon ? (
+              }
+            >
+              <ButtonBase sx={{ width: "100%" }}>
+                {item.icon ? (
                   <Icon className="icon" sx={{ width: 36 }}>
                     {item.icon}
                   </Icon>
                 ) : (
                   <Fragment>
-                    <BulletIcon
-                      className={`nav-bullet`}
-                      sx={{ display: mode === "compact" && "none" }}
-                    />
+                    <BulletIcon sx={{ display: mode === "compact" && "none" }} />
                     <Box
-                      className="nav-bullet-text"
                       sx={{
                         ml: "20px",
                         fontSize: "11px",
                         display: mode !== "compact" && "none"
-                      }}>
+                      }}
+                    >
                       {item.iconText}
                     </Box>
                   </Fragment>
@@ -157,17 +178,13 @@ export default function MatxVerticalNav({ items }) {
                 <StyledText mode={mode} className="sidenavHoverShow">
                   {item.name}
                 </StyledText>
-
                 <Box mx="auto" />
-
-                {item.badge && (
-                  <BadgeValue className="sidenavHoverShow">{item.badge.value}</BadgeValue>
-                )}
+                {item.badge && <BadgeValue>{item.badge.value}</BadgeValue>}
               </ButtonBase>
             </NavLink>
-          </InternalLink>
-        );
-      }
+          )}
+        </InternalLink>
+      );
     });
   };
 
