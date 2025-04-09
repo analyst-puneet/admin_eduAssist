@@ -43,7 +43,6 @@ export default function Sidenav({ children }) {
     });
   };
 
-  // src/app/components/Sidenav.jsx
   const customNavs = navigations.map((nav) => {
     if (nav.name === "Quick Links") {
       return {
@@ -52,7 +51,7 @@ export default function Sidenav({ children }) {
         onClick: (e) => {
           e.preventDefault();
           e.stopPropagation();
-          setShowQuickLinks(true);
+          setShowQuickLinks((prev) => !prev); // 🔁 toggle logic
         }
       };
     }

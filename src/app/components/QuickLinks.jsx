@@ -5,15 +5,14 @@ import { useNavigate } from "react-router-dom";
 
 const Overlay = styled("div")(({ theme }) => ({
   position: "fixed",
-  top: 70,
-  left: "19%", // will dynamically adjust via media queries
-  width: "81%",
-  height: "100vh",
+  top: 64,
+  left: "18.3%",
+  width: "82%",
+  height: "calc(100vh - 65.1px)", // subtract top offset
   zIndex: 1300,
   background: "#f0f2f5",
   padding: "24px",
   overflowY: "auto",
-
   [theme.breakpoints.down("md")]: {
     left: 0,
     width: "100%"
@@ -103,7 +102,29 @@ export default function QuickLinks({ open, onClose }) {
 
               {item.children.map((child, childIdx) => (
                 <ChildLink key={childIdx} onClick={handleLinkClick(child.path)}>
-                  <Typography variant="body2">{child.iconText}</Typography>
+                  {child.icon ? (
+                    <Icon fontSize="small" sx={{ color: "#2563eb" }}>
+                      {child.icon}
+                    </Icon>
+                  ) : (
+                    <Box
+                      sx={{
+                        fontSize: "11px",
+                        width: "22px",
+                        height: "22px",
+                        backgroundColor: "#e0e7ff",
+                        color: "#1e40af",
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        borderRadius: "6px",
+                        fontWeight: "bold",
+                        flexShrink: 0
+                      }}
+                    >
+                      {child.iconText}
+                    </Box>
+                  )}
                   <Typography variant="body2">{child.name}</Typography>
                 </ChildLink>
               ))}

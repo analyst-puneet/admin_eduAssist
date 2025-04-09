@@ -26,7 +26,7 @@ import { MatxMenu, MatxSearchBox } from "app/components";
 import { NotificationBar } from "app/components/NotificationBar";
 import { themeShadows } from "app/components/MatxTheme/themeColors";
 import { topBarHeight } from "app/utils/constant";
-import { MdDarkMode } from "react-icons/md";
+import { MdDarkMode, MdLightMode } from "react-icons/md";
 
 // STYLED COMPONENTS
 const StyledIconButton = styled(IconButton)(({ theme }) => ({
@@ -126,8 +126,13 @@ const Layout1Topbar = () => {
               <WebAsset />
             </StyledIconButton>
 
-            <StyledIconButton>
-              {/* <StarOutline /> */}
+            {/* <StarOutline /> */}
+            <StyledIconButton
+              onClick={() => {
+                const newTheme = settings.activeTheme === "blue" ? "blueDark" : "blue";
+                updateSettings({ activeTheme: newTheme });
+              }}
+            >
               <MdDarkMode />
             </StyledIconButton>
           </IconBox>

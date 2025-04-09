@@ -63,7 +63,16 @@ export default function TopSellingTable() {
     <Card elevation={3} sx={{ pt: "20px", mb: 3 }}>
       <CardHeader>
         <Title>top selling products</Title>
-        <Select size="small" defaultValue="this_month">
+        <Select
+          size="small"
+          defaultValue="this_month"
+          sx={{
+            color: (theme) => theme.palette.text.primary,
+            svg: {
+              color: (theme) => theme.palette.text.primary
+            }
+          }}
+        >
           <MenuItem value="this_month">This Month</MenuItem>
           <MenuItem value="last_month">Last Month</MenuItem>
         </Select>
