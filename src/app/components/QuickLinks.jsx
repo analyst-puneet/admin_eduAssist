@@ -6,7 +6,7 @@ import { useNavigate } from "react-router-dom";
 const Overlay = styled("div")(({ theme }) => ({
   position: "fixed",
   top: 64,
-  left: "18.3%",
+  left: "20.3%",
   width: "82%",
   height: "calc(100vh - 65.1px)", // subtract top offset
   zIndex: 1300,
