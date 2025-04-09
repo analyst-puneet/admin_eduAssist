@@ -110,7 +110,7 @@ const Layout1Topbar = () => {
             <Menu />
           </StyledIconButton>
           <Box component="span" sx={{ fontWeight: 600, fontSize: "1.1rem", color: "black" }}>
-            Mount Carnel School
+            Shree Sita Ram Public School
           </Box>
         </Box>
         <Box display="flex" alignItems="center">

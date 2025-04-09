@@ -8,7 +8,8 @@ const navigations = [
   // Just a heading like "Dashboard", no children
   {
     name: "Quick Links",
-    icon: "apps"
+    icon: "apps",
+    type: "label" // 👈 Yeh naya key add karo
   },
 
   {
