@@ -11,7 +11,7 @@ const getThemeOptions = (mode = "light") => {
     components: { ...components },
 
     palette: {
-      mode,
+      mode, // This is the key change - using the actual mode
       ...(mode === "dark"
         ? {
             background: {
@@ -19,8 +19,8 @@ const getThemeOptions = (mode = "light") => {
               paper: "#1e1e1e"
             },
             text: {
-              primary: "#fff",
-              secondary: "#cfcfcf"
+              primary: "#ffffff", // More pure white
+              secondary: "#b0b0b0"
             }
           }
         : {
@@ -29,8 +29,8 @@ const getThemeOptions = (mode = "light") => {
               paper: "#ffffff"
             },
             text: {
-              primary: "rgba(52, 49, 76, 1)",
-              secondary: "rgba(52, 49, 76, 0.54)"
+              primary: "#1A1A1A", // Darker for better contrast
+              secondary: "#666666"
             }
           })
     },
