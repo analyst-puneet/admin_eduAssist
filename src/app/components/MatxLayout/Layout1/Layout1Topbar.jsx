@@ -13,24 +13,21 @@ import Person from "@mui/icons-material/Person";
 import Settings from "@mui/icons-material/Settings";
 import WebAsset from "@mui/icons-material/WebAsset";
 import MailOutline from "@mui/icons-material/MailOutline";
-import StarOutline from "@mui/icons-material/StarOutline";
 import PowerSettingsNew from "@mui/icons-material/PowerSettingsNew";
+import { MdDarkMode } from "react-icons/md";
 
 import useAuth from "app/hooks/useAuth";
 import useSettings from "app/hooks/useSettings";
 import { NotificationProvider } from "app/contexts/NotificationContext";
 
 import { Span } from "app/components/Typography";
-import ShoppingCart from "app/components/ShoppingCart";
 import { MatxMenu, MatxSearchBox } from "app/components";
-import { NotificationBar } from "app/components/NotificationBar";
 import { themeShadows } from "app/components/MatxTheme/themeColors";
 import { topBarHeight } from "app/utils/constant";
-import { MdDarkMode, MdLightMode } from "react-icons/md";
 
 // STYLED COMPONENTS
 const StyledIconButton = styled(IconButton)(({ theme }) => ({
-  color: theme.palette.text.primary
+  color: `${theme.palette.text.primary} !important`
 }));
 
 const TopbarRoot = styled("div")({
@@ -49,7 +46,10 @@ const TopbarContainer = styled("div")(({ theme }) => ({
   display: "flex",
   alignItems: "center",
   justifyContent: "space-between",
-  background: theme.palette.primary.main,
+  background: theme.custom?.topbarBg || theme.palette.primary.main,
+
+  color: `${theme.palette.text.primary} !important`, // 🔥 Force apply with priority
+
   [theme.breakpoints.down("sm")]: { paddingLeft: 16, paddingRight: 16 },
   [theme.breakpoints.down("xs")]: { paddingLeft: 14, paddingRight: 16 }
 }));
@@ -71,9 +71,13 @@ const StyledItem = styled(MenuItem)(({ theme }) => ({
     width: "100%",
     display: "flex",
     alignItems: "center",
-    textDecoration: "none"
+    textDecoration: "none",
+    color: theme.palette.text.primary
   },
-  "& span": { marginRight: "10px", color: theme.palette.text.primary }
+  "& span": {
+    marginRight: "10px",
+    color: theme.palette.text.primary
+  }
 }));
 
 const IconBox = styled("div")(({ theme }) => ({
@@ -109,14 +113,20 @@ const Layout1Topbar = () => {
           <StyledIconButton onClick={handleSidebarToggle} sx={{ paddingRight: 0 }}>
             <Menu />
           </StyledIconButton>
-          <Box component="span" sx={{ fontWeight: 600, fontSize: "1.1rem", color: "black" }}>
+          <Box
+            component="span"
+            sx={{
+              fontWeight: 600,
+              fontSize: "1.1rem",
+              color: `${theme.palette.text.primary} !important` // 👈 Add this also
+            }}
+          >
             Shree Sita Ram Public School
           </Box>
         </Box>
         <Box display="flex" alignItems="center">
           <MatxSearchBox />
 
-          {/* Moved icon box to right side after search */}
           <IconBox>
             <StyledIconButton>
               <MailOutline />
@@ -126,7 +136,6 @@ const Layout1Topbar = () => {
               <WebAsset />
             </StyledIconButton>
 
-            {/* <StarOutline /> */}
             <StyledIconButton
               onClick={() => {
                 const newTheme = settings.activeTheme === "blue" ? "blueDark" : "blue";
@@ -139,16 +148,20 @@ const Layout1Topbar = () => {
 
           <NotificationProvider>{/* <NotificationBar /> */}</NotificationProvider>
 
-          {/* <ShoppingCart /> */}
-
           <MatxMenu
             menuButton={
               <UserMenu>
-                <Span>
+                <Span sx={{ color: theme.palette.text.primary }}>
                   Hi <strong>{user.name}</strong>
                 </Span>
 
-                <Avatar src={user.avatar} sx={{ cursor: "pointer" }} />
+                <Avatar
+                  src={user.avatar}
+                  sx={{
+                    cursor: "pointer",
+                    border: `2px solid ${theme.palette.text.primary}`
+                  }}
+                />
               </UserMenu>
             }
           >

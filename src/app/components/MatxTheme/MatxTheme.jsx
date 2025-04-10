@@ -1,15 +1,25 @@
+// components/MatxTheme/index.jsx
+import { createTheme, ThemeProvider } from "@mui/material/styles";
 import CssBaseline from "@mui/material/CssBaseline";
-import ThemeProvider from "@mui/material/styles/ThemeProvider";
 import useSettings from "app/hooks/useSettings";
+import getThemeOptions from "./themeOptions";
 
-export default function MatxTheme({ children }) {
+export const MatxTheme = ({ children }) => {
   const { settings } = useSettings();
-  let activeTheme = { ...settings.themes[settings.activeTheme] };
+
+  const mode = settings.activeTheme === "blueDark" ? "dark" : "light";
+  const themeOptions = getThemeOptions(mode);
+  const theme = createTheme({
+    ...themeOptions,
+    ...(settings.themes?.[settings.activeTheme] || {})
+  });
 
   return (
-    <ThemeProvider theme={activeTheme}>
+    <ThemeProvider theme={theme}>
       <CssBaseline />
       {children}
     </ThemeProvider>
   );
-}
+};
+
+export default MatxTheme;

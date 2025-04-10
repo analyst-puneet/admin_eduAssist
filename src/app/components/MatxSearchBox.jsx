@@ -1,14 +1,15 @@
-import { useState, Fragment } from "react";
+import { useState } from "react";
 import Icon from "@mui/material/Icon";
 import IconButton from "@mui/material/IconButton";
 import styled from "@mui/material/styles/styled";
+import { useTheme } from "@mui/material/styles"; // ✅ Import theme hook
 import { topBarHeight } from "app/utils/constant";
 
 // STYLED COMPONENTS
 const SearchContainer = styled("div")(({ theme }) => ({
   display: "flex",
   alignItems: "center",
-  height: topBarHeight,
+  height: 36,
   background: theme.palette.primary.main,
   color: theme.palette.text.primary,
   borderRadius: "20px",
@@ -30,7 +31,7 @@ const SearchInput = styled("input")(({ theme }) => ({
   outline: "none",
   fontSize: "1rem",
   paddingLeft: "10px",
-  height: "70%",
+  height: "100%",
   background: "transparent",
   color: theme.palette.text.primary,
   transition: "width 0.3s ease, opacity 0.3s ease",
@@ -41,12 +42,18 @@ const SearchInput = styled("input")(({ theme }) => ({
 
 export default function MatxSearchBox() {
   const [open, setOpen] = useState(false);
+  const theme = useTheme(); // ✅ Use theme hook here
 
   const toggle = () => setOpen(!open);
 
   return (
     <SearchWrapper>
-      <SearchContainer style={{ width: open ? 220 : 40 }}>
+      <SearchContainer
+        style={{
+          width: open ? 220 : 40,
+          border: `1px solid ${open ? theme.palette.grey[600] : "transparent"}`
+        }}
+      >
         <IconButton onClick={toggle} size="small">
           <Icon sx={{ color: "text.primary" }}>{open ? "close" : "search"}</Icon>
         </IconButton>
