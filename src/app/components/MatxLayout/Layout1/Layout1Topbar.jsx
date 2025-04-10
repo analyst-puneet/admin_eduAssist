@@ -14,7 +14,7 @@ import Settings from "@mui/icons-material/Settings";
 import WebAsset from "@mui/icons-material/WebAsset";
 import MailOutline from "@mui/icons-material/MailOutline";
 import PowerSettingsNew from "@mui/icons-material/PowerSettingsNew";
-import { MdDarkMode } from "react-icons/md";
+import { MdDarkMode, MdLightMode } from "react-icons/md";
 
 import useAuth from "app/hooks/useAuth";
 import useSettings from "app/hooks/useSettings";
@@ -46,9 +46,9 @@ const TopbarContainer = styled("div")(({ theme }) => ({
   display: "flex",
   alignItems: "center",
   justifyContent: "space-between",
-  background: theme.custom?.topbarBg || theme.palette.primary.main,
+  backgroundColor: theme.custom?.topbarBg || theme.palette.background.paper,
 
-  color: `${theme.palette.text.primary} !important`, // 🔥 Force apply with priority
+  color: theme.palette.text.primary, // 🔥 Force apply with priority
 
   [theme.breakpoints.down("sm")]: { paddingLeft: 16, paddingRight: 16 },
   [theme.breakpoints.down("xs")]: { paddingLeft: 14, paddingRight: 16 }
@@ -117,8 +117,7 @@ const Layout1Topbar = () => {
             component="span"
             sx={{
               fontWeight: 600,
-              fontSize: "1.1rem",
-              color: `${theme.palette.text.primary} !important` // 👈 Add this also
+              fontSize: "1.1rem"
             }}
           >
             Shree Sita Ram Public School
@@ -142,7 +141,12 @@ const Layout1Topbar = () => {
                 updateSettings({ activeTheme: newTheme });
               }}
             >
-              <MdDarkMode />
+              {settings.activeTheme === "blueDark" ? <MdLightMode /> : <MdDarkMode />}
+              {/* <MdDarkMode
+                sx={{
+                  color: `${theme.palette.text.primary} !important`
+                }}
+              /> */}
             </StyledIconButton>
           </IconBox>
 
@@ -151,7 +155,7 @@ const Layout1Topbar = () => {
           <MatxMenu
             menuButton={
               <UserMenu>
-                <Span sx={{ color: theme.palette.text.primary }}>
+                <Span>
                   Hi <strong>{user.name}</strong>
                 </Span>
 
@@ -159,7 +163,7 @@ const Layout1Topbar = () => {
                   src={user.avatar}
                   sx={{
                     cursor: "pointer",
-                    border: `2px solid ${theme.palette.text.primary}`
+                    border: `2px`
                   }}
                 />
               </UserMenu>

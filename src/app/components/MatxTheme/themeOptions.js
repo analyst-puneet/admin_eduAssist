@@ -2,8 +2,6 @@ import { red } from "@mui/material/colors";
 import { components } from "./components";
 
 const getThemeOptions = (mode = "light") => {
-  const topbarBg = mode === "dark" ? "#1A223F" : "#ffffff";
-
   return {
     typography: {
       fontSize: 14,
@@ -21,7 +19,7 @@ const getThemeOptions = (mode = "light") => {
               paper: "#1e1e1e"
             },
             text: {
-              primary: "#ffffff",
+              primary: "#fff",
               secondary: "#cfcfcf"
             }
           }
@@ -31,14 +29,14 @@ const getThemeOptions = (mode = "light") => {
               paper: "#ffffff"
             },
             text: {
-              primary: "#000000",
-              secondary: "#4b4b4b"
+              primary: "rgba(52, 49, 76, 1)",
+              secondary: "rgba(52, 49, 76, 0.54)"
             }
           })
     },
 
     custom: {
-      topbarBg
+      topbarBg: mode === "dark" ? "#1A223F" : "#ffffff"
     }
   };
 };
