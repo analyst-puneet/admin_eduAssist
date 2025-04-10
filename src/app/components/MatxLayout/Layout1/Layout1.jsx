@@ -1,4 +1,4 @@
-import { useEffect, useRef, memo } from "react";
+import { useEffect, useRef, memo, useState } from "react";
 import { Outlet } from "react-router-dom";
 import Scrollbar from "react-perfect-scrollbar";
 import Box from "@mui/material/Box";
@@ -62,14 +62,14 @@ const Layout1 = () => {
     leftSidebar: { mode: sidenavMode, show: showSidenav }
   } = layout1Settings;
 
+  const [isSidebarHovered, setIsSidebarHovered] = useState(false);
+
   const getSidenavWidth = () => {
     switch (sidenavMode) {
       case "full":
         return sideNavWidth;
-
       case "compact":
         return sidenavCompactWidth;
-
       default:
         return "0px";
     }
@@ -89,25 +89,27 @@ const Layout1 = () => {
       let mode = isMdScreen ? "close" : sidebarMode;
       updateSettings({ layout1Settings: { leftSidebar: { mode } } });
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isMdScreen]);
 
   return (
     <Layout1Root className={layoutClasses}>
       {showSidenav && sidenavMode !== "close" && (
         <SidenavTheme>
-          <Layout1Sidenav />
+          <Layout1Sidenav onHoverChange={setIsSidebarHovered} />
         </SidenavTheme>
       )}
 
-      <LayoutContainer width={sidenavWidth} open={secondarySidebar.open}>
+      <LayoutContainer
+        width={isSidebarHovered ? sideNavWidth : sidenavWidth}
+        open={secondarySidebar.open}
+      >
         {layout1Settings.topbar.show && layout1Settings.topbar.fixed && (
           <ThemeProvider theme={topbarTheme}>
             <Layout1Topbar fixed={true} className="elevation-z8" />
           </ThemeProvider>
         )}
 
-        {settings.perfectScrollbar && (
+        {settings.perfectScrollbar ? (
           <StyledScrollBar>
             {layout1Settings.topbar.show && !layout1Settings.topbar.fixed && (
               <ThemeProvider theme={topbarTheme}>
@@ -123,9 +125,7 @@ const Layout1 = () => {
 
             {settings.footer.show && !settings.footer.fixed && <Footer />}
           </StyledScrollBar>
-        )}
-
-        {!settings.perfectScrollbar && (
+        ) : (
           <ContentBox>
             {layout1Settings.topbar.show && !layout1Settings.topbar.fixed && (
               <ThemeProvider theme={topbarTheme}>

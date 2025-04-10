@@ -27,7 +27,10 @@ import { topBarHeight } from "app/utils/constant";
 
 // STYLED COMPONENTS
 const StyledIconButton = styled(IconButton)(({ theme }) => ({
-  color: `${theme.palette.text.primary} !important`
+  color: theme.palette.mode === "dark" ? "#fff" : theme.palette.text.primary,
+  "& svg": {
+    color: theme.palette.mode === "dark" ? "#fff" : theme.palette.text.primary
+  }
 }));
 
 const TopbarRoot = styled("div")({
@@ -39,29 +42,31 @@ const TopbarRoot = styled("div")({
 });
 
 const TopbarContainer = styled("div")(({ theme }) => ({
-  padding: "8px",
-  paddingLeft: 18,
-  paddingRight: 20,
+  padding: "8px 20px 8px 18px",
   height: "100%",
   display: "flex",
   alignItems: "center",
   justifyContent: "space-between",
   backgroundColor: theme.custom?.topbarBg || theme.palette.background.paper,
-
-  color: theme.palette.text.primary, // 🔥 Force apply with priority
-
+  color: theme.palette.mode === "dark" ? "#fff" : theme.palette.text.primary,
   [theme.breakpoints.down("sm")]: { paddingLeft: 16, paddingRight: 16 },
-  [theme.breakpoints.down("xs")]: { paddingLeft: 14, paddingRight: 16 }
+  [theme.breakpoints.down("xs")]: { paddingLeft: 14, paddingRight: 16 },
+  "*": {
+    color: theme.palette.mode === "dark" ? "#fff" : theme.palette.text.primary
+  }
 }));
 
-const UserMenu = styled("div")({
+const UserMenu = styled("div")(({ theme }) => ({
   padding: 4,
   display: "flex",
   borderRadius: 24,
   cursor: "pointer",
   alignItems: "center",
-  "& span": { margin: "0 8px" }
-});
+  "& span": {
+    margin: "0 8px",
+    color: theme.palette.mode === "dark" ? "#fff" : theme.palette.text.primary
+  }
+}));
 
 const StyledItem = styled(MenuItem)(({ theme }) => ({
   display: "flex",
@@ -72,17 +77,25 @@ const StyledItem = styled(MenuItem)(({ theme }) => ({
     display: "flex",
     alignItems: "center",
     textDecoration: "none",
-    color: theme.palette.text.primary
+    color: theme.palette.mode === "dark" ? "#fff" : theme.palette.text.primary
   },
   "& span": {
-    marginRight: "10px",
-    color: theme.palette.text.primary
+    marginRight: "10px"
+  },
+  "& svg": {
+    color: theme.palette.mode === "dark" ? "#fff" : theme.palette.text.primary
   }
 }));
 
 const IconBox = styled("div")(({ theme }) => ({
   display: "inherit",
   [theme.breakpoints.down("md")]: { display: "none !important" }
+}));
+
+const SchoolTitle = styled("span")(({ theme }) => ({
+  fontWeight: 600,
+  fontSize: "1.1rem",
+  color: theme.palette.mode === "dark" ? "#ffffff" : "#1A1A1A"
 }));
 
 const Layout1Topbar = () => {
@@ -96,15 +109,24 @@ const Layout1Topbar = () => {
   };
 
   const handleSidebarToggle = () => {
-    let { layout1Settings } = settings;
-    let mode;
-    if (isMdScreen) {
-      mode = layout1Settings.leftSidebar.mode === "close" ? "mobile" : "close";
-    } else {
-      mode = layout1Settings.leftSidebar.mode === "full" ? "close" : "full";
-    }
+    const { layout1Settings } = settings;
+    const isClosed = layout1Settings.leftSidebar.mode === "close";
+    const mode = isMdScreen
+      ? isClosed
+        ? "mobile"
+        : "close"
+      : layout1Settings.leftSidebar.mode === "full"
+      ? "close"
+      : "full";
     updateSidebarMode({ mode });
   };
+
+  const toggleTheme = () => {
+    const newTheme = settings.activeTheme === "blueDark" ? "blue" : "blueDark";
+    updateSettings({ activeTheme: newTheme });
+  };
+
+  const isDark = settings.activeTheme === "blueDark";
 
   return (
     <TopbarRoot>
@@ -113,16 +135,9 @@ const Layout1Topbar = () => {
           <StyledIconButton onClick={handleSidebarToggle} sx={{ paddingRight: 0 }}>
             <Menu />
           </StyledIconButton>
-          <Box
-            component="span"
-            sx={{
-              fontWeight: 600,
-              fontSize: "1.1rem"
-            }}
-          >
-            Shree Sita Ram Public School
-          </Box>
+          <SchoolTitle>Shree Sita Ram Public School</SchoolTitle>
         </Box>
+
         <Box display="flex" alignItems="center">
           <MatxSearchBox />
 
@@ -135,18 +150,8 @@ const Layout1Topbar = () => {
               <WebAsset />
             </StyledIconButton>
 
-            <StyledIconButton
-              onClick={() => {
-                const newTheme = settings.activeTheme === "blue" ? "blueDark" : "blue";
-                updateSettings({ activeTheme: newTheme });
-              }}
-            >
-              {settings.activeTheme === "blueDark" ? <MdLightMode /> : <MdDarkMode />}
-              {/* <MdDarkMode
-                sx={{
-                  color: `${theme.palette.text.primary} !important`
-                }}
-              /> */}
+            <StyledIconButton onClick={toggleTheme}>
+              {isDark ? <MdLightMode /> : <MdDarkMode />}
             </StyledIconButton>
           </IconBox>
 
@@ -158,12 +163,11 @@ const Layout1Topbar = () => {
                 <Span>
                   Hi <strong>{user.name}</strong>
                 </Span>
-
                 <Avatar
                   src={user.avatar}
                   sx={{
                     cursor: "pointer",
-                    border: `2px`
+                    border: `2px solid ${theme.palette.divider}`
                   }}
                 />
               </UserMenu>
