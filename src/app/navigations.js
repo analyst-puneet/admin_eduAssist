@@ -72,6 +72,27 @@ const navigations = [
       { name: "Add Record", path: "/behaviour/add", iconText: "AR" },
       { name: "Record List", path: "/behaviour/list", iconText: "RL" }
     ]
+  },
+  {
+    name: "Forms",
+    icon: "description", // Changed to more appropriate forms icon
+    children: [
+      {
+        name: "App Form",
+        path: "/material/form",
+        iconText: "AF"
+      },
+      {
+        name: "Simple Form",
+        path: "/material/form/simple", // You'll need to add this route
+        iconText: "SF"
+      },
+      {
+        name: "Stepper Form",
+        path: "/material/form/stepper", // You'll need to add this route
+        iconText: "ST"
+      }
+    ]
   }
 ];
 

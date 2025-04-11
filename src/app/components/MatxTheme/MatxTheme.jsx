@@ -8,18 +8,19 @@ export const MatxTheme = ({ children }) => {
   const { settings } = useSettings();
   const mode = settings.activeTheme === "blueDark" ? "dark" : "light";
 
-  // Step 1: Get base theme options
+  // Step 1: Base options according to mode
   const baseThemeOptions = getThemeOptions(mode);
-  const baseTheme = createTheme(baseThemeOptions);
 
-  // Step 2: Merge with settings.themes if available
-  const userTheme = createTheme(baseTheme, settings.themes?.[settings.activeTheme] || {});
-
-  // Step 3: Merge custom fields manually (like topbarBg)
-  const finalTheme = {
-    ...userTheme,
-    custom: baseThemeOptions.custom // ensure custom props are retained
+  // Step 2: Merge theme-specific colors if present
+  const mergedOptions = {
+    ...baseThemeOptions,
+    ...settings.themes?.[settings.activeTheme],
+    custom: {
+      ...baseThemeOptions.custom
+    }
   };
+
+  const finalTheme = createTheme(mergedOptions);
 
   return (
     <ThemeProvider theme={finalTheme}>

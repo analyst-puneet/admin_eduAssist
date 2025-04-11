@@ -4,7 +4,7 @@ import Box from "@mui/material/Box";
 import Avatar from "@mui/material/Avatar";
 import MenuItem from "@mui/material/MenuItem";
 import IconButton from "@mui/material/IconButton";
-import styled from "@mui/material/styles/styled";
+import Typography from "@mui/material/Typography";
 import useTheme from "@mui/material/styles/useTheme";
 import useMediaQuery from "@mui/material/useMediaQuery";
 import Home from "@mui/icons-material/Home";
@@ -15,7 +15,9 @@ import WebAsset from "@mui/icons-material/WebAsset";
 import MailOutline from "@mui/icons-material/MailOutline";
 import PowerSettingsNew from "@mui/icons-material/PowerSettingsNew";
 import { MdDarkMode, MdLightMode } from "react-icons/md";
+import CheckCircle from "@mui/icons-material/CheckCircle";
 
+import styled from "@mui/material/styles/styled";
 import useAuth from "app/hooks/useAuth";
 import useSettings from "app/hooks/useSettings";
 import { NotificationProvider } from "app/contexts/NotificationContext";
@@ -26,13 +28,6 @@ import { themeShadows } from "app/components/MatxTheme/themeColors";
 import { topBarHeight } from "app/utils/constant";
 
 // STYLED COMPONENTS
-const StyledIconButton = styled(IconButton)(({ theme }) => ({
-  color: theme.palette.mode === "dark" ? "#fff" : theme.palette.text.primary,
-  "& svg": {
-    color: theme.palette.mode === "dark" ? "#fff" : theme.palette.text.primary
-  }
-}));
-
 const TopbarRoot = styled("div")({
   top: 0,
   zIndex: 96,
@@ -48,12 +43,9 @@ const TopbarContainer = styled("div")(({ theme }) => ({
   alignItems: "center",
   justifyContent: "space-between",
   backgroundColor: theme.custom?.topbarBg || theme.palette.background.paper,
-  color: theme.palette.mode === "dark" ? "#fff" : theme.palette.text.primary,
+  color: theme.palette.text.primary,
   [theme.breakpoints.down("sm")]: { paddingLeft: 16, paddingRight: 16 },
-  [theme.breakpoints.down("xs")]: { paddingLeft: 14, paddingRight: 16 },
-  "*": {
-    color: theme.palette.mode === "dark" ? "#fff" : theme.palette.text.primary
-  }
+  [theme.breakpoints.down("xs")]: { paddingLeft: 14, paddingRight: 16 }
 }));
 
 const UserMenu = styled("div")(({ theme }) => ({
@@ -92,11 +84,20 @@ const IconBox = styled("div")(({ theme }) => ({
   [theme.breakpoints.down("md")]: { display: "none !important" }
 }));
 
-const SchoolTitle = styled("span")(({ theme }) => ({
-  fontWeight: 600,
-  fontSize: "1.1rem",
-  color: theme.palette.mode === "dark" ? "#ffffff" : "#1A1A1A"
-}));
+const UserInfo = styled("div")({
+  display: "flex",
+  flexDirection: "column",
+  marginRight: "16px",
+  textAlign: "right",
+  "& .name": {
+    fontWeight: "bold",
+    fontSize: "14px"
+  },
+  "& .role": {
+    fontSize: "12px",
+    color: "#666"
+  }
+});
 
 const Layout1Topbar = () => {
   const theme = useTheme();
@@ -128,75 +129,157 @@ const Layout1Topbar = () => {
 
   const isDark = settings.activeTheme === "blueDark";
 
+  const iconColor = isDark ? "#fff" : theme.palette.text.primary;
+
   return (
     <TopbarRoot>
       <TopbarContainer>
         <Box display="flex" alignItems="center" gap={1}>
-          <StyledIconButton onClick={handleSidebarToggle} sx={{ paddingRight: 0 }}>
+          <IconButton onClick={handleSidebarToggle} sx={{ color: iconColor }}>
             <Menu />
-          </StyledIconButton>
-          <SchoolTitle>Shree Sita Ram Public School</SchoolTitle>
+          </IconButton>
+          <Typography
+            variant="h6"
+            sx={{
+              fontWeight: 600,
+              fontSize: "1.1rem",
+              color: iconColor
+            }}
+          >
+            Shree Sita Ram Public School
+          </Typography>
         </Box>
 
         <Box display="flex" alignItems="center">
           <MatxSearchBox />
 
           <IconBox>
-            <StyledIconButton>
+            <IconButton sx={{ color: iconColor }}>
               <MailOutline />
-            </StyledIconButton>
+            </IconButton>
 
-            <StyledIconButton>
+            <IconButton sx={{ color: iconColor }}>
               <WebAsset />
-            </StyledIconButton>
+            </IconButton>
 
-            <StyledIconButton onClick={toggleTheme}>
+            <IconButton onClick={toggleTheme} sx={{ color: iconColor }}>
               {isDark ? <MdLightMode /> : <MdDarkMode />}
-            </StyledIconButton>
+            </IconButton>
           </IconBox>
 
           <NotificationProvider>{/* <NotificationBar /> */}</NotificationProvider>
 
-          <MatxMenu
-            menuButton={
-              <UserMenu>
-                <Span>
-                  Hi <strong>{user.name}</strong>
-                </Span>
+          <Box display="flex" alignItems="center" sx={{ marginLeft: 2 }}>
+            {/* <CheckCircle sx={{ color: iconColor, marginRight: 1 }} />
+            <UserInfo>
+              <Typography className="name">Joe Black</Typography>
+              <Typography className="role">Super Admin</Typography>
+            </UserInfo> */}
+
+            <MatxMenu
+              menuButton={
+                <UserMenu>
+                  <Avatar
+                    src={user.avatar}
+                    sx={{
+                      cursor: "pointer",
+                      border: `2px solid ${theme.palette.divider}`,
+                      width: 40,
+                      height: 40
+                    }}
+                  />
+                </UserMenu>
+              }
+            >
+              {/* User Info Section - Made more rectangular but narrower */}
+              <Box
+                sx={{
+                  display: "flex",
+                  alignItems: "center",
+                  padding: "12px 16px", // Reduced vertical padding
+                  minWidth: "240px", // Reduced from 300px
+                  minHeight: "80px" // Kept same height
+                }}
+              >
                 <Avatar
                   src={user.avatar}
                   sx={{
-                    cursor: "pointer",
-                    border: `2px solid ${theme.palette.divider}`
+                    width: 60,
+                    height: 60,
+                    marginRight: "16px"
                   }}
                 />
-              </UserMenu>
-            }
-          >
-            <StyledItem>
-              <Link to="/">
-                <Home />
-                <Span sx={{ marginInlineStart: 1 }}>Home</Span>
-              </Link>
-            </StyledItem>
+                <Box>
+                  <Typography variant="subtitle1" sx={{ fontWeight: 600 }}>
+                    Joe Black
+                  </Typography>
+                  <Typography variant="caption" color="textSecondary">
+                    Super Admin
+                  </Typography>
+                </Box>
+              </Box>
 
-            <StyledItem>
-              <Link to="/page-layouts/user-profile">
-                <Person />
-                <Span sx={{ marginInlineStart: 1 }}>Profile</Span>
-              </Link>
-            </StyledItem>
+              {/* Divider */}
+              <hr
+                style={{
+                  margin: 0,
+                  border: "none",
+                  height: "1px",
+                  backgroundColor: theme.palette.divider
+                }}
+              />
 
-            <StyledItem>
-              <Settings />
-              <Span sx={{ marginInlineStart: 1 }}>Settings</Span>
-            </StyledItem>
+              {/* Horizontal Menu Items - Adjusted for narrower width */}
+              <Box
+                sx={{
+                  display: "flex",
+                  justifyContent: "space-around",
+                  padding: "8px 0",
+                  flexWrap: "wrap" // Allows items to wrap if needed
+                }}
+              >
+                <StyledItem
+                  sx={{
+                    flex: "1 0 auto",
+                    justifyContent: "center",
+                    minWidth: "70px" // Minimum width for each item
+                  }}
+                >
+                  <Link to="/page-layouts/user-profile" style={{ flexDirection: "column" }}>
+                    <Person fontSize="small" />
+                    <Span sx={{ marginInlineStart: 0, marginTop: "4px" }}>Profile</Span>
+                  </Link>
+                </StyledItem>
 
-            <StyledItem onClick={logout}>
-              <PowerSettingsNew />
-              <Span sx={{ marginInlineStart: 1 }}>Logout</Span>
-            </StyledItem>
-          </MatxMenu>
+                <StyledItem
+                  sx={{
+                    flex: "1 0 auto",
+                    justifyContent: "center",
+                    minWidth: "70px"
+                  }}
+                >
+                  <Link to="/page-layouts/change-password" style={{ flexDirection: "column" }}>
+                    <Settings fontSize="small" />
+                    <Span sx={{ marginInlineStart: 0, marginTop: "4px" }}>Password</Span>
+                  </Link>
+                </StyledItem>
+
+                <StyledItem
+                  onClick={logout}
+                  sx={{
+                    flex: "1 0 auto",
+                    justifyContent: "center",
+                    minWidth: "70px"
+                  }}
+                >
+                  <Box sx={{ display: "flex", flexDirection: "column", alignItems: "center" }}>
+                    <PowerSettingsNew fontSize="small" />
+                    <Span sx={{ marginInlineStart: 0, marginTop: "4px" }}>Logout</Span>
+                  </Box>
+                </StyledItem>
+              </Box>
+            </MatxMenu>
+          </Box>
         </Box>
       </TopbarContainer>
     </TopbarRoot>
