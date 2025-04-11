@@ -6,20 +6,10 @@ import ButtonBase from "@mui/material/ButtonBase";
 import styled from "@mui/material/styles/styled";
 
 import useSettings from "app/hooks/useSettings";
-import { Paragraph, Span } from "../Typography";
+import { Span } from "../Typography";
 import MatxVerticalNavExpansionPanel from "./MatxVerticalNavExpansionPanel";
 
 // STYLED COMPONENTS
-const ListLabel = styled(Paragraph)(({ theme, mode }) => ({
-  fontSize: "12px",
-  marginTop: "20px",
-  marginLeft: "15px",
-  marginBottom: "10px",
-  textTransform: "uppercase",
-  display: mode === "compact" && "none",
-  color: theme.palette.text.secondary
-}));
-
 const ExtAndIntCommon = {
   display: "flex",
   overflow: "hidden",
@@ -60,6 +50,7 @@ const InternalLink = styled(Box)(({ theme }) => ({
 
 const StyledText = styled(Span)(({ mode }) => ({
   fontSize: "0.875rem",
+  fontWeight: 600,
   paddingLeft: "0.8rem",
   display: mode === "compact" && "none"
 }));
@@ -85,32 +76,32 @@ export default function MatxVerticalNav({ items }) {
 
   const renderLevels = (data) => {
     return data.map((item, index) => {
+      // Custom styled LABEL TYPE ITEM (like Quick Links)
       if (item.type === "label") {
         return (
-          <Box
+          <ButtonBase
             key={index}
             onClick={item.onClick}
             sx={{
-              px: 2,
-              py: 1,
-              cursor: "pointer",
+              ...ExtAndIntCommon,
+              width: "100%",
               color: "text.secondary",
-              fontWeight: 600,
-              display: "flex",
-              alignItems: "center",
-              gap: 1,
-              textTransform: "uppercase",
+              backgroundColor: "transparent",
               "&:hover": {
-                backgroundColor: "action.hover"
+                backgroundColor: "rgba(255, 255, 255, 0.08)"
               }
             }}
           >
-            <Icon fontSize="small">{item.icon}</Icon>
-            <span>{item.name}</span>
-          </Box>
+            <Icon className="icon">{item.icon}</Icon>
+            <StyledText mode={mode} className="sidenavHoverShow">
+              {item.name}
+            </StyledText>
+            <Box mx="auto" />
+          </ButtonBase>
         );
       }
 
+      // Expandable parent item
       if (item.children) {
         return (
           <MatxVerticalNavExpansionPanel mode={mode} item={item} key={index}>
@@ -119,6 +110,7 @@ export default function MatxVerticalNav({ items }) {
         );
       }
 
+      // Internal link item
       return (
         <InternalLink key={index}>
           {item.onClick ? (
@@ -141,7 +133,7 @@ export default function MatxVerticalNav({ items }) {
                   </Box>
                 </Fragment>
               )}
-              <StyledText mode={mode} className="sidenavHoverShow">
+              <StyledText mode={mode} className="sidenavHoverShow" sx={{ fontWeight: 900 }}>
                 {item.name}
               </StyledText>
               <Box mx="auto" />

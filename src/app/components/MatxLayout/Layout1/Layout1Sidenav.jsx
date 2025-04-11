@@ -9,7 +9,6 @@ import Sidenav from "app/components/Sidenav";
 import { themeShadows } from "app/components/MatxTheme/themeColors";
 import { sidenavCompactWidth, sideNavWidth } from "app/utils/constant";
 
-// STYLED COMPONENTS
 const SidebarNavRoot = styled("div", {
   shouldForwardProp: (prop) => !["width", "bg", "image"].includes(prop)
 })(({ theme, width, image }) => ({
@@ -48,7 +47,7 @@ const NavListBox = styled("div")({
   flexDirection: "column"
 });
 
-const Layout1Sidenav = () => {
+const Layout1Sidenav = ({ onHoverChange }) => {
   const theme = useTheme();
   const { settings, updateSettings } = useSettings();
   const leftSidebar = settings.layout1Settings.leftSidebar;
@@ -68,7 +67,12 @@ const Layout1Sidenav = () => {
   };
 
   return (
-    <SidebarNavRoot image={bgImgURL} width={getSidenavWidth()}>
+    <SidebarNavRoot
+      image={bgImgURL}
+      width={getSidenavWidth()}
+      onMouseEnter={() => onHoverChange(true)}
+      onMouseLeave={() => onHoverChange(false)}
+    >
       <NavListBox>
         <Brand>
           <Switch

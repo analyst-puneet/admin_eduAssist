@@ -62,7 +62,7 @@ export default function StatCards() {
 
             <Tooltip title="View Details" placement="top">
               <IconButton>
-                <ArrowRightAlt />
+                <ArrowRightAlt sx={{ color: (theme) => theme.palette.text.primary }} />
               </IconButton>
             </Tooltip>
           </StyledCard>
