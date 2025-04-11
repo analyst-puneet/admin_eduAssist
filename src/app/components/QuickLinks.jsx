@@ -2,20 +2,18 @@ import { IconButton, Icon, Typography, Grid, Box, useTheme, useMediaQuery } from
 import styled from "@mui/material/styles/styled";
 import navigation from "app/navigations";
 import { useNavigate } from "react-router-dom";
+import useSettings from "app/hooks/useSettings";
 
-const Overlay = styled("div")(({ theme }) => ({
-  position: "fixed",
-  top: 64,
-  left: "20.3%",
-  width: "82%",
-  height: "calc(100vh - 65.1px)", // subtract top offset
-  zIndex: 1300,
-  background: "#f0f2f5",
-  padding: "24px",
-  overflowY: "auto",
-  [theme.breakpoints.down("md")]: {
-    left: 0,
-    width: "100%"
+// Styled Container like AppForm.jsx
+const Container = styled("div")(({ theme }) => ({
+  margin: "30px",
+  [theme.breakpoints.down("sm")]: { margin: "16px" },
+  "& .header": {
+    marginBottom: "30px",
+    display: "flex",
+    justifyContent: "space-between",
+    alignItems: "center",
+    [theme.breakpoints.down("sm")]: { marginBottom: "16px" }
   }
 }));
 
@@ -56,45 +54,40 @@ const ChildLink = styled("div")(() => ({
   }
 }));
 
-export default function QuickLinks({ open, onClose }) {
+export default function QuickLinks() {
   const navigate = useNavigate();
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
-
-  if (!open) return null;
+  const { settings } = useSettings(); // ✅ FIXED HERE
 
   const filteredNavs = navigation.filter(
     (item) => item.children && item.name !== "Dashboard" && item.name !== "Quick Links"
   );
 
-  const handleLinkClick = (path) => (e) => {
-    e.stopPropagation();
+  const handleLinkClick = (path) => () => {
     navigate(path);
-    onClose();
   };
 
+  const isDark = settings.activeTheme === "blueDark";
+  const iconColor = isDark ? "#fff" : theme.palette.text.primary;
+
   return (
-    <Overlay onClick={(e) => e.stopPropagation()}>
-      <Box display="flex" justifyContent="space-between" alignItems="center" mb={3}>
-        <Typography variant="h5" fontWeight={600} sx={{ color: "#2e3a59" }}>
+    <Container>
+      <Box className="header">
+        <Typography variant="h5" fontWeight={600} sx={{ color: iconColor }}>
           Quick Links
         </Typography>
-        <IconButton
-          onClick={(e) => {
-            e.stopPropagation();
-            onClose();
-          }}
-        >
+        <IconButton onClick={() => navigate(-1)}>
           <Icon sx={{ color: "#2563eb" }}>close</Icon>
         </IconButton>
       </Box>
 
       <Grid container spacing={3}>
         {filteredNavs.map((item, idx) => (
-          <Grid item xs={12} sm={6} md={4} lg={4} key={idx}>
-            <ParentBox onClick={(e) => e.stopPropagation()}>
+          <Grid item xs={12} sm={6} md={4} key={idx}>
+            <ParentBox>
               <ParentHeader>
-                <Icon fontSize="small" sx={{ color: "#2563eb" }}>
+                <Icon fontSize="small" sx={{ color: iconColor }}>
                   {item.icon}
                 </Icon>
                 <Typography variant="subtitle1">{item.name}</Typography>
@@ -132,6 +125,6 @@ export default function QuickLinks({ open, onClose }) {
           </Grid>
         ))}
       </Grid>
-    </Overlay>
+    </Container>
   );
 }

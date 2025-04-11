@@ -9,7 +9,7 @@ const navigations = [
   {
     name: "Quick Links",
     icon: "apps",
-    type: "label" // 👈 Yeh naya key add karo
+    path: "/quickLinks"
   },
 
   {
@@ -84,7 +84,7 @@ const navigations = [
       },
       {
         name: "Simple Form",
-        path: "/material/form/simple", // You'll need to add this route
+        path: "/material/form/simple", // ✅ same path as route
         iconText: "SF"
       },
       {

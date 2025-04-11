@@ -2,6 +2,8 @@ import { lazy } from "react";
 import Loadable from "app/components/Loadable";
 
 const AppForm = Loadable(lazy(() => import("./forms/AppForm")));
+const SimpleForm = Loadable(lazy(() => import("./forms/SimpleForm")));
+const QuickLinks = Loadable(lazy(() => import("app/components/QuickLinks")));
 const AppMenu = Loadable(lazy(() => import("./menu/AppMenu")));
 const AppIcon = Loadable(lazy(() => import("./icons/AppIcon")));
 const AppProgress = Loadable(lazy(() => import("./AppProgress")));
@@ -19,6 +21,8 @@ const AppExpansionPanel = Loadable(lazy(() => import("./expansion-panel/AppExpan
 const materialRoutes = [
   { path: "/material/table", element: <AppTable /> },
   { path: "/material/form", element: <AppForm /> },
+  { path: "/material/form/simple", element: <SimpleForm /> },
+  { path: "/quickLinks", element: <QuickLinks /> },
   { path: "/material/buttons", element: <AppButton /> },
   { path: "/material/icons", element: <AppIcon /> },
   { path: "/material/progress", element: <AppProgress /> },

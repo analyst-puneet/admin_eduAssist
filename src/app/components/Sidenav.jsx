@@ -43,31 +43,16 @@ export default function Sidenav({ children }) {
     });
   };
 
-  const customNavs = navigations.map((nav) => {
-    if (nav.name === "Quick Links") {
-      return {
-        ...nav,
-        type: "label",
-        onClick: (e) => {
-          e.preventDefault();
-          e.stopPropagation();
-          setShowQuickLinks((prev) => !prev); // 🔁 toggle logic
-        }
-      };
-    }
-    return nav;
-  });
+  const customNavs = navigations.map((nav) => {});
 
   return (
     <Fragment>
       <StyledScrollBar options={{ suppressScrollX: true }}>
         {children}
-        <MatxVerticalNav items={customNavs} />
+        <MatxVerticalNav items={navigations} />
       </StyledScrollBar>
 
       {!showQuickLinks && <SideNavMobile onClick={() => updateSidebarMode({ mode: "close" })} />}
-
-      <QuickLinks open={showQuickLinks} onClose={() => setShowQuickLinks(false)} />
     </Fragment>
   );
 }
