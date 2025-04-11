@@ -189,7 +189,7 @@ const Layout1Topbar = () => {
                 />
                 <Box>
                   <Typography variant="subtitle1" sx={{ fontWeight: 600 }}>
-                    Joe Black
+                    Prashant Kumar
                   </Typography>
                   <Typography variant="caption" color="textSecondary">
                     Super Admin
@@ -213,7 +213,7 @@ const Layout1Topbar = () => {
                   display: "flex",
                   justifyContent: "space-between",
                   padding: "6px 12px",
-                  minWidth: "240px",
+                  minWidth: "200px",
                   gap: 1
                 }}
               >
@@ -233,10 +233,8 @@ const Layout1Topbar = () => {
 
                 <StyledItem onClick={logout}>
                   <Box display="flex" alignItems="center">
-                    
-                      <PowerSettingsNew fontSize="small" />
-                      <Span>Logout</Span>
-                    
+                    <PowerSettingsNew fontSize="small" />
+                    <Span>Logout</Span>
                   </Box>
                 </StyledItem>
               </Box>
