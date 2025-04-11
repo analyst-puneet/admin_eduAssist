@@ -17,40 +17,40 @@ const Container = styled("div")(({ theme }) => ({
   }
 }));
 
-const ParentBox = styled("div")(() => ({
-  background: "#ffffff",
+const ParentBox = styled("div")(({ theme }) => ({
+  background: theme.palette.background.paper,
   borderRadius: "16px",
   padding: "20px",
-  boxShadow: "0 4px 12px rgba(0, 0, 0, 0.05)",
+  boxShadow: theme.shadows[1],
   transition: "0.3s ease-in-out",
   height: "100%",
   "&:hover": {
-    boxShadow: "0 6px 20px rgba(0, 0, 0, 0.08)"
+    boxShadow: theme.shadows[4]
   }
 }));
 
-const ParentHeader = styled("div")(() => ({
+const ParentHeader = styled("div")(({ theme }) => ({
   display: "flex",
   alignItems: "center",
   gap: "10px",
   marginBottom: "14px",
   fontWeight: 600,
   fontSize: "17px",
-  color: "#2563eb"
+  color: theme.palette.primary.main
 }));
 
-const ChildLink = styled("div")(() => ({
+const ChildLink = styled("div")(({ theme }) => ({
   padding: "6px 0",
   display: "flex",
   alignItems: "center",
   gap: "8px",
   cursor: "pointer",
-  color: "#6b7280",
+  color: theme.palette.text.secondary,
   fontSize: "14px",
   fontWeight: 500,
   transition: "all 0.2s ease",
   "&:hover": {
-    color: "#1d4ed8"
+    color: theme.palette.primary.main
   }
 }));
 
@@ -58,7 +58,7 @@ export default function QuickLinks() {
   const navigate = useNavigate();
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
-  const { settings } = useSettings(); // ✅ FIXED HERE
+  const { settings } = useSettings();
 
   const filteredNavs = navigation.filter(
     (item) => item.children && item.name !== "Dashboard" && item.name !== "Quick Links"
@@ -68,8 +68,7 @@ export default function QuickLinks() {
     navigate(path);
   };
 
-  const isDark = settings.activeTheme === "blueDark";
-  const iconColor = isDark ? "#fff" : theme.palette.text.primary;
+  const iconColor = settings.activeTheme === "blueDark" ? "#fff" : theme.palette.text.primary;
 
   return (
     <Container>
@@ -78,7 +77,7 @@ export default function QuickLinks() {
           Quick Links
         </Typography>
         <IconButton onClick={() => navigate(-1)}>
-          <Icon sx={{ color: "#2563eb" }}>close</Icon>
+          <Icon sx={{ color: theme.palette.primary.main }}>close</Icon>
         </IconButton>
       </Box>
 
@@ -96,7 +95,7 @@ export default function QuickLinks() {
               {item.children.map((child, childIdx) => (
                 <ChildLink key={childIdx} onClick={handleLinkClick(child.path)}>
                   {child.icon ? (
-                    <Icon fontSize="small" sx={{ color: "#2563eb" }}>
+                    <Icon fontSize="small" sx={{ color: theme.palette.primary.main }}>
                       {child.icon}
                     </Icon>
                   ) : (
@@ -105,8 +104,8 @@ export default function QuickLinks() {
                         fontSize: "11px",
                         width: "22px",
                         height: "22px",
-                        backgroundColor: "#e0e7ff",
-                        color: "#1e40af",
+                        backgroundColor: theme.palette.primary.light,
+                        color: iconColor,
                         display: "flex",
                         alignItems: "center",
                         justifyContent: "center",

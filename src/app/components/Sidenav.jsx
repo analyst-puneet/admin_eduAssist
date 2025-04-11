@@ -1,17 +1,16 @@
-// src/app/components/Sidenav.jsx
-import { Fragment, useState } from "react";
+import { Fragment, useEffect, useRef, useState } from "react";
 import Scrollbar from "react-perfect-scrollbar";
 import styled from "@mui/material/styles/styled";
-
 import { MatxVerticalNav } from "app/components";
 import useSettings from "app/hooks/useSettings";
 import navigations from "app/navigations";
-import QuickLinks from "./QuickLinks"; // 👈 import it
 
 const StyledScrollBar = styled(Scrollbar)(() => ({
   paddingLeft: "1rem",
   paddingRight: "1rem",
-  position: "relative"
+  position: "relative",
+  height: "100%",
+  overflowY: "auto"
 }));
 
 const SideNavMobile = styled("div")(({ theme }) => ({
@@ -26,9 +25,23 @@ const SideNavMobile = styled("div")(({ theme }) => ({
   [theme.breakpoints.up("lg")]: { display: "none" }
 }));
 
+const StickyContainer = styled("div")(({ theme }) => ({
+  backgroundColor: theme.palette.background.paper,
+  transition: "all 0.3s ease",
+  "&.sticky": {
+    position: "sticky",
+    top: 0,
+    zIndex: 10,
+    borderBottom: `1px solid ${theme.palette.divider}`,
+    paddingTop: "6px",
+    paddingBottom: "6px"
+  }
+}));
+
 export default function Sidenav({ children }) {
-  const [showQuickLinks, setShowQuickLinks] = useState(false);
+  const [isSticky, setIsSticky] = useState(false);
   const { settings, updateSettings } = useSettings();
+  const quickRef = useRef();
 
   const updateSidebarMode = (sidebarSettings) => {
     let activeLayoutSettingsName = settings.activeLayout + "Settings";
@@ -43,16 +56,52 @@ export default function Sidenav({ children }) {
     });
   };
 
-  const customNavs = navigations.map((nav) => {});
+  const quickLinkNav = navigations.find((nav) => nav.name === "Quick Links");
+  const restNavs = navigations.filter(
+    (nav) => nav.name !== "Quick Links" && nav.name !== "Dashboard"
+  );
+  const dashboardNav = navigations.find((nav) => nav.name === "Dashboard");
+
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        setIsSticky(!entry.isIntersecting);
+      },
+      { threshold: 0, rootMargin: "-1px 0px 0px 0px" }
+    );
+
+    if (quickRef.current) {
+      observer.observe(quickRef.current);
+    }
+
+    return () => {
+      if (quickRef.current) observer.unobserve(quickRef.current);
+    };
+  }, []);
 
   return (
     <Fragment>
       <StyledScrollBar options={{ suppressScrollX: true }}>
         {children}
-        <MatxVerticalNav items={navigations} />
+
+        {/* Dashboard always on top */}
+        {dashboardNav && <MatxVerticalNav items={[dashboardNav]} />}
+
+        {/* Invisible marker to detect scroll point */}
+        <div ref={quickRef} />
+
+        {/* Sticky Quick Links container */}
+        {quickLinkNav && (
+          <StickyContainer className={isSticky ? "sticky" : ""}>
+            <MatxVerticalNav items={[quickLinkNav]} />
+          </StickyContainer>
+        )}
+
+        {/* Baaki sab */}
+        <MatxVerticalNav items={restNavs} />
       </StyledScrollBar>
 
-      {!showQuickLinks && <SideNavMobile onClick={() => updateSidebarMode({ mode: "close" })} />}
+      <SideNavMobile onClick={() => updateSidebarMode({ mode: "close" })} />
     </Fragment>
   );
 }
