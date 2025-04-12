@@ -13,6 +13,28 @@ const navigations = [
   },
 
   {
+    name: "Users",
+    icon: "people", // Changed to more appropriate forms icon
+    children: [
+      {
+        name: "View Users",
+        path: "/users",
+        iconText: "VU"
+      }
+      // {
+      //   name: "Create",
+      //   path: "/material/form/simple", // ✅ same path as route
+      //   iconText: "SF"
+      // },
+      // {
+      //   name: "Stepper Form",
+      //   path: "/material/form/stepper", // You'll need to add this route
+      //   iconText: "ST"
+      // }
+    ]
+  },
+
+  {
     name: "Front Office",
     icon: "support_agent",
     children: [
