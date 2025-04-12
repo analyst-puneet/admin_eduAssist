@@ -13,6 +13,7 @@ import {
 import { Breadcrumb, SimpleCard } from "app/components";
 import { useState } from "react";
 import CardContainer from "./CardContainer";
+import ListView from "./ListView"; // Import the new ListView component
 
 const Index = () => {
   const [role, setRole] = useState("");
@@ -29,14 +30,11 @@ const Index = () => {
 
       {/* SimpleCard with Add Staff Button Inside (Top-Right) */}
       <Box sx={{ position: "relative", marginTop: 2 }}>
-        {" "}
-        {/* Parent Box for positioning */}
         <SimpleCard
           title="Select Criteria"
           sx={{
             height: "auto",
-            padding: 2,
-            // marginTop: 4
+            padding: 2
           }}
         >
           {/* Add Staff Button (Absolute Position Inside Card) */}
@@ -45,8 +43,8 @@ const Index = () => {
             color="secondary"
             sx={{
               position: "absolute",
-              top: 16, // Adjust as needed
-              right: 16 // Adjust as needed
+              top: 16,
+              right: 16
             }}
           >
             + Add Staff
@@ -54,8 +52,6 @@ const Index = () => {
 
           {/* Form Content */}
           <Stack spacing={2} mt={3}>
-            {" "}
-            {/* Added mt to prevent overlap */}
             <Stack direction={{ xs: "column", md: "row" }} spacing={2} alignItems="flex-start">
               <FormControl fullWidth sx={{ minWidth: 200 }}>
                 <InputLabel>Role</InputLabel>
@@ -84,7 +80,9 @@ const Index = () => {
           <Tab label="List View" />
         </Tabs>
       </Box>
-      {tab === 0 && <CardContainer />}
+
+      {/* Tab Content */}
+      {tab === 0 ? <CardContainer /> : <ListView />}
     </div>
   );
 };
