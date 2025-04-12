@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   Box,
   Table,
@@ -11,98 +11,70 @@ import {
   TablePagination,
   IconButton,
   TextField,
-  InputAdornment
+  InputAdornment,
+  CircularProgress,
+  Alert,
+  Button // Added Button import
 } from "@mui/material";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import SearchIcon from "@mui/icons-material/Search";
+import axios from "axios";
 
 const ListView = () => {
-  // Table data
-  const rows = [
-    {
-      id: "9000",
-      name: "Joe Black",
-      role: "Super Admin",
-      department: "Admin",
-      designation: "Technical Head",
-      mobile: "6545645645",
-      pan: "ALWPG5809L"
-    },
-    {
-      id: "9002",
-      name: "Shwam Verma",
-      role: "Teacher",
-      department: "Academic",
-      designation: "Faculty",
-      mobile: "9552654564",
-      pan: "RLWEG5809L"
-    },
-    {
-      id: "9006",
-      name: "Brandon Heart",
-      role: "Librarian",
-      department: "Library",
-      designation: "Librarian",
-      mobile: "34564654",
-      pan: "ALWPG5825H"
-    },
-    {
-      id: "9003",
-      name: "William Abbot",
-      role: "Admin",
-      department: "Admin",
-      designation: "Principal",
-      mobile: "56465465",
-      pan: "ERTPG5809L"
-    },
-    {
-      id: "90006",
-      name: "Jason Sharfton",
-      role: "Teacher",
-      department: "Academic",
-      designation: "Faculty",
-      mobile: "4654665454",
-      pan: "UJYEG5809L"
-    },
-    {
-      id: "9004",
-      name: "James Deckar",
-      role: "Accountant",
-      department: "Finance",
-      designation: "Accountant",
-      mobile: "79786546463",
-      pan: "OLUDPG5809"
-    },
-    {
-      id: "9005",
-      name: "Maria Ford",
-      role: "Receptionist",
-      department: "Academic",
-      designation: "Receptionist",
-      mobile: "8521479630",
-      pan: "QTWPG5809L"
-    },
-    {
-      id: "54545454",
-      name: "Albert Thomas",
-      role: "Teacher",
-      department: "Maths",
-      designation: "Faculty",
-      mobile: "9522369875",
-      pan: "AMB14EB"
-    }
-  ];
+  // State for data, loading, and error
+  const [users, setUsers] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
   // State for search and pagination
   const [searchTerm, setSearchTerm] = useState("");
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(5);
 
-  // Filter rows based on search term
-  const filteredRows = rows.filter((row) =>
-    Object.values(row).some(
-      (value) => value && value.toString().toLowerCase().includes(searchTerm.toLowerCase())
-    )
+  // Fetch data from API
+  useEffect(() => {
+    const fetchUsers = async () => {
+      try {
+        const response = await axios.get("http://localhost:3000/users");
+        console.log("API Response:", response.data); // Debug log
+
+        // Handle different response structures
+        let usersData = [];
+
+        if (Array.isArray(response.data)) {
+          usersData = response.data;
+        } else if (response.data?.users && Array.isArray(response.data.users)) {
+          usersData = response.data.users;
+        } else if (response.data?.data?.users && Array.isArray(response.data.data.users)) {
+          usersData = response.data.data.users;
+        } else {
+          throw new Error("API response doesn't contain valid users data");
+        }
+
+        setUsers(usersData);
+      } catch (err) {
+        console.error("Error fetching users:", {
+          error: err,
+          response: err.response?.data,
+          status: err.response?.status
+        });
+        setError(err.message || "Failed to fetch users");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchUsers();
+  }, []);
+
+  // Filter users based on search term
+  const filteredRows = users.filter((user) =>
+    Object.entries(user).some(([key, value]) => {
+      if (key === "roles" && Array.isArray(value)) {
+        return value.some((role) => role.toLowerCase().includes(searchTerm.toLowerCase()));
+      }
+      return value && value.toString().toLowerCase().includes(searchTerm.toLowerCase());
+    })
   );
 
   // Handle page change
@@ -119,6 +91,35 @@ const ListView = () => {
   // Calculate paginated rows
   const paginatedRows = filteredRows.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage);
 
+  if (loading) {
+    return (
+      <Box display="flex" justifyContent="center" mt={4}>
+        <CircularProgress />
+      </Box>
+    );
+  }
+
+  if (error) {
+    return (
+      <Box mt={2}>
+        <Alert severity="error" sx={{ mb: 2 }}>
+          {error}
+        </Alert>
+        <Button variant="contained" color="primary" onClick={() => window.location.reload()}>
+          Retry
+        </Button>
+      </Box>
+    );
+  }
+
+  if (users.length === 0) {
+    return (
+      <Box mt={2}>
+        <Alert severity="info">No users found</Alert>
+      </Box>
+    );
+  }
+
   return (
     <Box mt={2}>
       {/* Search Box */}
@@ -126,7 +127,7 @@ const ListView = () => {
         <TextField
           fullWidth
           variant="outlined"
-          placeholder="Search..."
+          placeholder="Search users..."
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
           InputProps={{
@@ -141,7 +142,7 @@ const ListView = () => {
 
       {/* Table */}
       <TableContainer component={Paper} elevation={0}>
-        <Table sx={{ minWidth: 650 }} aria-label="simple table">
+        <Table sx={{ minWidth: 650 }} aria-label="users table">
           <TableHead>
             <TableRow>
               <TableCell>
@@ -160,7 +161,7 @@ const ListView = () => {
                 <strong>Designation</strong>
               </TableCell>
               <TableCell>
-                <strong>Mobile Number</strong>
+                <strong>Mobile</strong>
               </TableCell>
               <TableCell>
                 <strong>PAN Number</strong>
@@ -171,15 +172,15 @@ const ListView = () => {
             </TableRow>
           </TableHead>
           <TableBody>
-            {paginatedRows.map((row) => (
-              <TableRow key={row.id}>
-                <TableCell>{row.id}</TableCell>
-                <TableCell>{row.name}</TableCell>
-                <TableCell>{row.role}</TableCell>
-                <TableCell>{row.department}</TableCell>
-                <TableCell>{row.designation}</TableCell>
-                <TableCell>{row.mobile}</TableCell>
-                <TableCell>{row.pan}</TableCell>
+            {paginatedRows.map((user) => (
+              <TableRow key={user.empId}>
+                <TableCell>{user.empId}</TableCell>
+                <TableCell>{user.name}</TableCell>
+                <TableCell>{user.roles.join(", ")}</TableCell>
+                <TableCell>{user.department}</TableCell>
+                <TableCell>{user.designation}</TableCell>
+                <TableCell>{user.contact}</TableCell>
+                <TableCell>{user.PanNumber}</TableCell>
                 <TableCell>
                   <IconButton color="success">
                     <CheckCircleIcon />
@@ -200,7 +201,7 @@ const ListView = () => {
         page={page}
         onPageChange={handleChangePage}
         onRowsPerPageChange={handleChangeRowsPerPage}
-        labelDisplayedRows={({ from, to, count }) => `Records: ${from}-${to} of ${count}`}
+        labelDisplayedRows={({ from, to, count }) => `Showing ${from}-${to} of ${count} users`}
       />
     </Box>
   );
