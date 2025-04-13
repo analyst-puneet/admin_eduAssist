@@ -1,6 +1,6 @@
 import { Box, Button, Step, StepLabel, Stepper, Typography, Paper, Container } from "@mui/material";
 import React from "react";
-import Addstaff1 from "./Addstaff1";
+// import Addstaff1 from "./Addstaff1";
 import Addstaff2 from "./Addstaff2";
 import Addstaff3 from "./Addstaff3";
 
@@ -11,7 +11,8 @@ function getSteps() {
 function getStepContent(stepIndex) {
   switch (stepIndex) {
     case 0:
-      return <Addstaff1 />;
+      return "Unknown Step";
+      // return <Addstaff1 />;
     case 1:
       return <Addstaff2 />;
     case 2:
