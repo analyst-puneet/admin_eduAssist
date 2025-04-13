@@ -11,8 +11,7 @@ function getSteps() {
 function getStepContent(stepIndex) {
   switch (stepIndex) {
     case 0:
-      return "Unknown Step";
-      // return <Addstaff1 />;
+      return <Addstaff1 />;
     case 1:
       return <Addstaff2 />;
     case 2:
