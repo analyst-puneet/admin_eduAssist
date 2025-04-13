@@ -8,44 +8,68 @@ import {
   InputLabel,
   Select,
   MenuItem,
-  Divider
+  Divider,
+  useTheme
 } from "@mui/material";
 
 export default function AddStaff2() {
+  const theme = useTheme();
+  const isDarkMode = theme.palette.mode === "dark";
+
+  const inputStyle = (isDark, theme) => ({
+    "& .MuiOutlinedInput-notchedOutline": {
+      borderColor: isDark ? "white" : "grey.500"
+    },
+    "&:hover .MuiOutlinedInput-notchedOutline": {
+      borderColor: isDark ? "white" : "grey.700"
+    },
+    "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
+      borderColor: isDark ? "white" : theme.palette.primary.main
+    }
+  });
+
   return (
-    <Box p={3} boxShadow={2} borderRadius={2} bgcolor="#fff">
+    <Box>
       {/* Payroll Section */}
       <Typography variant="h6" gutterBottom>
         Add More Details
       </Typography>
 
       <Box mb={2}>
-        <Typography variant="subtitle1" gutterBottom>
+        <Typography variant="subtitle1" gutterBottom sx={inputStyle(isDarkMode, theme)}>
           Payroll
         </Typography>
 
         <Grid container spacing={2}>
           <Grid item xs={12} sm={4}>
-            <TextField label="EPF No." fullWidth />
+            <TextField label="EPF No." fullWidth sx={inputStyle(isDarkMode, theme)} />
           </Grid>
           <Grid item xs={12} sm={4}>
-            <TextField label="Basic Salary" fullWidth />
+            <TextField label="Basic Salary" fullWidth sx={inputStyle(isDarkMode, theme)} />
           </Grid>
+
           <Grid item xs={12} sm={4}>
-            <FormControl fullWidth>
-              <InputLabel>Contract Type</InputLabel>
-              <Select defaultValue="">
+            <FormControl fullWidth required sx={inputStyle(isDarkMode, theme)}>
+              <InputLabel id="contract-type-label">Contract Type</InputLabel>
+              <Select
+                labelId="contract-type-label"
+                id="contract-type"
+                defaultValue=""
+                label="Contract Type"
+                sx={inputStyle(isDarkMode, theme)}
+              >
                 <MenuItem value="Full-Time">Full-Time</MenuItem>
                 <MenuItem value="Part-Time">Part-Time</MenuItem>
                 <MenuItem value="Temporary">Temporary</MenuItem>
               </Select>
             </FormControl>
           </Grid>
+
           <Grid item xs={12} sm={6}>
-            <TextField label="Work Shift" fullWidth />
+            <TextField label="Work Shift" fullWidth sx={inputStyle(isDarkMode, theme)} />
           </Grid>
           <Grid item xs={12} sm={6}>
-            <TextField label="Work Location" fullWidth />
+            <TextField label="Work Location" fullWidth sx={inputStyle(isDarkMode, theme)} />
           </Grid>
         </Grid>
       </Box>
@@ -65,6 +89,7 @@ export default function AddStaff2() {
               placeholder="Number of Leaves"
               fullWidth
               type="number"
+              sx={inputStyle(isDarkMode, theme)}
             />
           </Grid>
           <Grid item xs={12} sm={4}>
@@ -73,6 +98,7 @@ export default function AddStaff2() {
               placeholder="Number of Leaves"
               fullWidth
               type="number"
+              sx={inputStyle(isDarkMode, theme)}
             />
           </Grid>
           <Grid item xs={12} sm={4}>
@@ -81,10 +107,17 @@ export default function AddStaff2() {
               placeholder="Number of Leaves"
               fullWidth
               type="number"
+              sx={inputStyle(isDarkMode, theme)}
             />
           </Grid>
           <Grid item xs={12} sm={4}>
-            <TextField label="Sick Leave" placeholder="Number of Leaves" fullWidth type="number" />
+            <TextField
+              label="Sick Leave"
+              placeholder="Number of Leaves"
+              fullWidth
+              type="number"
+              sx={inputStyle(isDarkMode, theme)}
+            />
           </Grid>
         </Grid>
       </Box>
@@ -99,19 +132,19 @@ export default function AddStaff2() {
 
         <Grid container spacing={2}>
           <Grid item xs={12} sm={4}>
-            <TextField label="Account Title" fullWidth />
+            <TextField label="Account Title" fullWidth sx={inputStyle(isDarkMode, theme)} />
           </Grid>
           <Grid item xs={12} sm={4}>
-            <TextField label="Bank Account Number" fullWidth />
+            <TextField label="Bank Account Number" fullWidth sx={inputStyle(isDarkMode, theme)} />
           </Grid>
           <Grid item xs={12} sm={4}>
-            <TextField label="Bank Name" fullWidth />
+            <TextField label="Bank Name" fullWidth sx={inputStyle(isDarkMode, theme)} />
           </Grid>
           <Grid item xs={12} sm={4}>
-            <TextField label="IFSC Code" fullWidth />
+            <TextField label="IFSC Code" fullWidth sx={inputStyle(isDarkMode, theme)} />
           </Grid>
           <Grid item xs={12} sm={4}>
-            <TextField label="Bank Branch Name" fullWidth />
+            <TextField label="Bank Branch Name" fullWidth sx={inputStyle(isDarkMode, theme)} />
           </Grid>
         </Grid>
       </Box>

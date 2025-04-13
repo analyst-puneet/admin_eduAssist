@@ -50,7 +50,7 @@ export default function StepperForm() {
               🎉 All steps completed – you're done!
             </Typography>
             <Button variant="contained" color="secondary" onClick={handleReset}>
-              Reset
+              Preview & Submit
             </Button>
           </Box>
         ) : (
