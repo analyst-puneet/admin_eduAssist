@@ -14,7 +14,7 @@ import {
   InputAdornment,
   CircularProgress,
   Alert,
-  Button // Added Button import
+  Button
 } from "@mui/material";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import SearchIcon from "@mui/icons-material/Search";
@@ -38,26 +38,18 @@ const ListView = () => {
         const response = await axios.get("http://localhost:3000/users");
         console.log("API Response:", response.data); // Debug log
 
-        // Handle different response structures
-        let usersData = [];
+        // Extract users data from API response
+        const usersData = Array.isArray(response.data)
+          ? response.data
+          : response.data?.users || response.data?.data?.users || [];
 
-        if (Array.isArray(response.data)) {
-          usersData = response.data;
-        } else if (response.data?.users && Array.isArray(response.data.users)) {
-          usersData = response.data.users;
-        } else if (response.data?.data?.users && Array.isArray(response.data.data.users)) {
-          usersData = response.data.data.users;
-        } else {
-          throw new Error("API response doesn't contain valid users data");
+        if (usersData.length === 0) {
+          throw new Error("No users found in API response");
         }
 
         setUsers(usersData);
       } catch (err) {
-        console.error("Error fetching users:", {
-          error: err,
-          response: err.response?.data,
-          status: err.response?.status
-        });
+        console.error("Error fetching users:", err);
         setError(err.message || "Failed to fetch users");
       } finally {
         setLoading(false);
@@ -130,6 +122,17 @@ const ListView = () => {
           placeholder="Search users..."
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
+          sx={{
+            "& .MuiOutlinedInput-notchedOutline": {
+              borderColor: "grey.500"
+            },
+            "&:hover .MuiOutlinedInput-notchedOutline": {
+              borderColor: "grey.700"
+            },
+            "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
+              borderColor: "primary.main"
+            }
+          }}
           InputProps={{
             startAdornment: (
               <InputAdornment position="start">

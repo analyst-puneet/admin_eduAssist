@@ -2,10 +2,12 @@ import { Card, Avatar, Typography, Stack, Box, IconButton, Tooltip } from "@mui/
 import { Edit, Visibility } from "@mui/icons-material";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { useTheme } from "@mui/material"; // 🆕 Import theme
 
 const UserCard = ({ name, id, phone, location, roles, img }) => {
   const [isHovered, setIsHovered] = useState(false);
   const navigate = useNavigate();
+  const theme = useTheme(); // 🆕 Theme hook for dark/light mode
 
   const handleViewClick = () => {
     console.log("Navigating to /staff-profile");
@@ -46,7 +48,7 @@ const UserCard = ({ name, id, phone, location, roles, img }) => {
         sx={{
           width: "95px",
           minHeight: "100%",
-          backgroundColor: "#e0e0e0",
+          backgroundColor: theme.palette.mode === "dark" ? "#1e2a3a" : "#e0e0e0", // 🆕 Dark mode color
           display: "flex",
           alignItems: "center",
           justifyContent: "center",
@@ -61,21 +63,20 @@ const UserCard = ({ name, id, phone, location, roles, img }) => {
             src={img}
             alt={name}
             sx={{
-              maxHeight: "100%",
-              maxWidth: "100%",
-              width: "auto",
-              height: "auto",
+              width: "85px",
+              height: "85px",
+              borderRadius: "50%",
+              objectFit: "cover",
               position: "absolute",
               top: "50%",
               left: "50%",
-              transform: "translate(-50%, -50%)",
-              objectFit: "contain"
+              transform: "translate(-50%, -50%)"
             }}
           />
         ) : (
           <Avatar
             sx={{
-              width: "45px",
+              width: "50px",
               height: "45px",
               bgcolor: "#bdbdbd",
               fontSize: "20px",

@@ -12,11 +12,11 @@ const navigations = [
   },
 
   {
-    name: "Users",
+    name: "Human Resources",
     icon: "people", // Changed to more appropriate forms icon
     children: [
       {
-        name: "View Users",
+        name: "Staff Details",
         path: "/users",
         iconText: "VU"
       }

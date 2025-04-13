@@ -13,11 +13,14 @@ import {
 import { Breadcrumb, SimpleCard } from "app/components";
 import { useState } from "react";
 import CardContainer from "./CardContainer";
-import ListView from "./ListView"; // Import the new ListView component
+import ListView from "./ListView";
+import { useTheme } from "@mui/material/styles";
 
 const Index = () => {
   const [role, setRole] = useState("");
   const [tab, setTab] = useState(0);
+  const theme = useTheme();
+  const isDarkMode = theme.palette.mode === "dark";
 
   const handleRoleChange = (e) => setRole(e.target.value);
   const handleTabChange = (e, val) => setTab(val);
@@ -25,7 +28,12 @@ const Index = () => {
   return (
     <div style={{ margin: "30px" }}>
       <Box className="breadcrumb">
-        <Breadcrumb routeSegments={[{ name: "Users", path: "/users" }, { name: "List" }]} />
+        <Breadcrumb
+          routeSegments={[
+            { name: "Users", path: "/users" },
+            { name: tab === 0 ? "Cards" : "Lists" }
+          ]}
+        />
       </Box>
 
       {/* SimpleCard with Add Staff Button Inside (Top-Right) */}
@@ -40,11 +48,15 @@ const Index = () => {
           {/* Add Staff Button (Absolute Position Inside Card) */}
           <Button
             variant="contained"
-            color="secondary"
             sx={{
               position: "absolute",
               top: 16,
-              right: 16
+              right: 16,
+              backgroundColor: isDarkMode ? "green" : "secondary.main",
+              color: isDarkMode ? "white" : "inherit",
+              "&:hover": {
+                backgroundColor: isDarkMode ? "#006400" : "secondary.dark"
+              }
             }}
           >
             + Add Staff
@@ -55,7 +67,23 @@ const Index = () => {
             <Stack direction={{ xs: "column", md: "row" }} spacing={2} alignItems="flex-start">
               <FormControl fullWidth sx={{ minWidth: 200 }}>
                 <InputLabel>Role</InputLabel>
-                <Select value={role} label="Role" onChange={handleRoleChange}>
+                <Select
+                  value={role}
+                  label="Role"
+                  onChange={handleRoleChange}
+                  sx={{
+                    borderColor: isDarkMode ? "white" : "grey.500",
+                    "& .MuiOutlinedInput-notchedOutline": {
+                      borderColor: isDarkMode ? "white" : "grey.500"
+                    },
+                    "&:hover .MuiOutlinedInput-notchedOutline": {
+                      borderColor: isDarkMode ? "white" : "grey.700"
+                    },
+                    "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
+                      borderColor: isDarkMode ? "white" : "primary.main"
+                    }
+                  }}
+                >
                   <MenuItem value="">Select</MenuItem>
                   <MenuItem value="admin">Admin</MenuItem>
                   <MenuItem value="faculty">Faculty</MenuItem>
@@ -64,11 +92,35 @@ const Index = () => {
               </FormControl>
 
               <FormControl fullWidth sx={{ minWidth: 200 }}>
-                <TextField label="Staff ID, Name, Role etc..." fullWidth />
+                <TextField
+                  label="Staff ID, Name, Role etc..."
+                  fullWidth
+                  sx={{
+                    borderColor: isDarkMode ? "white" : "grey.500",
+                    "& .MuiOutlinedInput-notchedOutline": {
+                      borderColor: isDarkMode ? "white" : "grey.500"
+                    },
+                    "&:hover .MuiOutlinedInput-notchedOutline": {
+                      borderColor: isDarkMode ? "white" : "grey.700"
+                    },
+                    "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
+                      borderColor: isDarkMode ? "white" : "primary.main"
+                    }
+                  }}
+                />
               </FormControl>
-            </Stack>
-            <Stack direction="row" spacing={2} justifyContent="center">
-              <Button variant="contained">Search</Button>
+
+              {/* Search Button */}
+              <Button
+                variant="contained"
+                sx={{
+                  height: "56px", // Match the input field height
+                  minWidth: "120px",
+                  alignSelf: "center"
+                }}
+              >
+                Search
+              </Button>
             </Stack>
           </Stack>
         </SimpleCard>
