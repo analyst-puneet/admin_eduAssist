@@ -1,120 +1,119 @@
-import { Card, Avatar, Typography, Stack, Box } from "@mui/material";
+import { Card, Avatar, Typography, Stack, Box, IconButton, Tooltip } from "@mui/material";
+import { Edit, Visibility } from "@mui/icons-material";
+import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 
-const UserCard = ({ name, id, phone, location, roles, img }) => (
-  <Card
-    sx={{
-      p: 0,
-      borderRadius: "8px",
-      boxShadow: "0 1px 3px rgba(0,0,0,0.1)",
-      display: "flex",
-      width: "100%",
-      height: "140px",
-      overflow: "hidden"
-    }}
-  >
-    {/* Left Side - Image/Avatar Container */}
-    <Box
+const UserCard = ({ name, id, phone, location, roles, img }) => {
+  const [isHovered, setIsHovered] = useState(false);
+  const navigate = useNavigate();
+
+  const handleViewClick = () => {
+    console.log("Navigating to /staff-profile");
+    navigate(`/staff-profile/${id}`);
+  };
+
+  return (
+    <Card
       sx={{
-        width: "95px",
-        minHeight: "100%",
-        backgroundColor: "#e0e0e0",
+        p: 0,
+        borderRadius: "8px",
+        boxShadow: "0 1px 3px rgba(0,0,0,0.1)",
         display: "flex",
-        alignItems: "center",
-        justifyContent: "center",
+        width: "100%",
+        height: "140px",
         overflow: "hidden",
-        position: "relative"
-      }}
-    >
-      {img ? (
-        <Box
-          component="img"
-          src={img}
-          alt={name}
-          sx={{
-            maxHeight: "100%",
-            maxWidth: "100%",
-            width: "auto",
-            height: "auto",
+        position: "relative",
+        transition: "all 0.3s ease",
+        "&:hover": {
+          boxShadow: "0 4px 12px rgba(0,0,0,0.15)",
+          "&::before": {
+            content: '""',
             position: "absolute",
-            top: "50%",
-            left: "50%",
-            transform: "translate(-50%, -50%)",
-            objectFit: "contain"
-          }}
-        />
-      ) : (
-        <Avatar
-          sx={{
-            width: "45px",
-            height: "45px",
-            bgcolor: "#bdbdbd",
-            fontSize: "20px",
-            fontWeight: "bold"
-          }}
-        >
-          {name.charAt(0)}
-        </Avatar>
-      )}
-    </Box>
-
-    {/* Right Side - User Details */}
-    <Box
-      sx={{
-        p: "10px",
-        flexGrow: 1,
-        display: "flex",
-        flexDirection: "column",
-        justifyContent: "space-between"
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            backgroundColor: "rgba(0,0,0,0.1)",
+            zIndex: 1
+          }
+        }
       }}
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
     >
-      <Box>
-        <Typography
-          variant="subtitle1"
-          sx={{
-            fontWeight: "bold",
-            fontSize: "0.9rem",
-            mb: "2px",
-            lineHeight: 1.2
-          }}
-        >
-          {name}
-        </Typography>
-        <Typography
-          variant="body2"
-          sx={{
-            color: "#616161",
-            fontSize: "0.75rem",
-            mb: "2px",
-            lineHeight: 1.2
-          }}
-        >
-          ID: {id}
-        </Typography>
-        <Typography
-          variant="body2"
-          sx={{
-            color: "#616161",
-            fontSize: "0.75rem",
-            mb: "2px",
-            lineHeight: 1.2
-          }}
-        >
-          Phone: {phone}
-        </Typography>
-        <Typography
-          variant="body2"
-          sx={{
-            color: "#616161",
-            fontSize: "0.75rem",
-            lineHeight: 1.2
-          }}
-        >
-          {location}
-        </Typography>
+      {/* Avatar / Image Section */}
+      <Box
+        sx={{
+          width: "95px",
+          minHeight: "100%",
+          backgroundColor: "#e0e0e0",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          overflow: "hidden",
+          position: "relative",
+          zIndex: 2
+        }}
+      >
+        {img ? (
+          <Box
+            component="img"
+            src={img}
+            alt={name}
+            sx={{
+              maxHeight: "100%",
+              maxWidth: "100%",
+              width: "auto",
+              height: "auto",
+              position: "absolute",
+              top: "50%",
+              left: "50%",
+              transform: "translate(-50%, -50%)",
+              objectFit: "contain"
+            }}
+          />
+        ) : (
+          <Avatar
+            sx={{
+              width: "45px",
+              height: "45px",
+              bgcolor: "#bdbdbd",
+              fontSize: "20px",
+              fontWeight: "bold"
+            }}
+          >
+            {name?.charAt(0).toUpperCase()}
+          </Avatar>
+        )}
       </Box>
 
-      <Box sx={{ mt: "6px" }}>
-        <Stack direction="row" spacing={0.5} sx={{ flexWrap: "wrap" }}>
+      {/* User Info Section */}
+      <Box
+        sx={{
+          p: "10px",
+          flexGrow: 1,
+          display: "flex",
+          flexDirection: "column",
+          justifyContent: "space-between",
+          zIndex: 2
+        }}
+      >
+        <Box>
+          <Typography variant="subtitle1" fontWeight="bold" fontSize="0.9rem" mb={0.5}>
+            {name}
+          </Typography>
+          <Typography variant="body2" color="text.secondary" fontSize="0.75rem">
+            ID: {id}
+          </Typography>
+          <Typography variant="body2" color="text.secondary" fontSize="0.75rem">
+            Phone: {phone}
+          </Typography>
+          <Typography variant="body2" color="text.secondary" fontSize="0.75rem">
+            {location}
+          </Typography>
+        </Box>
+
+        <Stack direction="row" spacing={0.5} flexWrap="wrap" mt={0.5}>
           {roles.map((role, idx) => (
             <Box
               key={idx}
@@ -125,7 +124,7 @@ const UserCard = ({ name, id, phone, location, roles, img }) => (
                 bgcolor: idx === 0 ? "#1976d2" : "#e0e0e0",
                 color: idx === 0 ? "#fff" : "#424242",
                 fontSize: "0.65rem",
-                fontWeight: "500",
+                fontWeight: 500,
                 mb: "2px"
               }}
             >
@@ -134,8 +133,53 @@ const UserCard = ({ name, id, phone, location, roles, img }) => (
           ))}
         </Stack>
       </Box>
-    </Box>
-  </Card>
-);
+
+      {/* Hover Buttons */}
+      {isHovered && (
+        <Box
+          sx={{
+            position: "absolute",
+            top: "50%",
+            left: "50%",
+            transform: "translate(-50%, -50%)",
+            display: "flex",
+            gap: 2,
+            zIndex: 3
+          }}
+        >
+          <Tooltip title="Edit" arrow>
+            <IconButton
+              size="medium"
+              color="primary"
+              sx={{
+                backgroundColor: "rgba(255, 255, 255, 0.9)",
+                "&:hover": {
+                  backgroundColor: "rgba(255, 255, 255, 1)"
+                }
+              }}
+            >
+              <Edit fontSize="small" />
+            </IconButton>
+          </Tooltip>
+          <Tooltip title="View" arrow>
+            <IconButton
+              size="medium"
+              color="secondary"
+              onClick={handleViewClick}
+              sx={{
+                backgroundColor: "rgba(255, 255, 255, 0.9)",
+                "&:hover": {
+                  backgroundColor: "rgba(255, 255, 255, 1)"
+                }
+              }}
+            >
+              <Visibility fontSize="small" />
+            </IconButton>
+          </Tooltip>
+        </Box>
+      )}
+    </Card>
+  );
+};
 
 export default UserCard;

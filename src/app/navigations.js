@@ -1,15 +1,14 @@
 const navigations = [
   {
-    name: "Dashboard",
-    path: "/dashboard/default",
-    icon: "dashboard"
-  },
-
-  // Just a heading like "Dashboard", no children
-  {
     name: "Quick Links",
     icon: "apps",
     path: "/quickLinks"
+  },
+
+  {
+    name: "Dashboard",
+    path: "/dashboard/default",
+    icon: "dashboard"
   },
 
   {

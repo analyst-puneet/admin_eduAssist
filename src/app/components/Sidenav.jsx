@@ -28,10 +28,10 @@ const SideNavMobile = styled("div")(({ theme }) => ({
 const StickyContainer = styled("div")(({ theme }) => ({
   backgroundColor: theme.palette.background.paper,
   transition: "all 0.3s ease",
+  zIndex: 10,
   "&.sticky": {
     position: "sticky",
     top: 0,
-    zIndex: 10,
     borderBottom: `1px solid ${theme.palette.divider}`,
     paddingTop: "6px",
     paddingBottom: "6px"
@@ -84,20 +84,20 @@ export default function Sidenav({ children }) {
       <StyledScrollBar options={{ suppressScrollX: true }}>
         {children}
 
-        {/* Dashboard always on top */}
-        {dashboardNav && <MatxVerticalNav items={[dashboardNav]} />}
-
-        {/* Invisible marker to detect scroll point */}
+        {/* Invisible marker for sticky detection */}
         <div ref={quickRef} />
 
-        {/* Sticky Quick Links container */}
+        {/* Sticky Quick Links at top */}
         {quickLinkNav && (
           <StickyContainer className={isSticky ? "sticky" : ""}>
             <MatxVerticalNav items={[quickLinkNav]} />
           </StickyContainer>
         )}
 
-        {/* Baaki sab */}
+        {/* Dashboard just after Quick Links */}
+        {dashboardNav && <MatxVerticalNav items={[dashboardNav]} />}
+
+        {/* Baaki sab nav items */}
         <MatxVerticalNav items={restNavs} />
       </StyledScrollBar>
 
