@@ -1,15 +1,36 @@
 const navigations = [
   {
+    name: "Quick Links",
+    icon: "apps",
+    path: "/quickLinks"
+  },
+
+  {
     name: "Dashboard",
     path: "/dashboard/default",
     icon: "dashboard"
   },
 
-  // Just a heading like "Dashboard", no children
   {
-    name: "Quick Links",
-    icon: "apps",
-    type: "label" // 👈 Yeh naya key add karo
+    name: "Human Resources",
+    icon: "people", // Changed to more appropriate forms icon
+    children: [
+      {
+        name: "Staff Details",
+        path: "/users",
+        iconText: "VU"
+      }
+      // {
+      //   name: "Create",
+      //   path: "/material/form/simple", // ✅ same path as route
+      //   iconText: "SF"
+      // },
+      // {
+      //   name: "Stepper Form",
+      //   path: "/material/form/stepper", // You'll need to add this route
+      //   iconText: "ST"
+      // }
+    ]
   },
 
   {
@@ -84,7 +105,7 @@ const navigations = [
       },
       {
         name: "Simple Form",
-        path: "/material/form/simple", // You'll need to add this route
+        path: "/material/form/simple", // ✅ same path as route
         iconText: "SF"
       },
       {

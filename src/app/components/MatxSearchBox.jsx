@@ -1,22 +1,8 @@
 import { useState } from "react";
 import Icon from "@mui/material/Icon";
 import IconButton from "@mui/material/IconButton";
-import styled from "@mui/material/styles/styled";
-import { useTheme } from "@mui/material/styles"; // ✅ Import theme hook
-import { topBarHeight } from "app/utils/constant";
-
-// STYLED COMPONENTS
-const SearchContainer = styled("div")(({ theme }) => ({
-  display: "flex",
-  alignItems: "center",
-  height: 36,
-  background: theme.palette.primary.main,
-  color: theme.palette.text.primary,
-  borderRadius: "20px",
-  padding: "0 8px",
-  transition: "width 0.3s ease",
-  overflow: "hidden"
-}));
+import InputBase from "@mui/material/InputBase";
+import { useTheme, styled } from "@mui/material/styles";
 
 const SearchWrapper = styled("div")({
   position: "relative",
@@ -24,45 +10,58 @@ const SearchWrapper = styled("div")({
   alignItems: "center"
 });
 
-const SearchInput = styled("input")(({ theme }) => ({
-  width: 0,
-  opacity: 0,
-  border: "none",
-  outline: "none",
-  fontSize: "1rem",
-  paddingLeft: "10px",
-  height: "100%",
-  background: "transparent",
+const SearchContainer = styled("div")(({ theme, open }) => ({
+  display: "flex",
+  alignItems: "center",
+  height: 36,
+  background: open ? theme.palette.background.paper : "transparent",
+  borderRadius: 20,
+  padding: "0 8px",
+  transition: "all 0.3s ease",
+  overflow: "hidden",
+  width: open ? 220 : 40,
+  border: open ? `1px solid ${theme.palette.divider}` : "none"
+}));
+
+const StyledInput = styled(InputBase)(({ theme }) => ({
   color: theme.palette.text.primary,
-  transition: "width 0.3s ease, opacity 0.3s ease",
-  "&::placeholder": {
-    color: theme.palette.text.primary
+  paddingLeft: 10,
+  fontSize: "0.95rem",
+  "& input::placeholder": {
+    color: theme.palette.text.secondary
   }
 }));
 
 export default function MatxSearchBox() {
   const [open, setOpen] = useState(false);
-  const theme = useTheme(); // ✅ Use theme hook here
+  const theme = useTheme();
 
   const toggle = () => setOpen(!open);
 
   return (
     <SearchWrapper>
-      <SearchContainer
-        style={{
-          width: open ? 220 : 40,
-          border: `1px solid ${open ? theme.palette.grey[600] : "transparent"}`
-        }}
-      >
-        <IconButton onClick={toggle} size="small">
-          <Icon sx={{ color: "text.primary" }}>{open ? "close" : "search"}</Icon>
+      <SearchContainer open={open}>
+        <IconButton
+          onClick={toggle}
+          size="small"
+          disableRipple
+          sx={{
+            padding: 0,
+            backgroundColor: "transparent",
+            "&:hover": { backgroundColor: "transparent" }
+          }}
+        >
+          <Icon sx={{ color: theme.palette.mode === "dark" ? "#ffffff" : "#838485" }}>
+            {open ? "close" : "search"}
+          </Icon>
         </IconButton>
-        <SearchInput
-          type="text"
+
+        <StyledInput
           placeholder="Search..."
-          style={{
+          sx={{
             width: open ? 160 : 0,
-            opacity: open ? 1 : 0
+            opacity: open ? 1 : 0,
+            transition: "width 0.3s ease, opacity 0.3s ease"
           }}
           autoFocus={open}
         />
