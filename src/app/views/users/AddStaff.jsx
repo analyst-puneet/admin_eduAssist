@@ -1,8 +1,8 @@
 import { Box, Button, Step, StepLabel, Stepper, Typography, Paper, Container } from "@mui/material";
 import React from "react";
-import Addstaff1 from "./Addstaff1";
-import Addstaff2 from "./Addstaff2";
-import Addstaff3 from "./Addstaff3";
+import Addstaff1 from "./AddStaff1";
+import Addstaff2 from "./AddStaff2";
+import Addstaff3 from "./AddStaff3";
 
 function getSteps() {
   return ["Personal Information", "Payroll & Bank Details", "Review & Submit"];
