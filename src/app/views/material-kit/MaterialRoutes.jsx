@@ -19,6 +19,7 @@ const AppAutoComplete = Loadable(lazy(() => import("./auto-complete/AppAutoCompl
 const AppExpansionPanel = Loadable(lazy(() => import("./expansion-panel/AppExpansionPanel")));
 const UserIndex = Loadable(lazy(() => import("app/views/users/Index")));
 const StaffProfileIndex = Loadable(lazy(() => import("app/views/users/StaffProfile")));
+const AddUser = Loadable(lazy(() => import("app/views/users/AddStaff")));
 
 const materialRoutes = [
   { path: "/material/table", element: <AppTable /> },
@@ -38,7 +39,8 @@ const materialRoutes = [
   { path: "/material/dialog", element: <AppDialog /> },
   { path: "/material/snackbar", element: <AppSnackbar /> },
   { path: "/users", element: <UserIndex /> },
-  { path: "/staff-profile/:empId", element: <StaffProfileIndex /> }
+  { path: "/staff-profile/:empId", element: <StaffProfileIndex /> },
+  { path: "/user/add-staff", element: <AddUser /> }
 ];
 
 export default materialRoutes;

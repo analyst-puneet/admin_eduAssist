@@ -15,13 +15,13 @@ import { useState } from "react";
 import CardContainer from "./CardContainer";
 import ListView from "./ListView";
 import { useTheme } from "@mui/material/styles";
-
+import { useNavigate } from "react-router-dom";
 const Index = () => {
   const [role, setRole] = useState("");
   const [tab, setTab] = useState(0);
   const theme = useTheme();
   const isDarkMode = theme.palette.mode === "dark";
-
+  const navigate = useNavigate();
   const handleRoleChange = (e) => setRole(e.target.value);
   const handleTabChange = (e, val) => setTab(val);
 
@@ -48,6 +48,7 @@ const Index = () => {
           {/* Add Staff Button (Absolute Position Inside Card) */}
           <Button
             variant="contained"
+            onClick={() => navigate("/user/add-staff")}
             sx={{
               position: "absolute",
               top: 16,
