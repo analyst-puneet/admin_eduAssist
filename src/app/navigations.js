@@ -19,17 +19,12 @@ const navigations = [
         name: "Staff Details",
         path: "/users",
         iconText: "VU"
+      },
+      {
+        name: "Staff Attendance",
+        path: "/staff-attendance",
+        iconText: "SA"
       }
-      // {
-      //   name: "Create",
-      //   path: "/material/form/simple", // ✅ same path as route
-      //   iconText: "SF"
-      // },
-      // {
-      //   name: "Stepper Form",
-      //   path: "/material/form/stepper", // You'll need to add this route
-      //   iconText: "ST"
-      // }
     ]
   },
 

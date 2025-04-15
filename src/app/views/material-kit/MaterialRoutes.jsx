@@ -20,6 +20,8 @@ const AppExpansionPanel = Loadable(lazy(() => import("./expansion-panel/AppExpan
 const UserIndex = Loadable(lazy(() => import("app/views/users/Index")));
 const StaffProfileIndex = Loadable(lazy(() => import("app/views/users/StaffProfile")));
 const AddUser = Loadable(lazy(() => import("app/views/users/AddStaff")));
+const StaffAttendance = Loadable(lazy(() => import("app/views/users/StaffAttendance")));
+const MarkAttendance = Loadable(lazy(() => import("app/views/users/MarkAttendance")));
 
 const materialRoutes = [
   { path: "/material/table", element: <AppTable /> },
@@ -40,7 +42,9 @@ const materialRoutes = [
   { path: "/material/snackbar", element: <AppSnackbar /> },
   { path: "/users", element: <UserIndex /> },
   { path: "/staff-profile/:empId", element: <StaffProfileIndex /> },
-  { path: "/user/add-staff", element: <AddUser /> }
+  { path: "/user/add-staff", element: <AddUser /> },
+  { path: "/staff-attendance", element: <StaffAttendance /> },
+  { path: "/staff/mark-attendance", element: <MarkAttendance /> }
 ];
 
 export default materialRoutes;
