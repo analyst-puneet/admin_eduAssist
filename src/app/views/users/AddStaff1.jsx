@@ -9,12 +9,17 @@ import {
   FormControl,
   Typography,
   Button,
-  useTheme
+  useTheme,
+  Dialog,
+  DialogContent,
+  IconButton
 } from "@mui/material";
 import { useNavigate } from "react-router-dom";
+import CloseIcon from "@mui/icons-material/Close";
+import AddPhotoAlternateIcon from "@mui/icons-material/AddPhotoAlternate";
 
 export default function Addstaff1() {
-  const navigate = useNavigate(); // Hook for navigation
+  const navigate = useNavigate();
   const theme = useTheme();
   const isDarkMode = theme.palette.mode === "dark";
 
@@ -31,6 +36,7 @@ export default function Addstaff1() {
   });
 
   const [selectedImage, setSelectedImage] = useState(null);
+  const [openPreview, setOpenPreview] = useState(false);
   const [role, setRole] = useState("");
 
   const handleImageChange = (e) => {
@@ -44,9 +50,16 @@ export default function Addstaff1() {
     setRole(e.target.value);
   };
 
-  // Handle the Back button click
   const handleBackClick = () => {
-    navigate("/users"); // Navigate back to the "/users" page
+    navigate("/users");
+  };
+
+  const handlePreviewOpen = () => {
+    setOpenPreview(true);
+  };
+
+  const handlePreviewClose = () => {
+    setOpenPreview(false);
   };
 
   return (
@@ -192,54 +205,81 @@ export default function Addstaff1() {
           <TextField label="Mother Name" fullWidth sx={inputStyle(isDarkMode, theme)} />
         </Grid>
 
-        {/* Upload Image */}
+        {/* Upload Image and Preview Section - Fixed Height */}
         <Grid item xs={12} sm={4}>
           <Box
-            component="label"
-            htmlFor="file-upload"
             sx={{
-              border: "1px dashed #ccc",
-              borderRadius: "4px",
-              padding: "16.5px 14px",
-              width: "100%",
-              textAlign: "center",
-              color: "#666",
-              cursor: "pointer"
+              display: "flex",
+              alignItems: "center",
+              gap: 2,
+              height: "56px" // Match MUI TextField height
             }}
           >
-            <input
-              id="file-upload"
-              type="file"
-              accept="image/*"
-              hidden
-              onChange={handleImageChange}
-            />
-            <Typography variant="body2">📷 Upload Staff Photo</Typography>
-          </Box>
-        </Grid>
-
-        {/* Preview Image */}
-        {selectedImage && (
-          <Grid item xs={12} sm={4}>
+            {/* Upload Button - Fixed Height */}
             <Box
+              component="label"
+              htmlFor="file-upload"
               sx={{
-                border: "1px solid #ccc",
+                border: "1px dashed",
+                borderColor: isDarkMode ? "white" : "grey.500",
                 borderRadius: "4px",
-                padding: "10px",
-                textAlign: "center"
+                padding: "8px 14px",
+                width: "100%",
+                height: "100%",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                cursor: "pointer",
+                "&:hover": {
+                  borderColor: isDarkMode ? "white" : theme.palette.primary.main,
+                  backgroundColor: isDarkMode ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.04)"
+                }
               }}
             >
-              <img
-                src={selectedImage}
-                alt="Preview"
-                style={{ maxWidth: "100%", maxHeight: "200px" }}
+              <input
+                id="file-upload"
+                type="file"
+                accept="image/*"
+                hidden
+                onChange={handleImageChange}
               />
-              <Typography variant="caption" display="block">
-                Uploaded Image Preview
-              </Typography>
+              <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+                <AddPhotoAlternateIcon fontSize="small" />
+                <Typography variant="body2">Upload Photo</Typography>
+              </Box>
             </Box>
-          </Grid>
-        )}
+
+            {/* Thumbnail Preview - Fixed Height */}
+            {selectedImage && (
+              <Box
+                onClick={handlePreviewOpen}
+                sx={{
+                  width: 56,
+                  height: 56,
+                  borderRadius: "4px",
+                  overflow: "hidden",
+                  border: "1px solid",
+                  borderColor: isDarkMode ? "white" : "grey.500",
+                  cursor: "pointer",
+                  flexShrink: 0,
+                  "&:hover": {
+                    borderColor: theme.palette.primary.main
+                  }
+                }}
+              >
+                <img
+                  src={selectedImage}
+                  alt="Preview"
+                  style={{
+                    width: "100%",
+                    height: "100%",
+                    objectFit: "cover"
+                  }}
+                />
+              </Box>
+            )}
+          </Box>
+        </Grid>
 
         {/* Address */}
         <Grid item xs={12} sm={6}>
@@ -294,6 +334,35 @@ export default function Addstaff1() {
           </FormControl>
         </Grid>
       </Grid>
+
+      {/* Preview Dialog */}
+      <Dialog open={openPreview} onClose={handlePreviewClose} maxWidth="md">
+        <DialogContent>
+          <Box sx={{ position: "relative" }}>
+            <IconButton
+              onClick={handlePreviewClose}
+              sx={{
+                position: "absolute",
+                right: 8,
+                top: 8,
+                color: (theme) => theme.palette.grey[500]
+              }}
+            >
+              <CloseIcon />
+            </IconButton>
+            <img
+              src={selectedImage}
+              alt="Full Preview"
+              style={{
+                maxWidth: "100%",
+                maxHeight: "80vh",
+                display: "block",
+                margin: "0 auto"
+              }}
+            />
+          </Box>
+        </DialogContent>
+      </Dialog>
     </Box>
   );
 }
