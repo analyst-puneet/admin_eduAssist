@@ -1,4 +1,14 @@
-import { Box, Button, Step, StepLabel, Stepper, Typography, Paper, Container } from "@mui/material";
+import {
+  Box,
+  Button,
+  Step,
+  StepLabel,
+  Stepper,
+  Typography,
+  Paper,
+  Container,
+  useTheme
+} from "@mui/material";
 import React from "react";
 import Addstaff1 from "./AddStaff1";
 import Addstaff2 from "./AddStaff2";
@@ -22,6 +32,8 @@ function getStepContent(stepIndex) {
 }
 
 export default function StepperForm() {
+  const theme = useTheme();
+  const isDarkMode = theme.palette.mode === "dark";
   const [activeStep, setActiveStep] = React.useState(0);
   const steps = getSteps();
 
@@ -29,8 +41,23 @@ export default function StepperForm() {
   const handleBack = () => setActiveStep((prev) => prev - 1);
   const handleReset = () => setActiveStep(0);
 
+  // Back button style that works in both enabled and disabled states
+  const backButtonStyle = {
+    backgroundColor: isDarkMode ? theme.palette.grey[700] : theme.palette.secondary.main,
+    color: theme.palette.common.white + " !important", // Force white text in all states
+    "&:hover": {
+      backgroundColor: isDarkMode ? theme.palette.grey[600] : theme.palette.secondary.dark
+    },
+    "&.Mui-disabled": {
+      backgroundColor: isDarkMode
+        ? theme.palette.grey[800]
+        : theme.palette.action.disabledBackground,
+      color: theme.palette.common.white + " !important" // Force white text when disabled
+    }
+  };
+
   return (
-    <Container maxWidth="md" sx={{ py: 5 }}>
+    <Container maxWidth="lg" sx={{ py: 5 }}>
       {/* Stepper */}
       <Paper elevation={3} sx={{ p: 3, mb: 4 }}>
         <Stepper activeStep={activeStep} alternativeLabel>
@@ -61,7 +88,7 @@ export default function StepperForm() {
             <Box mt={4} display="flex" justifyContent="space-between">
               <Button
                 variant="contained"
-                color="secondary"
+                sx={backButtonStyle}
                 disabled={activeStep === 0}
                 onClick={handleBack}
               >

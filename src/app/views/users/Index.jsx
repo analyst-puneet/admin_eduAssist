@@ -42,8 +42,10 @@ const Index = () => {
           title="Select Criteria"
           sx={{
             height: "auto",
-            padding: 2
+            padding: 2,
+            boxShadow: "none" // यहाँ शैडो को पूरी तरह हटा दिया
           }}
+          elevation={0}
         >
           {/* Add Staff Button (Absolute Position Inside Card) */}
           <Button
@@ -66,12 +68,13 @@ const Index = () => {
           {/* Form Content */}
           <Stack spacing={2} mt={3}>
             <Stack direction={{ xs: "column", md: "row" }} spacing={2} alignItems="flex-start">
-              <FormControl fullWidth sx={{ minWidth: 200 }}>
+              <FormControl fullWidth sx={{ minWidth: 200 }} size="small">
                 <InputLabel>Role</InputLabel>
                 <Select
                   value={role}
                   label="Role"
                   onChange={handleRoleChange}
+                  size="small"
                   sx={{
                     borderColor: isDarkMode ? "white" : "grey.500",
                     "& .MuiOutlinedInput-notchedOutline": {
@@ -92,10 +95,11 @@ const Index = () => {
                 </Select>
               </FormControl>
 
-              <FormControl fullWidth sx={{ minWidth: 200 }}>
+              <FormControl fullWidth sx={{ minWidth: 200 }} size="small">
                 <TextField
                   label="Staff ID, Name, Role etc..."
                   fullWidth
+                  size="small"
                   sx={{
                     borderColor: isDarkMode ? "white" : "grey.500",
                     "& .MuiOutlinedInput-notchedOutline": {
@@ -115,7 +119,7 @@ const Index = () => {
               <Button
                 variant="contained"
                 sx={{
-                  height: "56px", // Match the input field height
+                  height: "40px",
                   minWidth: "120px",
                   alignSelf: "center"
                 }}

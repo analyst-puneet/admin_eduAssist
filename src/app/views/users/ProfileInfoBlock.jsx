@@ -12,16 +12,31 @@ const ProfileInfoBlock = ({ userData }) => {
   ];
 
   return (
-    <Box>
+    <Box sx={{ mb: 3 }}>
       {profileData.map((item, index) => (
-        <Box key={index} mb={1}>
-          <Typography fontWeight="bold" variant="body2">
-            {item.label}
-          </Typography>
-          <Typography variant="body2" color="text.secondary">
-            {item.value}
-          </Typography>
-          <Divider sx={{ my: 1 }} />
+        <Box key={index} mb={2}>
+          <Box
+            sx={{
+              display: "flex",
+              alignItems: "center",
+              mb: 0.5
+            }}
+          >
+            <Typography
+              variant="subtitle2"
+              fontWeight="500"
+              sx={{
+                minWidth: "120px",
+                color: "text.secondary"
+              }}
+            >
+              {item.label}
+            </Typography>
+            <Typography variant="body1" fontWeight="500">
+              {item.value || "-"}
+            </Typography>
+          </Box>
+          {index < profileData.length - 1 && <Divider sx={{ my: 1 }} />}
         </Box>
       ))}
     </Box>

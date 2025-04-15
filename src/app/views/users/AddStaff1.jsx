@@ -12,28 +12,47 @@ import {
   useTheme,
   Dialog,
   DialogContent,
-  IconButton
+  IconButton,
+  Paper
 } from "@mui/material";
 import { useNavigate } from "react-router-dom";
 import CloseIcon from "@mui/icons-material/Close";
 import AddPhotoAlternateIcon from "@mui/icons-material/AddPhotoAlternate";
+import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 
 export default function Addstaff1() {
   const navigate = useNavigate();
   const theme = useTheme();
   const isDarkMode = theme.palette.mode === "dark";
 
-  const inputStyle = (isDark, theme) => ({
+  // Ultra-compact input styling
+  const inputStyle = {
+    "& .MuiInputBase-root": {
+      height: "38px",
+      fontSize: "0.875rem"
+    },
+    "& .MuiInputLabel-root": {
+      transform: "translate(14px, 10px) scale(1)",
+      fontSize: "0.875rem",
+      "&.MuiInputLabel-shrink": {
+        transform: "translate(14px, -9px) scale(0.75)"
+      }
+    },
     "& .MuiOutlinedInput-notchedOutline": {
-      borderColor: isDark ? "white" : "grey.500"
+      borderColor: isDarkMode ? "rgba(255,255,255,0.23)" : "rgba(0,0,0,0.23)",
+      borderRadius: "6px"
     },
     "&:hover .MuiOutlinedInput-notchedOutline": {
-      borderColor: isDark ? "white" : "grey.700"
+      borderColor: isDarkMode ? theme.palette.primary.light : theme.palette.primary.main,
+      borderWidth: "1.5px"
     },
     "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
-      borderColor: isDark ? "white" : theme.palette.primary.main
-    }
-  });
+      borderColor: theme.palette.primary.main,
+      borderWidth: "1.5px",
+      boxShadow: `0 0 0 2px ${theme.palette.primary.light}`
+    },
+    margin: "0.25rem 0"
+  };
 
   const [selectedImage, setSelectedImage] = useState(null);
   const [openPreview, setOpenPreview] = useState(false);
@@ -63,95 +82,142 @@ export default function Addstaff1() {
   };
 
   return (
-    <Box>
-      <Grid container spacing={2} alignItems="center" justifyContent="space-between">
-        <Grid item>
-          <Typography variant="h6" gutterBottom>
-            Basic Information
-          </Typography>
-        </Grid>
+    <Box
+      component={Paper}
+      elevation={0}
+      sx={{
+        p: 3,
+        backgroundColor: isDarkMode ? theme.palette.grey[900] : theme.palette.background.paper,
+        borderRadius: "12px"
+      }}
+    >
+      {/* Header Section */}
+      <Box
+        sx={{
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "center",
+          mb: 2
+        }}
+      >
+        <Typography
+          variant="h6"
+          sx={{
+            fontWeight: 600,
+            color: isDarkMode ? theme.palette.common.white : "inherit"
+          }}
+        >
+          Basic Information
+        </Typography>
 
-        <Grid item>
-          <Button variant="outlined" color="primary" onClick={handleBackClick}>
-            Back
-          </Button>
-        </Grid>
-      </Grid>
+        <Button
+          variant="contained"
+          onClick={handleBackClick}
+          // startIcon={<ArrowBackIcon fontSize="small" />}
+          sx={{
+            height: "36px",
+            borderRadius: "6px",
+            px: 2,
+            textTransform: "none",
+            fontWeight: 500,
+            fontSize: "0.8125rem",
+            backgroundColor: isDarkMode ? theme.palette.grey[700] : theme.palette.primary.main,
+            color: theme.palette.common.white,
+            "&:hover": {
+              backgroundColor: isDarkMode ? theme.palette.grey[600] : theme.palette.primary.dark,
+              transform: "translateY(-1px)"
+            },
+            transition: "all 0.2s ease",
+            boxShadow: "none"
+          }}
+        >
+          BACK
+        </Button>
+      </Box>
 
-      <Grid container spacing={2}>
-        {/* Staff ID */}
+      {/* Form Fields */}
+      <Grid container spacing={1.5}>
+        {/* Row 1 */}
         <Grid item xs={12} sm={4}>
-          <TextField label="Staff ID" fullWidth required sx={inputStyle(isDarkMode, theme)} />
+          <TextField label="Staff ID" fullWidth required sx={inputStyle} />
         </Grid>
-
-        {/* Role */}
         <Grid item xs={12} sm={4}>
-          <FormControl fullWidth required sx={inputStyle(isDarkMode, theme)}>
+          <FormControl fullWidth required sx={inputStyle}>
             <InputLabel id="role-label">Role</InputLabel>
             <Select
               labelId="role-label"
-              id="role"
               value={role}
               label="Role"
               onChange={handleRoleChange}
+              MenuProps={{
+                PaperProps: {
+                  sx: {
+                    maxHeight: 200,
+                    backgroundColor: isDarkMode ? theme.palette.grey[800] : undefined
+                  }
+                }
+              }}
             >
-              <MenuItem value="">Select</MenuItem>
-              <MenuItem value="admin">Admin</MenuItem>
-              <MenuItem value="faculty">Faculty</MenuItem>
-              <MenuItem value="librarian">Librarian</MenuItem>
+              <MenuItem value="" sx={{ fontSize: "0.875rem" }}>
+                Select
+              </MenuItem>
+              <MenuItem value="admin" sx={{ fontSize: "0.875rem" }}>
+                Admin
+              </MenuItem>
+              <MenuItem value="faculty" sx={{ fontSize: "0.875rem" }}>
+                Faculty
+              </MenuItem>
+              <MenuItem value="librarian" sx={{ fontSize: "0.875rem" }}>
+                Librarian
+              </MenuItem>
             </Select>
           </FormControl>
         </Grid>
-
-        {/* Designation */}
         <Grid item xs={12} sm={4}>
-          <FormControl fullWidth required sx={inputStyle(isDarkMode, theme)}>
+          <FormControl fullWidth required sx={inputStyle}>
             <InputLabel>Designation</InputLabel>
             <Select defaultValue="" label="Designation">
-              <MenuItem value="Professor">Professor</MenuItem>
-              <MenuItem value="Lecturer">Lecturer</MenuItem>
+              <MenuItem value="Professor" sx={{ fontSize: "0.875rem" }}>
+                Professor
+              </MenuItem>
+              <MenuItem value="Lecturer" sx={{ fontSize: "0.875rem" }}>
+                Lecturer
+              </MenuItem>
             </Select>
           </FormControl>
         </Grid>
 
-        {/* First Name */}
+        {/* Row 2 */}
         <Grid item xs={12} sm={4}>
-          <TextField label="First Name" fullWidth required sx={inputStyle(isDarkMode, theme)} />
+          <TextField label="First Name" fullWidth required sx={inputStyle} />
+        </Grid>
+        <Grid item xs={12} sm={4}>
+          <TextField label="Last Name" fullWidth sx={inputStyle} />
+        </Grid>
+        <Grid item xs={12} sm={4}>
+          <TextField label="Father Name" fullWidth sx={inputStyle} />
         </Grid>
 
-        {/* Last Name */}
+        {/* Row 3 */}
         <Grid item xs={12} sm={4}>
-          <TextField label="Last Name" fullWidth sx={inputStyle(isDarkMode, theme)} />
+          <TextField label="Email (Login Username)" fullWidth required sx={inputStyle} />
         </Grid>
-
-        {/* Father Name */}
         <Grid item xs={12} sm={4}>
-          <TextField label="Father Name" fullWidth sx={inputStyle(isDarkMode, theme)} />
-        </Grid>
-
-        {/* Email */}
-        <Grid item xs={12} sm={4}>
-          <TextField
-            label="Email (Login Username)"
-            fullWidth
-            required
-            sx={inputStyle(isDarkMode, theme)}
-          />
-        </Grid>
-
-        {/* Gender */}
-        <Grid item xs={12} sm={4}>
-          <FormControl fullWidth required sx={inputStyle(isDarkMode, theme)}>
+          <FormControl fullWidth required sx={inputStyle}>
             <InputLabel>Gender</InputLabel>
             <Select defaultValue="" label="Gender">
-              <MenuItem value="Male">Male</MenuItem>
-              <MenuItem value="Female">Female</MenuItem>
-              <MenuItem value="Other">Other</MenuItem>
+              <MenuItem value="Male" sx={{ fontSize: "0.875rem" }}>
+                Male
+              </MenuItem>
+              <MenuItem value="Female" sx={{ fontSize: "0.875rem" }}>
+                Female
+              </MenuItem>
+              <MenuItem value="Other" sx={{ fontSize: "0.875rem" }}>
+                Other
+              </MenuItem>
             </Select>
           </FormControl>
         </Grid>
-
-        {/* DOB */}
         <Grid item xs={12} sm={4}>
           <TextField
             label="Date of Birth"
@@ -159,81 +225,75 @@ export default function Addstaff1() {
             fullWidth
             InputLabelProps={{ shrink: true }}
             required
-            sx={inputStyle(isDarkMode, theme)}
+            sx={inputStyle}
           />
         </Grid>
 
-        {/* Phone */}
+        {/* Row 4 */}
         <Grid item xs={12} sm={4}>
-          <TextField label="Phone" fullWidth sx={inputStyle(isDarkMode, theme)} />
+          <TextField label="Phone" fullWidth sx={inputStyle} />
         </Grid>
-
-        {/* Emergency Contact */}
         <Grid item xs={12} sm={4}>
-          <TextField
-            label="Emergency Contact Number"
-            fullWidth
-            sx={inputStyle(isDarkMode, theme)}
-          />
+          <TextField label="Emergency Contact" fullWidth sx={inputStyle} />
         </Grid>
-
-        {/* Marital Status */}
         <Grid item xs={12} sm={4}>
-          <FormControl fullWidth sx={inputStyle(isDarkMode, theme)}>
+          <FormControl fullWidth sx={inputStyle}>
             <InputLabel>Marital Status</InputLabel>
             <Select defaultValue="" label="Marital Status">
-              <MenuItem value="Single">Single</MenuItem>
-              <MenuItem value="Married">Married</MenuItem>
-              <MenuItem value="Other">Other</MenuItem>
+              <MenuItem value="Single" sx={{ fontSize: "0.875rem" }}>
+                Single
+              </MenuItem>
+              <MenuItem value="Married" sx={{ fontSize: "0.875rem" }}>
+                Married
+              </MenuItem>
+              <MenuItem value="Other" sx={{ fontSize: "0.875rem" }}>
+                Other
+              </MenuItem>
             </Select>
           </FormControl>
         </Grid>
 
-        {/* Date of Joining */}
+        {/* Row 5 */}
         <Grid item xs={12} sm={4}>
           <TextField
             label="Date of Joining"
             type="date"
             fullWidth
             InputLabelProps={{ shrink: true }}
-            sx={inputStyle(isDarkMode, theme)}
+            sx={inputStyle}
           />
         </Grid>
-
-        {/* Mother Name */}
         <Grid item xs={12} sm={4}>
-          <TextField label="Mother Name" fullWidth sx={inputStyle(isDarkMode, theme)} />
+          <TextField label="Mother Name" fullWidth sx={inputStyle} />
         </Grid>
 
-        {/* Upload Image and Preview Section - Fixed Height */}
+        {/* Upload Image and Preview Section */}
         <Grid item xs={12} sm={4}>
-          <Box
-            sx={{
-              display: "flex",
-              alignItems: "center",
-              gap: 2,
-              height: "56px" // Match MUI TextField height
-            }}
-          >
-            {/* Upload Button - Fixed Height */}
+          <Box sx={{ display: "flex", alignItems: "center", gap: 1.5, height: "38px" }}>
+            {/* Upload Button */}
             <Box
               component="label"
               htmlFor="file-upload"
               sx={{
                 border: "1px dashed",
-                borderColor: isDarkMode ? "white" : "grey.500",
-                borderRadius: "4px",
-                padding: "8px 14px",
+                borderColor: isDarkMode ? theme.palette.grey[600] : theme.palette.grey[400],
+                borderRadius: "6px",
+                padding: "6px 10px",
                 width: "100%",
                 height: "100%",
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "center",
                 cursor: "pointer",
+                backgroundColor: isDarkMode
+                  ? theme.palette.grey[800]
+                  : theme.palette.background.paper,
+                color: isDarkMode ? theme.palette.common.white : theme.palette.text.primary,
                 "&:hover": {
-                  borderColor: isDarkMode ? "white" : theme.palette.primary.main,
-                  backgroundColor: isDarkMode ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.04)"
-                }
+                  borderColor: theme.palette.primary.main,
+                  backgroundColor: isDarkMode ? theme.palette.grey[700] : theme.palette.grey[100]
+                },
+                transition: "all 0.2s ease"
               }}
             >
               <input
@@ -243,28 +303,58 @@ export default function Addstaff1() {
                 hidden
                 onChange={handleImageChange}
               />
-              <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-                <AddPhotoAlternateIcon fontSize="small" />
-                <Typography variant="body2">Upload Photo</Typography>
+              <Box
+                sx={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 0.75,
+                  width: "100%",
+                  overflow: "hidden"
+                }}
+              >
+                <AddPhotoAlternateIcon
+                  fontSize="small"
+                  sx={{
+                    fontSize: "18px",
+                    color: isDarkMode ? theme.palette.grey[400] : theme.palette.grey[600]
+                  }}
+                />
+                <Typography
+                  variant="body2"
+                  noWrap
+                  sx={{
+                    maxWidth: "calc(100% - 30px)",
+                    fontSize: "0.8125rem"
+                  }}
+                >
+                  {selectedImage
+                    ? document.getElementById("file-upload")?.files[0]?.name || "Photo selected"
+                    : "Upload Photo"}
+                </Typography>
               </Box>
             </Box>
 
-            {/* Thumbnail Preview - Fixed Height */}
+            {/* Thumbnail Preview */}
             {selectedImage && (
               <Box
                 onClick={handlePreviewOpen}
                 sx={{
-                  width: 56,
-                  height: 56,
-                  borderRadius: "4px",
+                  width: 38,
+                  height: 38,
+                  borderRadius: "6px",
                   overflow: "hidden",
                   border: "1px solid",
-                  borderColor: isDarkMode ? "white" : "grey.500",
+                  borderColor: isDarkMode ? theme.palette.grey[600] : theme.palette.grey[400],
+                  backgroundColor: isDarkMode
+                    ? theme.palette.grey[800]
+                    : theme.palette.background.paper,
                   cursor: "pointer",
                   flexShrink: 0,
                   "&:hover": {
-                    borderColor: theme.palette.primary.main
-                  }
+                    borderColor: theme.palette.primary.main,
+                    transform: "scale(1.05)"
+                  },
+                  transition: "all 0.2s ease"
                 }}
               >
                 <img
@@ -281,14 +371,20 @@ export default function Addstaff1() {
           </Box>
         </Grid>
 
-        {/* Address */}
+        {/* Address Section */}
         <Grid item xs={12} sm={6}>
           <TextField
             label="Address"
             fullWidth
             multiline
             rows={2}
-            sx={inputStyle(isDarkMode, theme)}
+            sx={{
+              ...inputStyle,
+              "& .MuiInputBase-root": {
+                height: "auto",
+                minHeight: "80px"
+              }
+            }}
           />
         </Grid>
         <Grid item xs={12} sm={6}>
@@ -297,45 +393,53 @@ export default function Addstaff1() {
             fullWidth
             multiline
             rows={2}
-            sx={inputStyle(isDarkMode, theme)}
+            sx={{
+              ...inputStyle,
+              "& .MuiInputBase-root": {
+                height: "auto",
+                minHeight: "80px"
+              }
+            }}
           />
         </Grid>
 
-        {/* Qualification */}
+        {/* Additional Info */}
         <Grid item xs={12} sm={4}>
-          <TextField label="Qualification" fullWidth sx={inputStyle(isDarkMode, theme)} />
+          <TextField label="Qualification" fullWidth sx={inputStyle} />
+        </Grid>
+        <Grid item xs={12} sm={4}>
+          <TextField label="Work Experience" fullWidth sx={inputStyle} />
+        </Grid>
+        <Grid item xs={12} sm={4}>
+          <TextField label="Note" fullWidth sx={inputStyle} />
         </Grid>
 
-        {/* Work Experience */}
+        {/* Final Row */}
         <Grid item xs={12} sm={4}>
-          <TextField label="Work Experience" fullWidth sx={inputStyle(isDarkMode, theme)} />
+          <TextField label="PAN Number" fullWidth required sx={inputStyle} />
         </Grid>
-
-        {/* Note */}
         <Grid item xs={12} sm={4}>
-          <TextField label="Note" fullWidth sx={inputStyle(isDarkMode, theme)} />
-        </Grid>
-
-        {/* PAN Number */}
-        <Grid item xs={12} sm={4}>
-          <TextField label="PAN Number" fullWidth required sx={inputStyle(isDarkMode, theme)} />
-        </Grid>
-
-        {/* Department */}
-        <Grid item xs={12} sm={4}>
-          <FormControl fullWidth sx={inputStyle(isDarkMode, theme)}>
+          <FormControl fullWidth sx={inputStyle}>
             <InputLabel>Department</InputLabel>
             <Select defaultValue="" label="Department">
-              <MenuItem value="CSE">CSE</MenuItem>
-              <MenuItem value="ECE">ECE</MenuItem>
-              <MenuItem value="ME">ME</MenuItem>
-              <MenuItem value="CE">CE</MenuItem>
+              <MenuItem value="CSE" sx={{ fontSize: "0.875rem" }}>
+                CSE
+              </MenuItem>
+              <MenuItem value="ECE" sx={{ fontSize: "0.875rem" }}>
+                ECE
+              </MenuItem>
+              <MenuItem value="ME" sx={{ fontSize: "0.875rem" }}>
+                ME
+              </MenuItem>
+              <MenuItem value="CE" sx={{ fontSize: "0.875rem" }}>
+                CE
+              </MenuItem>
             </Select>
           </FormControl>
         </Grid>
       </Grid>
 
-      {/* Preview Dialog */}
+      {/* Image Preview Dialog */}
       <Dialog open={openPreview} onClose={handlePreviewClose} maxWidth="md">
         <DialogContent>
           <Box sx={{ position: "relative" }}>
@@ -345,7 +449,11 @@ export default function Addstaff1() {
                 position: "absolute",
                 right: 8,
                 top: 8,
-                color: (theme) => theme.palette.grey[500]
+                color: theme.palette.common.white,
+                backgroundColor: "rgba(0,0,0,0.5)",
+                "&:hover": {
+                  backgroundColor: "rgba(0,0,0,0.7)"
+                }
               }}
             >
               <CloseIcon />
@@ -357,7 +465,8 @@ export default function Addstaff1() {
                 maxWidth: "100%",
                 maxHeight: "80vh",
                 display: "block",
-                margin: "0 auto"
+                margin: "0 auto",
+                borderRadius: "4px"
               }}
             />
           </Box>
