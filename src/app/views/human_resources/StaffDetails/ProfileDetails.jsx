@@ -1,10 +1,10 @@
 import { Box, Tabs, Tab, Divider, CircularProgress } from "@mui/material";
 import { useState } from "react";
 import ProfileTab from "./ProfileTab";
-import PayrollTab from "./PayrollTab";
-import LeavesTab from "./LeavesTab";
-import AttendanceTab from "./AttendanceTab";
-import DocumentsTab from "./DocumentsTab";
+import PayrollTab from "./StaffDetails/PayrollTab";
+import LeavesTab from "./StaffDetails/LeavesTab";
+import AttendanceTab from "./StaffDetails/AttendanceTab";
+import DocumentsTab from "./StaffDetails/DocumentsTab";
 import TimelineTab from "./TimelineTab";
 
 const ProfileDetails = ({ userData }) => {

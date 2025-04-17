@@ -11,7 +11,7 @@ const UserCard = ({ name, id, phone, location, roles, img }) => {
 
   const handleViewClick = () => {
     console.log("Navigating to /staff-profile");
-    navigate(`/staff-profile/${id}`);
+    navigate(`/human_resources/staff-profile/${id}`);
   };
 
   return (

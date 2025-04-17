@@ -43,14 +43,14 @@ const Index = () => {
           sx={{
             height: "auto",
             padding: 2,
-            boxShadow: "none" 
+            boxShadow: "none"
           }}
           elevation={0}
         >
           {/* Add Staff Button (Absolute Position Inside Card) */}
           <Button
             variant="contained"
-            onClick={() => navigate("/user/add-staff")}
+            onClick={() => navigate("/human_resources/add-staff")}
             sx={{
               position: "absolute",
               top: 16,

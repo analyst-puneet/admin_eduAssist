@@ -19,7 +19,8 @@ import { useNavigate } from "react-router-dom";
 import CloseIcon from "@mui/icons-material/Close";
 import AddPhotoAlternateIcon from "@mui/icons-material/AddPhotoAlternate";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
-import BackButton from "../material-kit/buttons/BackButton";
+// import BackButton from "../material-kit/buttons/BackButton";
+import BackButton from "app/views/material-kit/buttons/BackButton";
 
 export default function Addstaff1() {
   const navigate = useNavigate();
@@ -71,7 +72,7 @@ export default function Addstaff1() {
   };
 
   const handleBackClick = () => {
-    navigate("/users");
+    navigate("/human_resources/staff-details");
   };
 
   const handlePreviewOpen = () => {

@@ -17,17 +17,17 @@ const navigations = [
     children: [
       {
         name: "Staff Details",
-        path: "/users",
+        path: "/human_resources/staff-details",
         iconText: "VU"
       },
       {
         name: "Staff Attendance",
-        path: "/staff-attendance",
+        path: "/human_resources/staff-attendance",
         iconText: "SA"
       },
       {
         name: "Staff Leave ",
-        path: "/staff/leave",
+        path: "/human_resources/staff-leave",
         iconText: "SL"
       }
     ]

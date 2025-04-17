@@ -1,7 +1,7 @@
 import { Box, useTheme, Paper } from "@mui/material";
 import ProfileHeader from "./ProfileHeader";
 import ProfileInfoBlock from "./ProfileInfoBlock";
-import ProfileActions from "./ProfileActions";
+import ProfileActions from "./StaffDetails/ProfileActions";
 
 const ProfileCard = ({ userData }) => {
   const theme = useTheme();
