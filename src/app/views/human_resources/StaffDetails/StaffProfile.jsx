@@ -45,7 +45,7 @@ const StaffProfile = () => {
   }, [empId]);
 
   const handleBack = () => {
-    navigate("/users");
+    navigate("/human_resources/staff-details");
   };
 
   // Back button styling
