@@ -24,6 +24,11 @@ const navigations = [
         name: "Staff Attendance",
         path: "/staff-attendance",
         iconText: "SA"
+      },
+      {
+        name: "Staff Leave ",
+        path: "/staff/leave",
+        iconText: "SL"
       }
     ]
   },

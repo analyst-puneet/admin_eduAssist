@@ -19,6 +19,7 @@ import { useNavigate } from "react-router-dom";
 import CloseIcon from "@mui/icons-material/Close";
 import AddPhotoAlternateIcon from "@mui/icons-material/AddPhotoAlternate";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
+import BackButton from "../material-kit/buttons/BackButton";
 
 export default function Addstaff1() {
   const navigate = useNavigate();
@@ -110,29 +111,7 @@ export default function Addstaff1() {
           Basic Information
         </Typography>
 
-        <Button
-          variant="contained"
-          onClick={handleBackClick}
-          // startIcon={<ArrowBackIcon fontSize="small" />}
-          sx={{
-            height: "36px",
-            borderRadius: "6px",
-            px: 2,
-            textTransform: "none",
-            fontWeight: 500,
-            fontSize: "0.8125rem",
-            backgroundColor: isDarkMode ? theme.palette.grey[700] : theme.palette.primary.main,
-            color: theme.palette.common.white,
-            "&:hover": {
-              backgroundColor: isDarkMode ? theme.palette.grey[600] : theme.palette.primary.dark,
-              transform: "translateY(-1px)"
-            },
-            transition: "all 0.2s ease",
-            boxShadow: "none"
-          }}
-        >
-          BACK
-        </Button>
+        <BackButton onClick={handleBackClick} />
       </Box>
 
       {/* Form Fields */}

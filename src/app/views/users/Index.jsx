@@ -43,7 +43,7 @@ const Index = () => {
           sx={{
             height: "auto",
             padding: 2,
-            boxShadow: "none" // यहाँ शैडो को पूरी तरह हटा दिया
+            boxShadow: "none" 
           }}
           elevation={0}
         >
