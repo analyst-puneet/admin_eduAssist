@@ -1,6 +1,6 @@
 import React, { useState } from "react";
-import { useNavigate } from "react-router-dom";
-
+import { useNavigate, Link } from "react-router-dom";
+import { useTheme } from "@mui/material/styles";
 import {
   Box,
   Button,
@@ -15,13 +15,45 @@ import {
   Chip,
   IconButton,
   TablePagination,
-  TextField
+  TextField,
+  Menu,
+  MenuItem
 } from "@mui/material";
 import MoreVertIcon from "@mui/icons-material/MoreVert";
-import CloseIcon from "@mui/icons-material/Close";
+import HomeIcon from "@mui/icons-material/Home";
+import ChevronRightIcon from "@mui/icons-material/ChevronRight";
+
+const Breadcrumbs = () => {
+  return (
+    <Box display="flex" alignItems="center" mb={3}>
+      <Typography variant="h6" fontWeight="bold" mr={1}>
+        Leave
+      </Typography>
+      <Typography color="textSecondary" mx={1}>
+        |
+      </Typography>
+      <Link to="/" style={{ display: "flex", alignItems: "center", color: "inherit" }}>
+        <HomeIcon color="primary" fontSize="small" />
+      </Link>
+      <ChevronRightIcon color="disabled" fontSize="small" />
+      <Typography
+        sx={{
+          color: "text.secondary",
+          borderBottom: "2px solid purple",
+          fontWeight: 500
+        }}
+      >
+        Leave
+      </Typography>
+    </Box>
+  );
+};
 
 const LeaveIndex = () => {
+  const theme = useTheme();
   const navigate = useNavigate();
+  const isDarkMode = theme.palette.mode === "dark";
+
   const leaveData = [
     {
       staff: "Joe Black",
@@ -105,8 +137,9 @@ const LeaveIndex = () => {
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(5);
   const [searchQuery, setSearchQuery] = useState("");
+  const [anchorEl, setAnchorEl] = useState(null);
+  const [selectedRow, setSelectedRow] = useState(null);
 
-  // Filtered + Paginated Data
   const filteredData = leaveData.filter(
     (row) =>
       row.staff.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -127,12 +160,33 @@ const LeaveIndex = () => {
 
   const handleSearchChange = (e) => {
     setSearchQuery(e.target.value);
-    setPage(0); // Reset page when search updates
+    setPage(0);
+  };
+
+  const handleMenuOpen = (event, row) => {
+    setAnchorEl(event.currentTarget);
+    setSelectedRow(row);
+  };
+
+  const handleMenuClose = () => {
+    setAnchorEl(null);
+    setSelectedRow(null);
+  };
+
+  const handleEdit = () => {
+    console.log("Edit clicked for:", selectedRow);
+    handleMenuClose();
+  };
+
+  const handleView = () => {
+    console.log("View clicked for:", selectedRow);
+    handleMenuClose();
   };
 
   return (
     <Box p={4}>
-      {/* Top Header */}
+      <Breadcrumbs />
+
       <Box display="flex" justifyContent="space-between" alignItems="center" mb={2}>
         <Typography variant="h6">Leaves</Typography>
         <Button variant="contained" color="primary" onClick={() => navigate("/apply")}>
@@ -140,8 +194,21 @@ const LeaveIndex = () => {
         </Button>
       </Box>
 
-      {/* Search Field */}
-      <Box mb={2}>
+      <Box
+        mb={2}
+        sx={{
+          borderColor: isDarkMode ? "white" : "grey.500",
+          "& .MuiOutlinedInput-notchedOutline": {
+            borderColor: isDarkMode ? "white" : "grey.500"
+          },
+          "&:hover .MuiOutlinedInput-notchedOutline": {
+            borderColor: isDarkMode ? "white" : "grey.700"
+          },
+          "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
+            borderColor: isDarkMode ? "white" : "primary.main"
+          }
+        }}
+      >
         <TextField
           fullWidth
           label="Search..."
@@ -151,7 +218,6 @@ const LeaveIndex = () => {
         />
       </Box>
 
-      {/* Table */}
       <TableContainer component={Paper}>
         <Table>
           <TableHead>
@@ -189,11 +255,8 @@ const LeaveIndex = () => {
                 <TableCell>{row.applyDate}</TableCell>
                 <TableCell>{getStatusChip(row.status)}</TableCell>
                 <TableCell>
-                  <IconButton size="small">
-                    <MoreVertIcon />
-                  </IconButton>
-                  <IconButton size="small">
-                    <CloseIcon />
+                  <IconButton size="small" onClick={(e) => handleMenuOpen(e, row)}>
+                    <MoreVertIcon sx={{ color: isDarkMode ? "white" : "grey.700" }} />
                   </IconButton>
                 </TableCell>
               </TableRow>
@@ -201,7 +264,6 @@ const LeaveIndex = () => {
           </TableBody>
         </Table>
 
-        {/* Pagination */}
         <TablePagination
           rowsPerPageOptions={[5, 10, 25]}
           component="div"
@@ -212,6 +274,46 @@ const LeaveIndex = () => {
           onRowsPerPageChange={handleChangeRowsPerPage}
         />
       </TableContainer>
+
+      {/* Action Menu */}
+      {/* Action Menu */}
+      <Menu
+        anchorEl={anchorEl}
+        open={Boolean(anchorEl)}
+        onClose={handleMenuClose}
+        anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
+        transformOrigin={{ vertical: "top", horizontal: "right" }}
+        PaperProps={{
+          elevation: 3,
+          sx: {
+            borderRadius: 1,
+            minWidth: 50,
+            boxShadow: "0px 4px 12px rgba(0, 0, 0, 0.1)"
+          }
+        }}
+        MenuListProps={{
+          sx: { py: 0 }
+        }}
+      >
+        <MenuItem
+          onClick={handleEdit}
+          sx={{
+            "&:hover": { backgroundColor: "rgba(0, 0, 0, 0.04)" },
+            padding: "8px 16px"
+          }}
+        >
+          Edit
+        </MenuItem>
+        <MenuItem
+          onClick={handleView}
+          sx={{
+            "&:hover": { backgroundColor: "rgba(0, 0, 0, 0.04)" },
+            padding: "8px 16px"
+          }}
+        >
+          View
+        </MenuItem>
+      </Menu>
     </Box>
   );
 };
