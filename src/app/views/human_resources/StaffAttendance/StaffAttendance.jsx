@@ -15,7 +15,35 @@ import {
   TableRow,
   Paper
 } from "@mui/material";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
+import HomeIcon from "@mui/icons-material/Home";
+import ChevronRightIcon from "@mui/icons-material/ChevronRight";
+
+const Breadcrumbs = () => {
+  return (
+    <Box display="flex" alignItems="center" mb={3}>
+      <Typography variant="h6" fontWeight="bold" mr={1}>
+        Attendence
+      </Typography>
+      <Typography color="textSecondary" mx={1}>
+        |
+      </Typography>
+      <Link to="/" style={{ display: "flex", alignItems: "center", color: "inherit" }}>
+        <HomeIcon color="primary" fontSize="small" />
+      </Link>
+      <ChevronRightIcon color="disabled" fontSize="small" />
+      <Typography
+        sx={{
+          color: "text.secondary",
+          borderBottom: "2px solid purple",
+          fontWeight: 500
+        }}
+      >
+        Attendence
+      </Typography>
+    </Box>
+  );
+};
 
 const StaffAttendance = () => {
   const navigate = useNavigate();
@@ -26,7 +54,7 @@ const StaffAttendance = () => {
   };
 
   const handleClick = () => {
-    navigate("/staff/mark-attendance");
+    navigate("/human_resources/staff/mark-attendance");
   };
 
   // Dummy data (yeh baad me dynamic hoga after attendance marking)
@@ -56,6 +84,7 @@ const StaffAttendance = () => {
 
   return (
     <Box p={4}>
+      <Breadcrumbs />
       {/* Top Section */}
       <Box display="flex" justifyContent="space-between" alignItems="center" mb={3}>
         <FormControl variant="outlined" sx={{ minWidth: 200 }}>
