@@ -40,18 +40,15 @@ export default function Addstaff1() {
         transform: "translate(14px, -9px) scale(0.75)"
       }
     },
+    borderColor: isDarkMode ? "white" : "grey.500",
     "& .MuiOutlinedInput-notchedOutline": {
-      borderColor: isDarkMode ? "rgba(255,255,255,0.23)" : "rgba(0,0,0,0.23)",
-      borderRadius: "6px"
+      borderColor: isDarkMode ? "white" : "grey.500"
     },
     "&:hover .MuiOutlinedInput-notchedOutline": {
-      borderColor: isDarkMode ? theme.palette.primary.light : theme.palette.primary.main,
-      borderWidth: "1.5px"
+      borderColor: isDarkMode ? "white" : "grey.700"
     },
     "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
-      borderColor: theme.palette.primary.main,
-      borderWidth: "1.5px",
-      boxShadow: `0 0 0 2px ${theme.palette.primary.light}`
+      borderColor: isDarkMode ? "white" : "primary.main"
     },
     margin: "0.25rem 0"
   };
