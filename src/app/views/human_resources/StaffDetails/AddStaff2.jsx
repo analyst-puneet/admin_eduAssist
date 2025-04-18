@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import {
   Box,
   Grid,
@@ -15,14 +15,54 @@ import {
 } from "@mui/material";
 import { useNavigate } from "react-router-dom";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
-// import BackButton from "app/views/material-kit/buttons/BackButton";
 
-export default function AddStaff2() {
+export default function AddStaff2({ formData, setFormData }) {
   const navigate = useNavigate();
   const theme = useTheme();
   const isDarkMode = theme.palette.mode === "dark";
 
-  // Ultra-compact input styling (same as AddStaff1)
+  // Initialize state from formData
+  const [payrollInfo, setPayrollInfo] = useState(
+    formData.payrollInfo || {
+      epfNo: "",
+      basicSalary: "",
+      contractType: "",
+      workShift: "",
+      workLocation: ""
+    }
+  );
+
+  const [leaveAllocation, setLeaveAllocation] = useState(
+    formData.leaveAllocation || {
+      medicalLeave: "",
+      casualLeave: "",
+      maternityLeave: "",
+      sickLeave: ""
+    }
+  );
+
+  const [bankInfo, setBankInfo] = useState(
+    formData.bankInfo || {
+      accountHolderName: "",
+      accountNumber: "",
+      bankName: "",
+      ifscCode: "",
+      branchName: "",
+      accountType: ""
+    }
+  );
+
+  // Update formData whenever any field changes
+  useEffect(() => {
+    setFormData((prev) => ({
+      ...prev,
+      payrollInfo,
+      leaveAllocation,
+      bankInfo
+    }));
+  }, [payrollInfo, leaveAllocation, bankInfo]);
+
+  // Ultra-compact input styling
   const inputStyle = {
     "& .MuiInputBase-root": {
       height: "38px",
@@ -46,6 +86,27 @@ export default function AddStaff2() {
       borderColor: isDarkMode ? "white" : "primary.main"
     },
     margin: "0.25rem 0"
+  };
+
+  const handlePayrollChange = (field, value) => {
+    setPayrollInfo((prev) => ({
+      ...prev,
+      [field]: value
+    }));
+  };
+
+  const handleLeaveChange = (field, value) => {
+    setLeaveAllocation((prev) => ({
+      ...prev,
+      [field]: value
+    }));
+  };
+
+  const handleBankInfoChange = (field, value) => {
+    setBankInfo((prev) => ({
+      ...prev,
+      [field]: value
+    }));
   };
 
   return (
@@ -93,15 +154,32 @@ export default function AddStaff2() {
 
         <Grid container spacing={1.5}>
           <Grid item xs={12} sm={4}>
-            <TextField label="EPF No." fullWidth sx={inputStyle} />
+            <TextField
+              label="EPF No."
+              fullWidth
+              sx={inputStyle}
+              value={payrollInfo.epfNo}
+              onChange={(e) => handlePayrollChange("epfNo", e.target.value)}
+            />
           </Grid>
           <Grid item xs={12} sm={4}>
-            <TextField label="Basic Salary" fullWidth type="number" sx={inputStyle} />
+            <TextField
+              label="Basic Salary"
+              fullWidth
+              type="number"
+              sx={inputStyle}
+              value={payrollInfo.basicSalary}
+              onChange={(e) => handlePayrollChange("basicSalary", e.target.value)}
+            />
           </Grid>
           <Grid item xs={12} sm={4}>
             <FormControl fullWidth sx={inputStyle}>
               <InputLabel>Contract Type</InputLabel>
-              <Select defaultValue="" label="Contract Type">
+              <Select
+                value={payrollInfo.contractType}
+                label="Contract Type"
+                onChange={(e) => handlePayrollChange("contractType", e.target.value)}
+              >
                 <MenuItem value="Full-Time" sx={{ fontSize: "0.875rem" }}>
                   Full-Time
                 </MenuItem>
@@ -115,10 +193,22 @@ export default function AddStaff2() {
             </FormControl>
           </Grid>
           <Grid item xs={12} sm={6}>
-            <TextField label="Work Shift" fullWidth sx={inputStyle} />
+            <TextField
+              label="Work Shift"
+              fullWidth
+              sx={inputStyle}
+              value={payrollInfo.workShift}
+              onChange={(e) => handlePayrollChange("workShift", e.target.value)}
+            />
           </Grid>
           <Grid item xs={12} sm={6}>
-            <TextField label="Work Location" fullWidth sx={inputStyle} />
+            <TextField
+              label="Work Location"
+              fullWidth
+              sx={inputStyle}
+              value={payrollInfo.workLocation}
+              onChange={(e) => handlePayrollChange("workLocation", e.target.value)}
+            />
           </Grid>
         </Grid>
       </Box>
@@ -151,6 +241,8 @@ export default function AddStaff2() {
               fullWidth
               type="number"
               sx={inputStyle}
+              value={leaveAllocation.medicalLeave}
+              onChange={(e) => handleLeaveChange("medicalLeave", e.target.value)}
             />
           </Grid>
           <Grid item xs={12} sm={3}>
@@ -160,6 +252,8 @@ export default function AddStaff2() {
               fullWidth
               type="number"
               sx={inputStyle}
+              value={leaveAllocation.casualLeave}
+              onChange={(e) => handleLeaveChange("casualLeave", e.target.value)}
             />
           </Grid>
           <Grid item xs={12} sm={3}>
@@ -169,6 +263,8 @@ export default function AddStaff2() {
               fullWidth
               type="number"
               sx={inputStyle}
+              value={leaveAllocation.maternityLeave}
+              onChange={(e) => handleLeaveChange("maternityLeave", e.target.value)}
             />
           </Grid>
           <Grid item xs={12} sm={3}>
@@ -178,6 +274,8 @@ export default function AddStaff2() {
               fullWidth
               type="number"
               sx={inputStyle}
+              value={leaveAllocation.sickLeave}
+              onChange={(e) => handleLeaveChange("sickLeave", e.target.value)}
             />
           </Grid>
         </Grid>
@@ -205,24 +303,59 @@ export default function AddStaff2() {
 
         <Grid container spacing={1.5}>
           <Grid item xs={12} sm={4}>
-            <TextField label="Account Holder Name" fullWidth sx={inputStyle} />
+            <TextField
+              label="Account Holder Name"
+              fullWidth
+              sx={inputStyle}
+              value={bankInfo.accountHolderName}
+              onChange={(e) => handleBankInfoChange("accountHolderName", e.target.value)}
+            />
           </Grid>
           <Grid item xs={12} sm={4}>
-            <TextField label="Account Number" fullWidth type="number" sx={inputStyle} />
+            <TextField
+              label="Account Number"
+              fullWidth
+              type="number"
+              sx={inputStyle}
+              value={bankInfo.accountNumber}
+              onChange={(e) => handleBankInfoChange("accountNumber", e.target.value)}
+            />
           </Grid>
           <Grid item xs={12} sm={4}>
-            <TextField label="Bank Name" fullWidth sx={inputStyle} />
+            <TextField
+              label="Bank Name"
+              fullWidth
+              sx={inputStyle}
+              value={bankInfo.bankName}
+              onChange={(e) => handleBankInfoChange("bankName", e.target.value)}
+            />
           </Grid>
           <Grid item xs={12} sm={4}>
-            <TextField label="IFSC Code" fullWidth sx={inputStyle} />
+            <TextField
+              label="IFSC Code"
+              fullWidth
+              sx={inputStyle}
+              value={bankInfo.ifscCode}
+              onChange={(e) => handleBankInfoChange("ifscCode", e.target.value)}
+            />
           </Grid>
           <Grid item xs={12} sm={4}>
-            <TextField label="Branch Name" fullWidth sx={inputStyle} />
+            <TextField
+              label="Branch Name"
+              fullWidth
+              sx={inputStyle}
+              value={bankInfo.branchName}
+              onChange={(e) => handleBankInfoChange("branchName", e.target.value)}
+            />
           </Grid>
           <Grid item xs={12} sm={4}>
             <FormControl fullWidth sx={inputStyle}>
               <InputLabel>Account Type</InputLabel>
-              <Select defaultValue="" label="Account Type">
+              <Select
+                value={bankInfo.accountType}
+                label="Account Type"
+                onChange={(e) => handleBankInfoChange("accountType", e.target.value)}
+              >
                 <MenuItem value="Savings" sx={{ fontSize: "0.875rem" }}>
                   Savings
                 </MenuItem>

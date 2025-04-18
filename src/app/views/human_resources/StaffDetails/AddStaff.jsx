@@ -18,22 +18,22 @@ import Addstaff4 from "./AddStaff4";
 function getSteps() {
   return [
     "Personal Information",
-    "Educatinal Details",
+    "Educational Details",
     "Payroll & Bank Details",
     "Review & Submit"
   ];
 }
 
-function getStepContent(stepIndex) {
+function getStepContent(stepIndex, formData, setFormData) {
   switch (stepIndex) {
     case 0:
-      return <Addstaff1 />;
+      return <Addstaff1 formData={formData} setFormData={setFormData} />;
     case 1:
-      return <Addstaff4 />;
+      return <Addstaff4 formData={formData} setFormData={setFormData} />;
     case 2:
-      return <Addstaff2 />;
+      return <Addstaff2 formData={formData} setFormData={setFormData} />;
     case 3:
-      return <Addstaff3 />;
+      return <Addstaff3 formData={formData} setFormData={setFormData} />;
     default:
       return "Unknown Step";
   }
@@ -45,9 +45,24 @@ export default function StepperForm() {
   const [activeStep, setActiveStep] = React.useState(0);
   const steps = getSteps();
 
+  // Initialize form data from sessionStorage or empty object
+  const [formData, setFormData] = React.useState(() => {
+    const savedData = sessionStorage.getItem("staffFormData");
+    return savedData ? JSON.parse(savedData) : {};
+  });
+
+  // Save to sessionStorage whenever formData changes
+  React.useEffect(() => {
+    sessionStorage.setItem("staffFormData", JSON.stringify(formData));
+  }, [formData]);
+
   const handleNext = () => setActiveStep((prev) => prev + 1);
   const handleBack = () => setActiveStep((prev) => prev - 1);
-  const handleReset = () => setActiveStep(0);
+  const handleReset = () => {
+    setActiveStep(0);
+    setFormData({});
+    sessionStorage.removeItem("staffFormData");
+  };
 
   // Back button style that works in both enabled and disabled states
   const backButtonStyle = {
@@ -90,7 +105,7 @@ export default function StepperForm() {
           </Box>
         ) : (
           <Box>
-            {getStepContent(activeStep)}
+            {getStepContent(activeStep, formData, setFormData)}
 
             {/* Navigation Buttons */}
             <Box mt={4} display="flex" justifyContent="space-between">

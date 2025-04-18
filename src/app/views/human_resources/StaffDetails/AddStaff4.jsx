@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   Box,
   Grid,
@@ -14,30 +14,54 @@ import {
   IconButton
 } from "@mui/material";
 import DeleteIcon from "@mui/icons-material/Delete";
+import InsertDriveFileIcon from "@mui/icons-material/InsertDriveFile";
+import AddCircleOutlineIcon from "@mui/icons-material/AddCircleOutline";
 
-export default function AddStaff4() {
+export default function AddStaff4({ formData, setFormData }) {
   const theme = useTheme();
   const isDarkMode = theme.palette.mode === "dark";
 
-  const [educationLevel, setEducationLevel] = useState("");
-  const [sections, setSections] = useState([]);
+  const [educationLevel, setEducationLevel] = useState(formData.educationLevel || "");
+  const [sections, setSections] = useState(formData.sections || []);
+  const [fileNames, setFileNames] = useState(formData.fileNames || {});
+  const [ugYears, setUgYears] = useState(formData.ugYears || 3);
+  const [subjects, setSubjects] = useState(
+    formData.subjects || [
+      { id: 1, name: "" },
+      { id: 2, name: "" },
+      { id: 3, name: "" },
+      { id: 4, name: "" },
+      { id: 5, name: "" }
+    ]
+  );
 
-  const [subjects, setSubjects] = useState([
-    { id: 1, name: "" },
-    { id: 2, name: "" },
-    { id: 3, name: "" },
-    { id: 4, name: "" },
-    { id: 5, name: "" }
-  ]);
+  useEffect(() => {
+    setFormData((prev) => ({
+      ...prev,
+      educationLevel,
+      sections,
+      fileNames,
+      ugYears,
+      subjects
+    }));
+  }, [educationLevel, sections, fileNames, ugYears, subjects]);
 
-  const handleSubjectChange = (index, value) => {
-    const updatedSubjects = [...subjects];
-    updatedSubjects[index].name = value;
-    setSubjects(updatedSubjects);
+  const handleFileChange = (fieldName, e) => {
+    const file = e.target.files[0];
+    if (file) {
+      setFileNames((prev) => ({
+        ...prev,
+        [fieldName]: file.name
+      }));
+    }
   };
 
-  const handleAddSubject = () => {
-    setSubjects([...subjects, { id: subjects.length + 1, name: "" }]);
+  const handleRemoveFile = (fieldName) => {
+    setFileNames((prev) => {
+      const newFiles = { ...prev };
+      delete newFiles[fieldName];
+      return newFiles;
+    });
   };
 
   const inputStyle = {
@@ -65,6 +89,55 @@ export default function AddStaff4() {
     margin: "0.25rem 0"
   };
 
+  const FileInput = ({ label, fieldName, accept = "*" }) => (
+    <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+      <Box
+        component="label"
+        sx={{
+          border: "1px dashed",
+          borderColor: isDarkMode ? theme.palette.grey[600] : theme.palette.grey[400],
+          borderRadius: "6px",
+          p: 1,
+          flexGrow: 1,
+          display: "flex",
+          alignItems: "center",
+          gap: 1,
+          cursor: "pointer",
+          bgcolor: isDarkMode ? theme.palette.grey[800] : theme.palette.background.paper,
+          "&:hover": {
+            borderColor: theme.palette.primary.main
+          }
+        }}
+      >
+        <InsertDriveFileIcon fontSize="small" />
+        <Typography variant="body2" noWrap>
+          {fileNames[fieldName] || label}
+        </Typography>
+        <input
+          type="file"
+          accept={accept}
+          onChange={(e) => handleFileChange(fieldName, e)}
+          hidden
+        />
+      </Box>
+      {fileNames[fieldName] && (
+        <IconButton size="small" onClick={() => handleRemoveFile(fieldName)} color="error">
+          <DeleteIcon fontSize="small" />
+        </IconButton>
+      )}
+    </Box>
+  );
+
+  const handleSubjectChange = (index, value) => {
+    const updatedSubjects = [...subjects];
+    updatedSubjects[index].name = value;
+    setSubjects(updatedSubjects);
+  };
+
+  const handleAddSubject = () => {
+    setSubjects([...subjects, { id: subjects.length + 1, name: "" }]);
+  };
+
   const handleEducationLevelChange = (event) => {
     setEducationLevel(event.target.value);
   };
@@ -77,6 +150,11 @@ export default function AddStaff4() {
 
   const handleRemoveSection = (section) => {
     setSections(sections.filter((item) => item !== section));
+    if (section === "UG") setUgYears(3);
+  };
+
+  const handleAddMoreUGYear = () => {
+    setUgYears((prev) => prev + 1);
   };
 
   return (
@@ -91,14 +169,7 @@ export default function AddStaff4() {
     >
       {/* 10th Section */}
       <Box mb={3}>
-        <Typography
-          variant="subtitle1"
-          sx={{
-            fontWeight: 500,
-            mb: 1.5,
-            color: isDarkMode ? theme.palette.grey[300] : theme.palette.text.secondary
-          }}
-        >
+        <Typography variant="subtitle1" sx={{ fontWeight: 600, mb: 1.5 }}>
           10th Class Details
         </Typography>
         <Grid container spacing={1.5}>
@@ -109,27 +180,19 @@ export default function AddStaff4() {
             <TextField label="Board" fullWidth sx={inputStyle} />
           </Grid>
           <Grid item xs={12} sm={6}>
-            <TextField label="Percentage" fullWidth type="number" sx={inputStyle} />
+            <TextField label="Percentage" type="number" fullWidth sx={inputStyle} />
           </Grid>
           <Grid item xs={12} sm={6}>
-            <TextField label="Marksheet" fullWidth type="file" sx={inputStyle} />
+            <FileInput label="10th Marksheet" fieldName="tenthMarksheet" accept=".pdf,.jpg,.png" />
           </Grid>
         </Grid>
       </Box>
 
       {/* 12th Section */}
       <Box mb={3}>
-        <Typography
-          variant="subtitle1"
-          sx={{
-            fontWeight: 500,
-            mb: 1.5,
-            color: isDarkMode ? theme.palette.grey[300] : theme.palette.text.secondary
-          }}
-        >
+        <Typography variant="subtitle1" sx={{ fontWeight: 600, mb: 1.5 }}>
           12th Class Details
         </Typography>
-
         <Grid container spacing={1.5}>
           <Grid item xs={12} sm={6}>
             <TextField label="School Name" fullWidth sx={inputStyle} />
@@ -149,17 +212,19 @@ export default function AddStaff4() {
             </Grid>
           ))}
         </Grid>
-
         <Button variant="outlined" sx={{ mt: 2 }} onClick={handleAddSubject}>
           Add Subject
         </Button>
-
         <Grid container spacing={1.5} mt={2}>
           <Grid item xs={12} sm={6}>
-            <TextField label="Percentage" fullWidth type="number" sx={inputStyle} />
+            <TextField label="Percentage" type="number" fullWidth sx={inputStyle} />
           </Grid>
           <Grid item xs={12} sm={6}>
-            <TextField label="Marksheet" fullWidth type="file" sx={inputStyle} />
+            <FileInput
+              label="12th Marksheet"
+              fieldName="twelfthMarksheet"
+              accept=".pdf,.jpg,.png"
+            />
           </Grid>
         </Grid>
       </Box>
@@ -171,7 +236,7 @@ export default function AddStaff4() {
         </Typography>
       </Box>
 
-      {/* Render all added sections FIRST */}
+      {/* UG Section */}
       {sections.includes("UG") && (
         <Box mb={3}>
           <Typography variant="subtitle1" sx={{ fontWeight: 500, mb: 1.5 }}>
@@ -190,19 +255,25 @@ export default function AddStaff4() {
             <Grid item xs={12} sm={6}>
               <TextField label="Percentage of Final Year" fullWidth type="number" sx={inputStyle} />
             </Grid>
-            <Grid item xs={12} sm={6}>
-              <TextField label="Marksheet (1st Year)" fullWidth type="file" sx={inputStyle} />
-            </Grid>
-            <Grid item xs={12} sm={6}>
-              <TextField label="Marksheet (2nd Year)" fullWidth type="file" sx={inputStyle} />
-            </Grid>
-            <Grid item xs={12} sm={6}>
-              <TextField label="Marksheet (3rd Year)" fullWidth type="file" sx={inputStyle} />
+            {[...Array(ugYears)].map((_, i) => (
+              <Grid item xs={12} sm={6} key={`ugYear${i + 1}`}>
+                <FileInput label={`UG Marksheet (Year ${i + 1})`} fieldName={`ugYear${i + 1}`} />
+              </Grid>
+            ))}
+            <Grid item xs={12}>
+              <Button
+                variant="outlined"
+                startIcon={<AddCircleOutlineIcon />}
+                onClick={handleAddMoreUGYear}
+              >
+                Add More Marksheet
+              </Button>
             </Grid>
           </Grid>
         </Box>
       )}
 
+      {/* PG Section */}
       {sections.includes("PG") && (
         <Box mb={3}>
           <Typography variant="subtitle1" sx={{ fontWeight: 500, mb: 1.5 }}>
@@ -219,23 +290,16 @@ export default function AddStaff4() {
               <TextField label="Course" fullWidth sx={inputStyle} />
             </Grid>
             <Grid item xs={12} sm={6}>
-              <TextField label="Percentage" fullWidth type="number" sx={inputStyle} />
+              <TextField label="Percentage" type="number" fullWidth sx={inputStyle} />
             </Grid>
             <Grid item xs={12} sm={6}>
-              <TextField label="Marksheet" fullWidth type="file" sx={inputStyle} />
-            </Grid>
-            <Grid item xs={12} sm={6}>
-              <TextField
-                label="Upload Marksheet (All Years if applicable)"
-                fullWidth
-                type="file"
-                sx={inputStyle}
-              />
+              <FileInput label="PG Marksheet" fieldName="pgMarksheet" />
             </Grid>
           </Grid>
         </Box>
       )}
 
+      {/* PhD Section */}
       {sections.includes("PhD") && (
         <Box mb={3}>
           <Typography variant="subtitle1" sx={{ fontWeight: 500, mb: 1.5 }}>
@@ -255,21 +319,16 @@ export default function AddStaff4() {
               <TextField label="Thesis Title (Optional)" fullWidth sx={inputStyle} />
             </Grid>
             <Grid item xs={12} sm={6}>
-              <TextField label="Completion Year" fullWidth type="number" sx={inputStyle} />
+              <TextField label="Completion Year" type="number" fullWidth sx={inputStyle} />
             </Grid>
             <Grid item xs={12} sm={6}>
-              <TextField
-                label="Research Paper/Thesis Upload"
-                fullWidth
-                type="file"
-                sx={inputStyle}
-              />
+              <FileInput label="PhD Thesis (PDF)" fieldName="phdThesis" accept=".pdf" />
             </Grid>
           </Grid>
         </Box>
       )}
 
-      {/* Add Section Dropdown & Button */}
+      {/* Dropdown for Adding Higher Ed Section */}
       <Box mt={3} display="flex" gap={2} alignItems="center" flexWrap="wrap">
         <FormControl size="small" sx={{ minWidth: 180 }}>
           <InputLabel id="education-level-label">Select Level</InputLabel>

@@ -150,13 +150,22 @@ const DropzoneBox = ({ label, onDrop, file }) => {
   );
 };
 
-const Addstaff3 = () => {
-  const [files, setFiles] = useState({
-    resume: null,
-    joiningLetter: null,
-    resignationLetter: null,
-    otherDocuments: null
-  });
+const Addstaff3 = ({ formData, setFormData }) => {
+  const [files, setFiles] = useState(
+    formData.files || {
+      resume: null,
+      joiningLetter: null,
+      resignationLetter: null,
+      otherDocuments: null
+    }
+  );
+
+  useEffect(() => {
+    setFormData((prev) => ({
+      ...prev,
+      files
+    }));
+  }, [files]);
 
   const handleFileUpload = (field) => (acceptedFiles) => {
     const file = acceptedFiles[0];
