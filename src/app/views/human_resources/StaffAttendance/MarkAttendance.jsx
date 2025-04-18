@@ -50,7 +50,6 @@ const attendanceStatuses = [
   "Half Day Second Shift"
 ];
 
-// Custom Styled Components for Table and Table Cells
 const StyledTableCell = styled(TableCell)(({ theme }) => ({
   fontWeight: 600,
   padding: theme.spacing(1.5),
@@ -85,17 +84,21 @@ const MarkAttendance = () => {
   const navigate = useNavigate();
 
   const [selectedRole, setSelectedRole] = useState("");
+  const [selectedStaffName, setSelectedStaffName] = useState("");
   const [attendanceDate, setAttendanceDate] = useState(dayjs());
   const [filteredStaff, setFilteredStaff] = useState(mockStaffData);
   const [attendance, setAttendance] = useState({});
   const [bulkStatus, setBulkStatus] = useState(null);
 
   const handleSearch = () => {
-    setFilteredStaff(
-      selectedRole === ""
-        ? mockStaffData
-        : mockStaffData.filter((staff) => staff.role === selectedRole)
-    );
+    let staff = mockStaffData;
+    if (selectedRole) {
+      staff = staff.filter((s) => s.role === selectedRole);
+    }
+    if (selectedStaffName) {
+      staff = staff.filter((s) => s.name === selectedStaffName);
+    }
+    setFilteredStaff(staff);
   };
 
   const handleAttendanceChange = (id, field, value) => {
@@ -128,7 +131,7 @@ const MarkAttendance = () => {
               Filter Staff
             </Typography>
             <Grid container spacing={2} alignItems="center">
-              <Grid item xs={12} sm={5}>
+              <Grid item xs={12} sm={4}>
                 <FormControl fullWidth size="small">
                   <InputLabel>Role</InputLabel>
                   <Select
@@ -145,7 +148,24 @@ const MarkAttendance = () => {
                   </Select>
                 </FormControl>
               </Grid>
-              <Grid item xs={12} sm={5}>
+              <Grid item xs={12} sm={4}>
+                <FormControl fullWidth size="small">
+                  <InputLabel>Staff Name</InputLabel>
+                  <Select
+                    value={selectedStaffName}
+                    onChange={(e) => setSelectedStaffName(e.target.value)}
+                    label="Staff Name"
+                  >
+                    <MenuItem value="">All Staff</MenuItem>
+                    {mockStaffData.map((staff) => (
+                      <MenuItem key={staff.id} value={staff.name}>
+                        {staff.name}
+                      </MenuItem>
+                    ))}
+                  </Select>
+                </FormControl>
+              </Grid>
+              <Grid item xs={12} sm={3}>
                 <DatePicker
                   label="Attendance Date"
                   value={attendanceDate}
@@ -153,7 +173,7 @@ const MarkAttendance = () => {
                   renderInput={(params) => <TextField {...params} fullWidth size="small" />}
                 />
               </Grid>
-              <Grid item xs={12} sm={2}>
+              <Grid item xs={12} sm={1}>
                 <Button
                   fullWidth
                   variant="contained"
@@ -167,7 +187,6 @@ const MarkAttendance = () => {
           </CardContent>
         </Card>
 
-        {/* Bulk Actions */}
         <Card elevation={3} sx={{ mb: 3 }}>
           <CardContent>
             <Typography variant="subtitle1" color="text.secondary" gutterBottom>
@@ -186,7 +205,6 @@ const MarkAttendance = () => {
           </CardContent>
         </Card>
 
-        {/* Staff List */}
         <Typography variant="subtitle1" gutterBottom>
           Staff List ({filteredStaff.length})
         </Typography>
@@ -257,7 +275,6 @@ const MarkAttendance = () => {
           </Table>
         </TableContainer>
 
-        {/* Buttons */}
         <Box mt={3} display="flex" justifyContent="space-between" alignItems="center">
           <Button
             variant="contained"

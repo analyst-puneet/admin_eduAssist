@@ -12,7 +12,6 @@ import Button from "@mui/material/Button";
 import Checkbox from "@mui/material/Checkbox";
 import TextField from "@mui/material/TextField";
 import styled from "@mui/material/styles/styled";
-import LoadingButton from "@mui/lab/LoadingButton";
 import useTheme from "@mui/material/styles/useTheme";
 // GLOBAL CUSTOM COMPONENTS
 import MatxDivider from "app/components/MatxDivider";
@@ -160,14 +159,14 @@ export default function Register() {
                       </Paragraph>
                     </Box>
 
-                    <LoadingButton
+                    <Button
                       type="submit"
                       color="primary"
                       loading={loading}
                       variant="contained"
                       sx={{ my: 2 }}>
                       Register
-                    </LoadingButton>
+                    </Button>
 
                     <Paragraph>
                       Already have an account?

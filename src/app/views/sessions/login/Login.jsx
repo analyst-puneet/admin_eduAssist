@@ -12,7 +12,6 @@ import Grid from "@mui/material/Grid";
 import Button from "@mui/material/Button";
 import Checkbox from "@mui/material/Checkbox";
 import TextField from "@mui/material/TextField";
-import LoadingButton from "@mui/lab/LoadingButton";
 import { styled, useTheme } from "@mui/material/styles";
 
 // Global Custom Components
@@ -77,8 +76,8 @@ const Root = styled("div")(({ theme }) => ({
 
 // Initial form values
 const initialValues = {
-  username: "Hemant5567",
-  password: "Hemant123",
+  username: "",
+  password: "",
   remember: true,
 };
 
@@ -225,7 +224,7 @@ export default function Login() {
                       </NavLink>
                     </Box>
 
-                    <LoadingButton
+                   <Button
                       type="submit"
                       color="primary"
                       loading={isSubmitting}
@@ -233,7 +232,7 @@ export default function Login() {
                       sx={{ my: 2 }}
                     >
                       Login
-                    </LoadingButton>
+                    </Button>
 
                     <Paragraph>
                       Don't have an account?

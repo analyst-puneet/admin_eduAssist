@@ -96,7 +96,7 @@ const Layout1Topbar = () => {
   const logout = async () => {
     try {
         await axios.post(`${BASE_URL}/api/auth/logout`, {}, { withCredentials: true });
-        window.location.href = '/login';
+        window.location.href = 'session/signin';
     } catch (error) {
         console.error("Logout failed:", error);
     }
