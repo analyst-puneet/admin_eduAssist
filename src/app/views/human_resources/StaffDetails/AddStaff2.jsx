@@ -48,8 +48,6 @@ export default function AddStaff2() {
     margin: "0.25rem 0"
   };
 
-  
-
   return (
     <Box
       component={Paper}
@@ -78,8 +76,6 @@ export default function AddStaff2() {
         >
           Payroll & Bank Details
         </Typography>
-
-       
       </Box>
 
       {/* Payroll Section */}
