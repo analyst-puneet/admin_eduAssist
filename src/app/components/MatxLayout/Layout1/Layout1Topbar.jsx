@@ -16,7 +16,7 @@ import MailOutline from "@mui/icons-material/MailOutline";
 import PowerSettingsNew from "@mui/icons-material/PowerSettingsNew";
 import { MdDarkMode, MdLightMode } from "react-icons/md";
 import CheckCircle from "@mui/icons-material/CheckCircle";
-
+import axios from "axios"
 import styled from "@mui/material/styles/styled";
 import useAuth from "app/hooks/useAuth";
 import useSettings from "app/hooks/useSettings";
@@ -26,7 +26,7 @@ import { Span } from "app/components/Typography";
 import { MatxMenu, MatxSearchBox } from "app/components";
 import { themeShadows } from "app/components/MatxTheme/themeColors";
 import { topBarHeight } from "app/utils/constant";
-
+import { BASE_URL } from "../../../../main";
 // STYLED COMPONENTS
 const TopbarRoot = styled("div")({
   top: 0,
@@ -102,13 +102,20 @@ const UserInfo = styled("div")({
 const Layout1Topbar = () => {
   const theme = useTheme();
   const { settings, updateSettings } = useSettings();
-  const { logout, user } = useAuth();
+  const {  user } = useAuth();
   const isMdScreen = useMediaQuery(theme.breakpoints.down("md"));
 
   const updateSidebarMode = (sidebarSettings) => {
     updateSettings({ layout1Settings: { leftSidebar: { ...sidebarSettings } } });
   };
-
+  const logout = async () => {
+    try {
+        await axios.post(`${BASE_URL}/api/auth/logout`, {}, { withCredentials: true });
+        window.location.href = '/login';
+    } catch (error) {
+        console.error("Logout failed:", error);
+    }
+};
   const handleSidebarToggle = () => {
     const { layout1Settings } = settings;
     const isClosed = layout1Settings.leftSidebar.mode === "close";
@@ -179,15 +186,15 @@ const Layout1Topbar = () => {
             <MatxMenu
               menuButton={
                 <UserMenu>
-                  <Avatar
-                    src={user.avatar}
-                    sx={{
-                      cursor: "pointer",
-                      border: `2px solid ${theme.palette.divider}`,
-                      width: 40,
-                      height: 40
-                    }}
-                  />
+              <Avatar
+                src={user?.avatar || ""}
+                sx={{
+                  cursor: "pointer",
+                  border: `2px solid ${theme.palette.divider}`,
+                  width: 40,
+                  height: 40
+                }}
+              />
                 </UserMenu>
               }
             >
@@ -201,14 +208,14 @@ const Layout1Topbar = () => {
                   minHeight: "80px" // Kept same height
                 }}
               >
-                <Avatar
-                  src={user.avatar}
-                  sx={{
-                    width: 60,
-                    height: 60,
-                    marginRight: "16px"
-                  }}
-                />
+              <Avatar
+                src={user?.avatar || ""}
+                sx={{
+                  width: 60,
+                  height: 60,
+                  marginRight: "16px"
+                }}
+              />
                 <Box>
                   <Typography variant="subtitle1" sx={{ fontWeight: 600 }}>
                     Joe Black
