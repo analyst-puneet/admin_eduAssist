@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import axios from "axios";
-const BASE_URL = "https://backend-aufx.onrender.com/";
+const BASE_URL = "https://backend-aufx.onrender.com";
 
 
 const useAuth = () => {
