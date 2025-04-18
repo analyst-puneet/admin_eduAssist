@@ -134,11 +134,7 @@ const ListView = () => {
             }
           }}
           InputProps={{
-            startAdornment: (
-              <InputAdornment position="start">
-                <SearchIcon />
-              </InputAdornment>
-            )
+            startAdornment: <InputAdornment position="start"></InputAdornment>
           }}
         />
       </Box>

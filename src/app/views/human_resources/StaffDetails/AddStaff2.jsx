@@ -15,6 +15,7 @@ import {
 } from "@mui/material";
 import { useNavigate } from "react-router-dom";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
+// import BackButton from "app/views/material-kit/buttons/BackButton";
 
 export default function AddStaff2() {
   const navigate = useNavigate();
@@ -34,25 +35,20 @@ export default function AddStaff2() {
         transform: "translate(14px, -9px) scale(0.75)"
       }
     },
+    borderColor: isDarkMode ? "white" : "grey.500",
     "& .MuiOutlinedInput-notchedOutline": {
-      borderColor: isDarkMode ? "rgba(255,255,255,0.23)" : "rgba(0,0,0,0.23)",
-      borderRadius: "6px"
+      borderColor: isDarkMode ? "white" : "grey.500"
     },
     "&:hover .MuiOutlinedInput-notchedOutline": {
-      borderColor: isDarkMode ? theme.palette.primary.light : theme.palette.primary.main,
-      borderWidth: "1.5px"
+      borderColor: isDarkMode ? "white" : "grey.700"
     },
     "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
-      borderColor: theme.palette.primary.main,
-      borderWidth: "1.5px",
-      boxShadow: `0 0 0 2px ${theme.palette.primary.light}`
+      borderColor: isDarkMode ? "white" : "primary.main"
     },
     margin: "0.25rem 0"
   };
 
-  const handleBackClick = () => {
-    navigate("/users");
-  };
+  
 
   return (
     <Box
@@ -83,28 +79,7 @@ export default function AddStaff2() {
           Payroll & Bank Details
         </Typography>
 
-        <Button
-          variant="contained"
-          onClick={handleBackClick}
-          sx={{
-            height: "36px",
-            borderRadius: "6px",
-            px: 2,
-            textTransform: "none",
-            fontWeight: 500,
-            fontSize: "0.8125rem",
-            backgroundColor: isDarkMode ? theme.palette.grey[700] : theme.palette.primary.main,
-            color: theme.palette.common.white,
-            "&:hover": {
-              backgroundColor: isDarkMode ? theme.palette.grey[600] : theme.palette.primary.dark,
-              transform: "translateY(-1px)"
-            },
-            transition: "all 0.2s ease",
-            boxShadow: "none"
-          }}
-        >
-          BACK
-        </Button>
+       
       </Box>
 
       {/* Payroll Section */}

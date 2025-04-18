@@ -47,7 +47,7 @@ export default function Footer() {
             <Span m="auto" />
 
             <Paragraph m={0}>
-              Design and Developed by <a href="#">AlphaNet</a>
+              Design and Developed by <a href="#">ERP</a>
             </Paragraph>
           </FooterContent>
         </AppFooter>

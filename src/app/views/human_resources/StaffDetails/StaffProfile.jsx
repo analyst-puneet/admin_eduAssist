@@ -5,6 +5,7 @@ import axios from "axios";
 import ProfileCard from "./ProfileCard";
 import ProfileDetails from "./ProfileDetails";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
+import BackButton from "app/views/material-kit/buttons/BackButton";
 
 const StaffProfile = () => {
   const theme = useTheme();
@@ -45,7 +46,7 @@ const StaffProfile = () => {
   }, [empId]);
 
   const handleBack = () => {
-    navigate("/users");
+    navigate("/human_resources/staff-details");
   };
 
   // Back button styling
@@ -112,16 +113,8 @@ const StaffProfile = () => {
 
   return (
     <Box p={2}>
-      <Box mb={3}>
-        <Button
-          variant="contained"
-          color="primary"
-          onClick={handleBack}
-          // startIcon={<ArrowBackIcon />}
-          sx={backButtonStyle}
-        >
-          BACK
-        </Button>
+      <Box mb={2} mt={2} display="flex" justifyContent="flex-end">
+        <BackButton onClick={handleBack} />
       </Box>
 
       <Grid container spacing={3}>
