@@ -13,9 +13,15 @@ import React from "react";
 import Addstaff1 from "./AddStaff1";
 import Addstaff2 from "./AddStaff2";
 import Addstaff3 from "./AddStaff3";
+import Addstaff4 from "./AddStaff4";
 
 function getSteps() {
-  return ["Personal Information", "Payroll & Bank Details", "Review & Submit"];
+  return [
+    "Personal Information",
+    "Educatinal Details",
+    "Payroll & Bank Details",
+    "Review & Submit"
+  ];
 }
 
 function getStepContent(stepIndex) {
@@ -23,8 +29,10 @@ function getStepContent(stepIndex) {
     case 0:
       return <Addstaff1 />;
     case 1:
-      return <Addstaff2 />;
+      return <Addstaff4 />;
     case 2:
+      return <Addstaff2 />;
+    case 3:
       return <Addstaff3 />;
     default:
       return "Unknown Step";

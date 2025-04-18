@@ -172,14 +172,6 @@ export default function Addstaff1() {
           <TextField label="Last Name" fullWidth sx={inputStyle} />
         </Grid>
         <Grid item xs={12} sm={4}>
-          <TextField label="Father Name" fullWidth sx={inputStyle} />
-        </Grid>
-
-        {/* Row 3 */}
-        <Grid item xs={12} sm={4}>
-          <TextField label="Email (Login Username)" fullWidth required sx={inputStyle} />
-        </Grid>
-        <Grid item xs={12} sm={4}>
           <FormControl fullWidth required sx={inputStyle}>
             <InputLabel>Gender</InputLabel>
             <Select defaultValue="" label="Gender">
@@ -195,6 +187,15 @@ export default function Addstaff1() {
             </Select>
           </FormControl>
         </Grid>
+        <Grid item xs={12} sm={4}>
+          <TextField label="Father Name" fullWidth sx={inputStyle} />
+        </Grid>
+
+        {/* Row 3 */}
+        <Grid item xs={12} sm={4}>
+          <TextField label="Email (Login Username)" fullWidth required sx={inputStyle} />
+        </Grid>
+       
         <Grid item xs={12} sm={4}>
           <TextField
             label="Date of Birth"
