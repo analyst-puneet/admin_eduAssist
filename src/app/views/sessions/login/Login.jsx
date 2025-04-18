@@ -5,7 +5,6 @@ import { Formik } from "formik";
 import * as Yup from "yup";
 import axios from "axios";
 import { BASE_URL } from "./../../../../main";
-
 import Box from "@mui/material/Box";
 import Card from "@mui/material/Card";
 import Grid from "@mui/material/Grid";
@@ -16,8 +15,6 @@ import { styled, useTheme } from "@mui/material/styles";
 import MatxLogo from "app/components/MatxLogo";
 import MatxDivider from "app/components/MatxDivider";
 import { Paragraph, Span } from "app/components/Typography";
-
-// Styled Components
 const GoogleButton = styled(Button)(({ theme }) => ({
   color: "rgba(0, 0, 0, 0.87)",
   boxShadow: theme.shadows[0],
@@ -72,14 +69,11 @@ const Root = styled("div")(({ theme }) => ({
   },
 }));
 
-// Initial form values
 const initialValues = {
   username: "",
   password: "",
   remember: true,
 };
-
-// Validation schema
 const validationSchema = Yup.object().shape({
   username: Yup.string().required("Username is required!"),
   password: Yup.string()

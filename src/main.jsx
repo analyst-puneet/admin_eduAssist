@@ -2,11 +2,13 @@ import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
 import { BrowserRouter } from "react-router-dom";
 import { AuthProvider } from "app/contexts/AuthContext";
-// ROOT APP COMPONENT
 import App from "./app/App";
-// THIRD PARTY CSS
 import "perfect-scrollbar/css/perfect-scrollbar.css";
-export const BASE_URL = "http://localhost:5000";
+let BASE_URL = "https://backend-aufx.onrender.com/";
+if (window.location.host == "localhost") {
+  BASE_URL = "http://localhost:5000";
+}
+export { BASE_URL };
 const root = createRoot(document.getElementById("root"));
 
 root.render(

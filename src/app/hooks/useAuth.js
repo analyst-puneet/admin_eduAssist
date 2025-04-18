@@ -4,7 +4,7 @@ import axios from "axios";
 if(window.location.host=="localhost"){
   const BASE_URL = "http://localhost:5000";
 }else{
-  // const BASE_URL = "http://localhost:2000";
+  const BASE_URL = "https://backend-aufx.onrender.com/";
 }
 
 const useAuth = () => {
