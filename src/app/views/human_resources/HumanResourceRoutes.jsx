@@ -22,7 +22,7 @@ const humanResourceRoutes = [
   { path: "/human_resources/staff-attendance", element: <StaffAttendance /> },
   { path: "/human_resources/staff/mark-attendance", element: <MarkAttendance /> },
   { path: "/human_resources/staff-leave", element: <LeaveIndex /> },
-  { path: "/apply", element: <ApplyLeave /> }
+  { path: "/human_resources/staff-leave/apply", element: <ApplyLeave /> }
 ];
 
 export default humanResourceRoutes;

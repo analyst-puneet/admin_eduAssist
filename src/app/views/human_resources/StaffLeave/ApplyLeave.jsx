@@ -1,13 +1,13 @@
 import React, { useState } from "react";
-import {
-  Box,
-  Button,
-  TextField,
-  MenuItem,
-  Typography,
-  Grid,
-  Paper
-} from "@mui/material";
+import { Box, Button, TextField, MenuItem, Typography, Grid, Paper } from "@mui/material";
+import BackButton from "app/views/material-kit/buttons/BackButton";
+import { useNavigate } from "react-router-dom";
+import { useTheme } from "@mui/material/styles";
+
+import AttachFileIcon from "@mui/icons-material/AttachFile";
+import DescriptionIcon from "@mui/icons-material/Description";
+import DeleteIcon from "@mui/icons-material/Delete";
+import { IconButton } from "@mui/material";
 
 const leaveOptions = ["Casual Leave", "Medical Leave", "Earned Leave"];
 
@@ -21,6 +21,38 @@ const ApplyLeave = () => {
     document: null
   });
 
+  const navigate = useNavigate();
+  const theme = useTheme();
+  const isDarkMode = theme.palette.mode === "dark";
+
+  const inputStyle = {
+    "& .MuiInputBase-root": {
+      height: "38px",
+      fontSize: "0.875rem"
+    },
+    "& .MuiInputLabel-root": {
+      transform: "translate(14px, 10px) scale(1)",
+      fontSize: "0.875rem",
+      "&.MuiInputLabel-shrink": {
+        transform: "translate(14px, -9px) scale(0.75)"
+      }
+    },
+    "& .MuiOutlinedInput-notchedOutline": {
+      borderColor: isDarkMode ? "white" : "grey.500"
+    },
+    "&:hover .MuiOutlinedInput-notchedOutline": {
+      borderColor: isDarkMode ? "white" : "grey.700"
+    },
+    "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
+      borderColor: isDarkMode ? "white" : "primary.main"
+    },
+    margin: "0.25rem 0"
+  };
+
+  const handleBackClick = () => {
+    navigate("/human_resources/staff-leave");
+  };
+
   const handleChange = (e) => {
     const { name, value, files } = e.target;
     if (name === "document") {
@@ -33,16 +65,23 @@ const ApplyLeave = () => {
   const handleSubmit = (e) => {
     e.preventDefault();
     console.log("Submitted Data:", formData);
-    // yahan API call laga dena
+    // API call yahan add karo
   };
 
   return (
     <Box p={4}>
-      <Typography variant="h6" gutterBottom>
-        Add Details
-      </Typography>
+      <Grid container justifyContent="space-between" alignItems="center">
+        <Grid item>
+          <Typography variant="h6" gutterBottom>
+            Add Details
+          </Typography>
+        </Grid>
+        <Grid item>
+          <BackButton onClick={handleBackClick} />
+        </Grid>
+      </Grid>
 
-      <Paper sx={{ p: 3 }}>
+      <Paper sx={{ p: 3, mt: 2 }}>
         <form onSubmit={handleSubmit}>
           <Grid container spacing={2}>
             {/* Apply Date */}
@@ -56,6 +95,7 @@ const ApplyLeave = () => {
                 InputLabelProps={{ shrink: true }}
                 value={formData.applyDate}
                 onChange={handleChange}
+                sx={inputStyle}
               />
             </Grid>
 
@@ -69,6 +109,7 @@ const ApplyLeave = () => {
                 required
                 value={formData.leaveType}
                 onChange={handleChange}
+                sx={inputStyle}
               >
                 {leaveOptions.map((type) => (
                   <MenuItem key={type} value={type}>
@@ -89,6 +130,7 @@ const ApplyLeave = () => {
                 InputLabelProps={{ shrink: true }}
                 value={formData.fromDate}
                 onChange={handleChange}
+                sx={inputStyle}
               />
             </Grid>
 
@@ -103,6 +145,7 @@ const ApplyLeave = () => {
                 InputLabelProps={{ shrink: true }}
                 value={formData.toDate}
                 onChange={handleChange}
+                sx={inputStyle}
               />
             </Grid>
 
@@ -116,30 +159,106 @@ const ApplyLeave = () => {
                 rows={3}
                 value={formData.reason}
                 onChange={handleChange}
+                sx={{
+                  "& .MuiOutlinedInput-notchedOutline": {
+                    borderColor: isDarkMode ? "white" : "grey.500"
+                  },
+                  "&:hover .MuiOutlinedInput-notchedOutline": {
+                    borderColor: isDarkMode ? "white" : "grey.700"
+                  },
+                  "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
+                    borderColor: isDarkMode ? "white" : "primary.main"
+                  }
+                }}
               />
             </Grid>
 
             {/* Attach Document */}
             <Grid item xs={12}>
-              <Button
-                variant="outlined"
-                component="label"
-                fullWidth
-                sx={{ textTransform: "none" }}
-              >
-                {formData.document ? formData.document.name : "Attach Document"}
-                <input
-                  type="file"
-                  hidden
-                  name="document"
-                  onChange={handleChange}
-                />
-              </Button>
+              <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
+                {/* File Upload Button */}
+                <Button
+                  variant="outlined"
+                  component="label"
+                  fullWidth
+                  sx={{
+                    textTransform: "none",
+                    py: 1.5,
+                    borderStyle: "dashed",
+                    "&:hover": {
+                      borderStyle: "dashed",
+                      backgroundColor: "action.hover"
+                    }
+                  }}
+                  startIcon={<AttachFileIcon />}
+                >
+                  {formData.document ? "Change Document" : "Upload Document"}
+                  <input
+                    type="file"
+                    hidden
+                    name="document"
+                    onChange={handleChange}
+                    accept=".pdf,.doc,.docx,.jpg,.jpeg,.png" // Specify accepted file types
+                  />
+                </Button>
+
+                {/* File Preview Section */}
+                {formData.document && (
+                  <Paper
+                    variant="outlined"
+                    sx={{
+                      p: 2,
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "space-between",
+                      backgroundColor: "background.paper"
+                    }}
+                  >
+                    <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
+                      {formData.document.type.includes("image/") ? (
+                        <img
+                          src={URL.createObjectURL(formData.document)}
+                          alt="Preview"
+                          style={{
+                            width: 60,
+                            height: 60,
+                            objectFit: "cover",
+                            borderRadius: 1
+                          }}
+                        />
+                      ) : (
+                        <DescriptionIcon sx={{ fontSize: 40, color: "text.secondary" }} />
+                      )}
+
+                      <Box>
+                        <Typography variant="body1" noWrap>
+                          {formData.document.name}
+                        </Typography>
+                        <Typography variant="caption" color="text.secondary">
+                          {(formData.document.size / 1024).toFixed(2)} KB
+                        </Typography>
+                      </Box>
+                    </Box>
+
+                    <IconButton
+                      onClick={() => setFormData({ ...formData, document: null })}
+                      color="error"
+                    >
+                      <DeleteIcon />
+                    </IconButton>
+                  </Paper>
+                )}
+              </Box>
             </Grid>
 
             {/* Submit Button */}
             <Grid item xs={12} display="flex" justifyContent="flex-end">
-              <Button variant="contained" color="primary" type="submit">
+              <Button
+                variant="contained"
+                color="primary"
+                type="submit"
+                sx={{ textTransform: "none" }}
+              >
                 Save
               </Button>
             </Grid>
