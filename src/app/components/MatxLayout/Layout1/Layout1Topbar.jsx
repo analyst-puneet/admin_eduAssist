@@ -7,7 +7,6 @@ import IconButton from "@mui/material/IconButton";
 import Typography from "@mui/material/Typography";
 import useTheme from "@mui/material/styles/useTheme";
 import useMediaQuery from "@mui/material/useMediaQuery";
-import Home from "@mui/icons-material/Home";
 import Menu from "@mui/icons-material/Menu";
 import Person from "@mui/icons-material/Person";
 import Settings from "@mui/icons-material/Settings";
@@ -63,19 +62,20 @@ const UserMenu = styled("div")(({ theme }) => ({
 const StyledItem = styled(MenuItem)(({ theme }) => ({
   display: "flex",
   alignItems: "center",
-  minWidth: 185,
-  "& a": {
-    width: "100%",
+  justifyContent: "center",
+  minWidth: 0,
+  padding: "6px 12px",
+  "& a, & div": {
     display: "flex",
     alignItems: "center",
     textDecoration: "none",
     color: theme.palette.mode === "dark" ? "#fff" : theme.palette.text.primary
   },
   "& span": {
-    marginRight: "10px"
+    marginLeft: "6px"
   },
   "& svg": {
-    color: theme.palette.mode === "dark" ? "#fff" : theme.palette.text.primary
+    fontSize: "18px"
   }
 }));
 
@@ -83,21 +83,6 @@ const IconBox = styled("div")(({ theme }) => ({
   display: "inherit",
   [theme.breakpoints.down("md")]: { display: "none !important" }
 }));
-
-const UserInfo = styled("div")({
-  display: "flex",
-  flexDirection: "column",
-  marginRight: "16px",
-  textAlign: "right",
-  "& .name": {
-    fontWeight: "bold",
-    fontSize: "14px"
-  },
-  "& .role": {
-    fontSize: "12px",
-    color: "#666"
-  }
-});
 
 const Layout1Topbar = () => {
   const theme = useTheme();
@@ -157,7 +142,7 @@ const Layout1Topbar = () => {
           </Typography>
         </Box>
 
-        <Box display="flex" alignItems="center">
+        <Box display="flex" alignItems="center" sx={{ marginRight: 2 }}>
           <MatxSearchBox />
 
           <IconBox>
@@ -177,12 +162,6 @@ const Layout1Topbar = () => {
           <NotificationProvider>{/* <NotificationBar /> */}</NotificationProvider>
 
           <Box display="flex" alignItems="center" sx={{ marginLeft: 2 }}>
-            {/* <CheckCircle sx={{ color: iconColor, marginRight: 1 }} />
-            <UserInfo>
-              <Typography className="name">Joe Black</Typography>
-              <Typography className="role">Super Admin</Typography>
-            </UserInfo> */}
-
             <MatxMenu
               menuButton={
                 <UserMenu>
@@ -198,14 +177,14 @@ const Layout1Topbar = () => {
                 </UserMenu>
               }
             >
-              {/* User Info Section - Made more rectangular but narrower */}
+              {/* User Info Header */}
               <Box
                 sx={{
                   display: "flex",
                   alignItems: "center",
-                  padding: "12px 16px", // Reduced vertical padding
-                  minWidth: "240px", // Reduced from 300px
-                  minHeight: "80px" // Kept same height
+                  padding: "12px 16px",
+                  minWidth: "240px",
+                  minHeight: "80px"
                 }}
               >
               <Avatar
@@ -218,7 +197,7 @@ const Layout1Topbar = () => {
               />
                 <Box>
                   <Typography variant="subtitle1" sx={{ fontWeight: 600 }}>
-                    Joe Black
+                    Prashant Kumar
                   </Typography>
                   <Typography variant="caption" color="textSecondary">
                     Super Admin
@@ -236,52 +215,34 @@ const Layout1Topbar = () => {
                 }}
               />
 
-              {/* Horizontal Menu Items - Adjusted for narrower width */}
+              {/* Menu Row */}
               <Box
                 sx={{
                   display: "flex",
-                  justifyContent: "space-around",
-                  padding: "8px 0",
-                  flexWrap: "wrap" // Allows items to wrap if needed
+                  justifyContent: "space-between",
+                  padding: "6px 12px",
+                  minWidth: "200px",
+                  gap: 1
                 }}
               >
-                <StyledItem
-                  sx={{
-                    flex: "1 0 auto",
-                    justifyContent: "center",
-                    minWidth: "70px" // Minimum width for each item
-                  }}
-                >
-                  <Link to="/page-layouts/user-profile" style={{ flexDirection: "column" }}>
+                <StyledItem>
+                  <Link to="/page-layouts/user-profile">
                     <Person fontSize="small" />
-                    <Span sx={{ marginInlineStart: 0, marginTop: "4px" }}>Profile</Span>
+                    <Span>Profile</Span>
                   </Link>
                 </StyledItem>
 
-                <StyledItem
-                  sx={{
-                    flex: "1 0 auto",
-                    justifyContent: "center",
-                    minWidth: "70px"
-                  }}
-                >
-                  <Link to="/page-layouts/change-password" style={{ flexDirection: "column" }}>
+                <StyledItem>
+                  <Link to="/page-layouts/change-password">
                     <Settings fontSize="small" />
-                    <Span sx={{ marginInlineStart: 0, marginTop: "4px" }}>Password</Span>
+                    <Span>Password</Span>
                   </Link>
                 </StyledItem>
 
-                <StyledItem
-                  onClick={logout}
-                  sx={{
-                    flex: "1 0 auto",
-                    justifyContent: "center",
-                    minWidth: "70px"
-                  }}
-                >
-                  <Box sx={{ display: "flex", flexDirection: "column", alignItems: "center" }}>
+                <StyledItem onClick={logout}>
+                  <Box display="flex" alignItems="center">
                     <PowerSettingsNew fontSize="small" />
-                    <Span sx={{ marginInlineStart: 0, marginTop: "4px" }}>Logout</Span>
+                    <Span>Logout</Span>
                   </Box>
                 </StyledItem>
               </Box>
