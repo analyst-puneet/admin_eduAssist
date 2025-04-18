@@ -27,9 +27,11 @@ const UserCard = ({ name, id, phone, location, roles, img }) => {
         minHeight: "220px",
         position: "relative",
         transition: "all 0.3s ease",
+        backgroundColor: "background.paper", // Default background
         "&:hover": {
           transform: "translateY(-4px)",
           boxShadow: "0 6px 16px rgba(0,0,0,0.12)",
+          backgroundColor: "rgba(0,0,0,0.05)", // Thoda sa dark overlay
           "& .hover-buttons": {
             opacity: 1
           }
@@ -42,30 +44,33 @@ const UserCard = ({ name, id, phone, location, roles, img }) => {
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
     >
-      {/* Hover Buttons - New Position */}
+      {/* CENTERED BUTTONS (Visible on hover) */}
       <Box
         className="hover-buttons"
         sx={{
           position: "absolute",
-          top: 12,
-          right: 12,
+          top: "50%",
+          left: "50%",
+          transform: "translate(-50%, -50%)",
           display: "flex",
-          gap: 1,
-          zIndex: 3,
+          gap: 2,
+          zIndex: 2,
           opacity: 0,
-          transition: "opacity 0.2s ease"
+          transition: "all 0.3s ease"
         }}
       >
         <Tooltip title="Edit" arrow>
           <IconButton
-            size="small"
+            size="medium"
             color="primary"
             sx={{
               backgroundColor: "rgba(255,255,255,0.9)",
-              boxShadow: "0 1px 3px rgba(0,0,0,0.1)",
+              boxShadow: "0 4px 12px rgba(0,0,0,0.15)",
               "&:hover": {
-                backgroundColor: "white"
-              }
+                backgroundColor: "white",
+                transform: "scale(1.1)"
+              },
+              transition: "all 0.2s ease"
             }}
           >
             <Edit fontSize="small" />
@@ -73,15 +78,17 @@ const UserCard = ({ name, id, phone, location, roles, img }) => {
         </Tooltip>
         <Tooltip title="View" arrow>
           <IconButton
-            size="small"
+            size="medium"
             color="secondary"
             onClick={handleViewClick}
             sx={{
               backgroundColor: "rgba(255,255,255,0.9)",
-              boxShadow: "0 1px 3px rgba(0,0,0,0.1)",
+              boxShadow: "0 4px 12px rgba(0,0,0,0.15)",
               "&:hover": {
-                backgroundColor: "white"
-              }
+                backgroundColor: "white",
+                transform: "scale(1.1)"
+              },
+              transition: "all 0.2s ease"
             }}
           >
             <Visibility fontSize="small" />
@@ -89,7 +96,7 @@ const UserCard = ({ name, id, phone, location, roles, img }) => {
         </Tooltip>
       </Box>
 
-      {/* Avatar Section - Centered */}
+      {/* Avatar Section */}
       <Box
         sx={{
           width: "80px",
@@ -115,11 +122,7 @@ const UserCard = ({ name, id, phone, location, roles, img }) => {
             component="img"
             src={img}
             alt={name}
-            sx={{
-              width: "100%",
-              height: "100%",
-              objectFit: "cover"
-            }}
+            sx={{ width: "100%", height: "100%", objectFit: "cover" }}
           />
         ) : (
           <Avatar
@@ -137,32 +140,11 @@ const UserCard = ({ name, id, phone, location, roles, img }) => {
         )}
       </Box>
 
-      {/* User Info Section - Centered */}
-      <Box
-        sx={{
-          width: "100%",
-          textAlign: "center",
-          mb: 1.5,
-          [theme.breakpoints.down("sm")]: {
-            mb: 1
-          }
-        }}
-      >
-        <Typography
-          variant="h6"
-          fontWeight="600"
-          fontSize="1.1rem"
-          noWrap
-          sx={{
-            mb: 0.5,
-            [theme.breakpoints.down("sm")]: {
-              fontSize: "1rem"
-            }
-          }}
-        >
+      {/* User Info Section */}
+      <Box sx={{ width: "100%", textAlign: "center", mb: 1.5 }}>
+        <Typography variant="h6" fontWeight="600" fontSize="1.1rem" noWrap sx={{ mb: 0.5 }}>
           {name}
         </Typography>
-
         <Typography
           variant="body2"
           color="text.secondary"
@@ -172,7 +154,6 @@ const UserCard = ({ name, id, phone, location, roles, img }) => {
         >
           ID: {id}
         </Typography>
-
         <Typography variant="body2" color="text.secondary" fontSize="0.75rem" noWrap>
           {phone}
         </Typography>
@@ -183,16 +164,10 @@ const UserCard = ({ name, id, phone, location, roles, img }) => {
         <Typography
           variant="caption"
           color="text.secondary"
-          sx={{
-            display: "block",
-            textAlign: "center",
-            mb: 1,
-            fontSize: "0.7rem"
-          }}
+          sx={{ display: "block", textAlign: "center", mb: 1, fontSize: "0.7rem" }}
         >
           {location}
         </Typography>
-
         <Stack
           direction="row"
           spacing={0.5}
@@ -213,7 +188,6 @@ const UserCard = ({ name, id, phone, location, roles, img }) => {
                 color: theme.palette.getContrastText(
                   idx === 0 ? theme.palette.primary.light : theme.palette.grey[200]
                 ),
-
                 "& .MuiChip-label": {
                   px: 1,
                   py: 0.25
