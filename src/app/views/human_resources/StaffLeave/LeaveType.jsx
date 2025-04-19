@@ -158,10 +158,8 @@ const LeaveType = () => {
             },
             "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
               borderColor: isDarkMode ? "white" : "primary.main"
-            },
-        
             }
-          }
+          }}
         />
       </Box>
 
@@ -213,7 +211,7 @@ const LeaveType = () => {
                   </TableCell>
                   <TableCell>
                     <IconButton onClick={(e) => handleMenuOpen(e, row)}>
-                      <MoreVertIcon />
+                      <MoreVertIcon sx={{ color: isDarkMode ? "white" : "grey.700" }} />
                     </IconButton>
                   </TableCell>
                 </TableRow>

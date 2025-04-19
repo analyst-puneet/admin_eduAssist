@@ -18,17 +18,15 @@ import {
   MenuItem,
   Grid,
   IconButton,
-  Toolbar
+  Chip,
+  TablePagination,
+  Menu
 } from "@mui/material";
 import {
   Home as HomeIcon,
   ChevronRight as ChevronRightIcon,
-  FileCopy as CopyIcon,
-  PictureAsPdf as PdfIcon,
-  Print as PrintIcon,
-  GridOn as ExcelIcon,
-  Search as SearchIcon,
-  Edit as EditIcon // ✅ Edit Icon added
+  MoreVert as MoreVertIcon,
+  Edit as EditIcon
 } from "@mui/icons-material";
 import { Link } from "react-router-dom";
 
@@ -60,21 +58,63 @@ const Breadcrumbs = () => {
 
 export default function LeaveTypeTransaction() {
   const theme = useTheme();
+  const isDarkMode = theme.palette.mode === "dark";
   const [groupName, setGroupName] = useState("");
   const [status, setStatus] = useState("ACTIVE");
   const [searchQuery, setSearchQuery] = useState("");
+  const [page, setPage] = useState(0);
+  const [rowsPerPage, setRowsPerPage] = useState(5);
+  const [anchorEl, setAnchorEl] = useState(null);
+  const [selectedRow, setSelectedRow] = useState(null);
 
   // Static table data
   const tableRows = [
     { id: 1, groupName: "Regular Teacher", status: "ACTIVE" },
     { id: 2, groupName: "Adhoc Teacher", status: "ACTIVE" },
-    { id: 3, groupName: "Regular Non Teaching", status: "INACTIVE" }
+    { id: 3, groupName: "Regular Non Teaching", status: "INACTIVE" },
+    { id: 4, groupName: "Contract Staff", status: "ACTIVE" },
+    { id: 5, groupName: "Administrative Staff", status: "ACTIVE" },
+    { id: 6, groupName: "Support Staff", status: "INACTIVE" }
   ];
 
   const handleSubmit = (e) => {
     e.preventDefault();
     setGroupName("");
     setStatus("ACTIVE");
+  };
+
+  const handleChangePage = (event, newPage) => {
+    setPage(newPage);
+  };
+
+  const handleChangeRowsPerPage = (event) => {
+    setRowsPerPage(parseInt(event.target.value, 10));
+    setPage(0);
+  };
+
+  const handleSearchChange = (e) => {
+    setSearchQuery(e.target.value);
+    setPage(0);
+  };
+
+  const handleMenuOpen = (event, row) => {
+    setAnchorEl(event.currentTarget);
+    setSelectedRow(row);
+  };
+
+  const handleMenuClose = () => {
+    setAnchorEl(null);
+    setSelectedRow(null);
+  };
+
+  const handleEdit = () => {
+    console.log("Edit clicked for:", selectedRow);
+    handleMenuClose();
+  };
+
+  const handleView = () => {
+    console.log("View clicked for:", selectedRow);
+    handleMenuClose();
   };
 
   const filteredRows = tableRows.filter((row) =>
@@ -85,10 +125,15 @@ export default function LeaveTypeTransaction() {
     <Box p={4}>
       <Breadcrumbs />
 
+      <Box display="flex" justifyContent="space-between" alignItems="center" mb={2}>
+        <Typography variant="h6">Leave Groups</Typography>
+       
+      </Box>
+
       {/* Form Card */}
-      <Paper sx={{ p: 3, mb: 3, width: "100%" }}>
-        <Typography variant="h5" mb={2}>
-          LEAVE GROUP
+      <Paper sx={{ p: 3, mb: 3 }}>
+        <Typography variant="h6" mb={2}>
+          Add New Leave Group
         </Typography>
         <form onSubmit={handleSubmit}>
           <Grid container spacing={2} alignItems="center">
@@ -101,7 +146,10 @@ export default function LeaveTypeTransaction() {
                 onChange={(e) => setGroupName(e.target.value)}
                 sx={{
                   "& .MuiOutlinedInput-root": { height: "40px" },
-                  "& .MuiInputLabel-root": { fontSize: "0.875rem" }
+                  "& .MuiInputLabel-root": { fontSize: "0.875rem" },
+                  "& .MuiOutlinedInput-notchedOutline": {
+                    borderColor: isDarkMode ? "white" : "grey.500"
+                  }
                 }}
               />
             </Grid>
@@ -118,7 +166,10 @@ export default function LeaveTypeTransaction() {
                   onChange={(e) => setStatus(e.target.value)}
                   sx={{
                     height: "40px",
-                    "& .MuiSelect-select": { paddingTop: "12px", paddingBottom: "12px" }
+                    "& .MuiSelect-select": { paddingTop: "12px", paddingBottom: "12px" },
+                    "& .MuiOutlinedInput-notchedOutline": {
+                      borderColor: isDarkMode ? "white" : "grey.500"
+                    }
                   }}
                 >
                   <MenuItem value="ACTIVE">ACTIVE</MenuItem>
@@ -146,103 +197,87 @@ export default function LeaveTypeTransaction() {
         </form>
       </Paper>
 
+      {/* Search Field */}
+      <Box mb={2}>
+        <TextField
+          fullWidth
+          label="Search..."
+          variant="outlined"
+          value={searchQuery}
+          onChange={handleSearchChange}
+          sx={{
+            borderColor: isDarkMode ? "white" : "grey.500",
+            "& .MuiOutlinedInput-notchedOutline": {
+              borderColor: isDarkMode ? "white" : "grey.500"
+            },
+            "&:hover .MuiOutlinedInput-notchedOutline": {
+              borderColor: isDarkMode ? "white" : "grey.700"
+            },
+            "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
+              borderColor: isDarkMode ? "white" : "primary.main"
+            }
+          }}
+        />
+      </Box>
+
       {/* Table Section */}
-      <Paper sx={{ width: "100%", mb: 2 }}>
-        <Toolbar
-          sx={{
-            justifyContent: "space-between",
-            borderBottom: `1px solid ${theme.palette.divider}`,
-            p: 2
-          }}
-        >
-          <Typography variant="h6">LEAVE-TYPE TRANSACTION</Typography>
-        </Toolbar>
-
-        <Box
-          sx={{
-            p: 2,
-            display: "flex",
-            justifyContent: "space-between",
-            alignItems: "center"
-          }}
-        >
-          <Box>
-            <IconButton>
-              <CopyIcon fontSize="small" />
-            </IconButton>
-            <IconButton>
-              <ExcelIcon fontSize="small" />
-            </IconButton>
-            <IconButton>
-              <PdfIcon fontSize="small" />
-            </IconButton>
-            <IconButton>
-              <PrintIcon fontSize="small" />
-            </IconButton>
-          </Box>
-
-          <TextField
-            variant="outlined"
-            placeholder="Search..."
-            size="small"
-            InputProps={{
-              startAdornment: <SearchIcon fontSize="small" sx={{ mr: 1 }} />
-            }}
-            sx={{ width: 250 }}
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-          />
-        </Box>
-
-        <TableContainer>
-          <Table>
-            <TableHead>
-              <TableRow sx={{ backgroundColor: theme.palette.grey[100] }}>
+      <TableContainer component={Paper}>
+        <Table>
+          <TableHead>
+            <TableRow>
+              <TableCell>
+                <strong>S.No</strong>
+              </TableCell>
+              <TableCell>
+                <strong>Group Name</strong>
+              </TableCell>
+              <TableCell>
+                <strong>Status</strong>
+              </TableCell>
+              <TableCell>
+                <strong>Action</strong>
+              </TableCell>
+            </TableRow>
+          </TableHead>
+          <TableBody>
+            {filteredRows.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map((row) => (
+              <TableRow key={row.id}>
+                <TableCell>{row.id}</TableCell>
+                <TableCell>{row.groupName}</TableCell>
                 <TableCell>
-                  <strong>S.NO</strong>
+                  <Chip
+                    label={row.status}
+                    color={row.status === "ACTIVE" ? "success" : "default"}
+                    size="small"
+                  />
                 </TableCell>
                 <TableCell>
-                  <strong>Group Name</strong>
-                </TableCell>
-                <TableCell>
-                  <strong>Status</strong>
-                </TableCell>
-                <TableCell>
-                  <strong>Action</strong>
+                  <IconButton onClick={(e) => handleMenuOpen(e, row)}>
+                    <MoreVertIcon sx={{ color: isDarkMode ? "white" : "grey.700" }} />
+                  </IconButton>
                 </TableCell>
               </TableRow>
-            </TableHead>
-            <TableBody>
-              {filteredRows.map((row) => (
-                <TableRow key={row.id} hover>
-                  <TableCell>{row.id}</TableCell>
-                  <TableCell>{row.groupName}</TableCell>
-                  <TableCell>
-                    <Box
-                      component="span"
-                      sx={{
-                        color:
-                          row.status === "ACTIVE"
-                            ? theme.palette.success.main
-                            : theme.palette.error.main,
-                        fontWeight: 500,
-                        textTransform: "uppercase"
-                      }}
-                    >
-                      {row.status}
-                    </Box>
-                  </TableCell>
-                  <TableCell>
-                    <IconButton size="small">
-                      <EditIcon color="primary" />
-                    </IconButton>
-                  </TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        </TableContainer>
-      </Paper>
+            ))}
+          </TableBody>
+        </Table>
+
+        <TablePagination
+          rowsPerPageOptions={[5, 10, 25]}
+          component="div"
+          count={filteredRows.length}
+          rowsPerPage={rowsPerPage}
+          page={page}
+          onPageChange={handleChangePage}
+          onRowsPerPageChange={handleChangeRowsPerPage}
+        />
+      </TableContainer>
+
+      <Menu anchorEl={anchorEl} open={Boolean(anchorEl)} onClose={handleMenuClose}>
+        <MenuItem onClick={handleEdit}>
+          <EditIcon fontSize="small" sx={{ mr: 1 }} /> Edit
+        </MenuItem>
+        <MenuItem onClick={handleView}>View</MenuItem>
+      </Menu>
     </Box>
   );
 }

@@ -1,5 +1,15 @@
 import React, { useState } from "react";
-import { Box, Button, TextField, MenuItem, Typography, Grid, Paper } from "@mui/material";
+import {
+  Box,
+  Button,
+  TextField,
+  MenuItem,
+  Typography,
+  Grid,
+  Paper,
+  FormControlLabel,
+  Checkbox
+} from "@mui/material";
 import BackButton from "app/views/material-kit/buttons/BackButton";
 import { useNavigate } from "react-router-dom";
 import { useTheme } from "@mui/material/styles";
@@ -18,7 +28,10 @@ const ApplyLeave = () => {
     fromDate: "",
     toDate: "",
     reason: "",
-    document: null
+    document: null,
+    isOutOfStation: false,
+    destinationAddress: "",
+    mobileNumber: ""
   });
 
   const navigate = useNavigate();
@@ -54,9 +67,11 @@ const ApplyLeave = () => {
   };
 
   const handleChange = (e) => {
-    const { name, value, files } = e.target;
+    const { name, value, files, checked, type } = e.target;
     if (name === "document") {
       setFormData({ ...formData, document: files[0] });
+    } else if (type === "checkbox") {
+      setFormData({ ...formData, [name]: checked });
     } else {
       setFormData({ ...formData, [name]: value });
     }
@@ -148,6 +163,52 @@ const ApplyLeave = () => {
                 sx={inputStyle}
               />
             </Grid>
+
+            {/* Out of Station Checkbox */}
+            <Grid item xs={12}>
+              <FormControlLabel
+                control={
+                  <Checkbox
+                    checked={formData.isOutOfStation}
+                    onChange={handleChange}
+                    name="isOutOfStation"
+                    color="primary"
+                  />
+                }
+                label="Out of Station"
+              />
+            </Grid>
+
+            {/* Conditional Fields - Only show if Out of Station is checked */}
+            {formData.isOutOfStation && (
+              <>
+                <Grid item xs={12} md={6}>
+                  <TextField
+                    label="Destination Address"
+                    name="destinationAddress"
+                    fullWidth
+                    value={formData.destinationAddress}
+                    onChange={handleChange}
+                    sx={inputStyle}
+                  />
+                </Grid>
+                <Grid item xs={12} md={6}>
+                  <TextField
+                    label="Mobile Number"
+                    name="mobileNumber"
+                    fullWidth
+                    type="tel"
+                    value={formData.mobileNumber}
+                    onChange={handleChange}
+                    sx={inputStyle}
+                    inputProps={{
+                      pattern: "[0-9]{10}",
+                      title: "Please enter a 10-digit mobile number"
+                    }}
+                  />
+                </Grid>
+              </>
+            )}
 
             {/* Reason */}
             <Grid item xs={12}>
