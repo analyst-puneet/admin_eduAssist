@@ -13,11 +13,18 @@ import {
   useTheme,
   IconButton
 } from "@mui/material";
-import DeleteIcon from "@mui/icons-material/Delete";
-import InsertDriveFileIcon from "@mui/icons-material/InsertDriveFile";
-import AddCircleOutlineIcon from "@mui/icons-material/AddCircleOutline";
+import {
+  Delete as DeleteIcon,
+  InsertDriveFile as InsertDriveFileIcon,
+  AddCircleOutline as AddCircleOutlineIcon
+} from "@mui/icons-material";
 
-export default function AddStaff4({ formData, setFormData }) {
+export default function AddStaff4({
+  formData,
+  setFormData,
+  onValidationChange,
+  triggerValidation
+}) {
   const theme = useTheme();
   const isDarkMode = theme.palette.mode === "dark";
 
@@ -35,6 +42,56 @@ export default function AddStaff4({ formData, setFormData }) {
     ]
   );
 
+  // Validation states
+  const [errors, setErrors] = useState({
+    tenthSchool: false,
+    tenthBoard: false,
+    tenthPercentage: false,
+    tenthMarksheet: false,
+    twelfthSchool: false,
+    twelfthBoard: false,
+    twelfthPercentage: false,
+    twelfthMarksheet: false,
+    subjects: Array(5).fill(false)
+  });
+
+  const [showErrors, setShowErrors] = useState(false);
+
+  // Validate form and notify parent
+  const validateForm = (show = false) => {
+    const newErrors = {
+      tenthSchool: !formData.tenthSchool,
+      tenthBoard: !formData.tenthBoard,
+      tenthPercentage: !formData.tenthPercentage,
+      tenthMarksheet: !fileNames.tenthMarksheet,
+      twelfthSchool: !formData.twelfthSchool,
+      twelfthBoard: !formData.twelfthBoard,
+      twelfthPercentage: !formData.twelfthPercentage,
+      twelfthMarksheet: !fileNames.twelfthMarksheet,
+      subjects: subjects.map((subject) => !subject.name)
+    };
+
+    if (show) setErrors(newErrors);
+
+    const isFormValid =
+      !newErrors.tenthSchool &&
+      !newErrors.tenthBoard &&
+      !newErrors.tenthPercentage &&
+      !newErrors.tenthMarksheet &&
+      !newErrors.twelfthSchool &&
+      !newErrors.twelfthBoard &&
+      !newErrors.twelfthPercentage &&
+      !newErrors.twelfthMarksheet &&
+      !newErrors.subjects.some((error) => error);
+
+    if (onValidationChange) {
+      onValidationChange(isFormValid);
+    }
+
+    return isFormValid;
+  };
+
+  // Update formData whenever any field changes
   useEffect(() => {
     setFormData((prev) => ({
       ...prev,
@@ -44,26 +101,17 @@ export default function AddStaff4({ formData, setFormData }) {
       ugYears,
       subjects
     }));
+    validateForm();
   }, [educationLevel, sections, fileNames, ugYears, subjects]);
 
-  const handleFileChange = (fieldName, e) => {
-    const file = e.target.files[0];
-    if (file) {
-      setFileNames((prev) => ({
-        ...prev,
-        [fieldName]: file.name
-      }));
+  useEffect(() => {
+    if (triggerValidation) {
+      setShowErrors(true);
+      validateForm(true);
     }
-  };
+  }, [triggerValidation]);
 
-  const handleRemoveFile = (fieldName) => {
-    setFileNames((prev) => {
-      const newFiles = { ...prev };
-      delete newFiles[fieldName];
-      return newFiles;
-    });
-  };
-
+  // Input styling with error state
   const inputStyle = {
     "& .MuiInputBase-root": {
       height: "38px",
@@ -76,26 +124,51 @@ export default function AddStaff4({ formData, setFormData }) {
         transform: "translate(14px, -9px) scale(0.75)"
       }
     },
-    borderColor: isDarkMode ? "white" : "grey.500",
-    "& .MuiOutlinedInput-notchedOutline": {
-      borderColor: isDarkMode ? "white" : "grey.500"
-    },
-    "&:hover .MuiOutlinedInput-notchedOutline": {
-      borderColor: isDarkMode ? "white" : "grey.700"
-    },
-    "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
-      borderColor: isDarkMode ? "white" : "primary.main"
-    },
     margin: "0.25rem 0"
   };
 
-  const FileInput = ({ label, fieldName, accept = "*" }) => (
+  const errorStyle = {
+    ...inputStyle,
+    "& .MuiOutlinedInput-notchedOutline": {
+      borderColor: "error.main",
+      borderWidth: "2px"
+    }
+  };
+
+  const handleFileChange = (fieldName, e) => {
+    const file = e.target.files[0];
+    if (file) {
+      setFileNames((prev) => ({
+        ...prev,
+        [fieldName]: file.name
+      }));
+      if (errors[fieldName]) {
+        setErrors((prev) => ({ ...prev, [fieldName]: false }));
+      }
+    }
+  };
+
+  const handleRemoveFile = (fieldName) => {
+    setFileNames((prev) => {
+      const newFiles = { ...prev };
+      delete newFiles[fieldName];
+      return newFiles;
+    });
+    setErrors((prev) => ({ ...prev, [fieldName]: true }));
+  };
+
+  const FileInput = ({ label, fieldName, accept = "*", required = false }) => (
     <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
       <Box
         component="label"
         sx={{
-          border: "1px dashed",
-          borderColor: isDarkMode ? theme.palette.grey[600] : theme.palette.grey[400],
+          border: `1px dashed ${
+            errors[fieldName]
+              ? theme.palette.error.main
+              : isDarkMode
+              ? theme.palette.grey[600]
+              : theme.palette.grey[400]
+          }`,
           borderRadius: "6px",
           p: 1,
           flexGrow: 1,
@@ -103,7 +176,11 @@ export default function AddStaff4({ formData, setFormData }) {
           alignItems: "center",
           gap: 1,
           cursor: "pointer",
-          bgcolor: isDarkMode ? theme.palette.grey[800] : theme.palette.background.paper,
+          bgcolor: errors[fieldName]
+            ? theme.palette.error.light + "20"
+            : isDarkMode
+            ? theme.palette.grey[800]
+            : theme.palette.background.paper,
           "&:hover": {
             borderColor: theme.palette.primary.main
           }
@@ -132,10 +209,21 @@ export default function AddStaff4({ formData, setFormData }) {
     const updatedSubjects = [...subjects];
     updatedSubjects[index].name = value;
     setSubjects(updatedSubjects);
+    if (value && errors.subjects[index]) {
+      setErrors((prev) => {
+        const newSubjects = [...prev.subjects];
+        newSubjects[index] = false;
+        return { ...prev, subjects: newSubjects };
+      });
+    }
   };
 
   const handleAddSubject = () => {
     setSubjects([...subjects, { id: subjects.length + 1, name: "" }]);
+    setErrors((prev) => ({
+      ...prev,
+      subjects: [...prev.subjects, false]
+    }));
   };
 
   const handleEducationLevelChange = (event) => {
@@ -157,6 +245,48 @@ export default function AddStaff4({ formData, setFormData }) {
     setUgYears((prev) => prev + 1);
   };
 
+  // Handle basic field changes
+  const handleBasicFieldChange = (field, value) => {
+    setFormData((prev) => ({
+      ...prev,
+      [field]: value
+    }));
+    if (value && errors[field]) {
+      setErrors((prev) => ({ ...prev, [field]: false }));
+    }
+  };
+
+  // Validate field on blur
+  const handleFieldBlur = (field) => {
+    if (field in formData) {
+      setErrors((prev) => ({ ...prev, [field]: !formData[field] }));
+    }
+  };
+
+  // Higher education section validation
+  const validateHigherEducation = (section) => {
+    switch (section) {
+      case "UG":
+        return (
+          !formData.ugCollegeName ||
+          !formData.ugCourse ||
+          !formData.ugPercentage ||
+          !fileNames.ugYear1
+        );
+      case "PG":
+        return (
+          !formData.pgCollegeName ||
+          !formData.pgCourse ||
+          !formData.pgPercentage ||
+          !fileNames.pgMarksheet
+        );
+      case "PhD":
+        return !formData.phdCollegeName || !formData.phdCourse || !formData.phdCompletionYear;
+      default:
+        return false;
+    }
+  };
+
   return (
     <Box
       component={Paper}
@@ -174,16 +304,59 @@ export default function AddStaff4({ formData, setFormData }) {
         </Typography>
         <Grid container spacing={1.5}>
           <Grid item xs={12} sm={6}>
-            <TextField label="School Name" fullWidth sx={inputStyle} />
+            <TextField
+              label="School Name"
+              fullWidth
+              required
+              sx={errors.tenthSchool ? errorStyle : inputStyle}
+              value={formData.tenthSchool || ""}
+              onChange={(e) => handleBasicFieldChange("tenthSchool", e.target.value)}
+              onBlur={() => handleFieldBlur("tenthSchool")}
+              error={errors.tenthSchool}
+              helperText={errors.tenthSchool ? "School name is required" : ""}
+            />
           </Grid>
           <Grid item xs={12} sm={6}>
-            <TextField label="Board" fullWidth sx={inputStyle} />
+            <TextField
+              label="Board"
+              fullWidth
+              required
+              sx={errors.tenthBoard ? errorStyle : inputStyle}
+              value={formData.tenthBoard || ""}
+              onChange={(e) => handleBasicFieldChange("tenthBoard", e.target.value)}
+              onBlur={() => handleFieldBlur("tenthBoard")}
+              error={errors.tenthBoard}
+              helperText={errors.tenthBoard ? "Board is required" : ""}
+            />
           </Grid>
           <Grid item xs={12} sm={6}>
-            <TextField label="Percentage" type="number" fullWidth sx={inputStyle} />
+            <TextField
+              label="Percentage"
+              type="number"
+              fullWidth
+              required
+              sx={errors.tenthPercentage ? errorStyle : inputStyle}
+              value={formData.tenthPercentage || ""}
+              onChange={(e) => handleBasicFieldChange("tenthPercentage", e.target.value)}
+              onBlur={() => handleFieldBlur("tenthPercentage")}
+              error={errors.tenthPercentage}
+              helperText={errors.tenthPercentage ? "Percentage is required" : ""}
+            />
           </Grid>
           <Grid item xs={12} sm={6}>
-            <FileInput label="10th Marksheet" fieldName="tenthMarksheet" accept=".pdf,.jpg,.png" />
+            <Box>
+              <FileInput
+                label="10th Marksheet (Required)"
+                fieldName="tenthMarksheet"
+                accept=".pdf,.jpg,.png"
+                required
+              />
+              {errors.tenthMarksheet && (
+                <Typography variant="caption" color="error" sx={{ mt: 0.5, display: "block" }}>
+                  10th marksheet is required
+                </Typography>
+              )}
+            </Box>
           </Grid>
         </Grid>
       </Box>
@@ -195,10 +368,30 @@ export default function AddStaff4({ formData, setFormData }) {
         </Typography>
         <Grid container spacing={1.5}>
           <Grid item xs={12} sm={6}>
-            <TextField label="School Name" fullWidth sx={inputStyle} />
+            <TextField
+              label="School Name"
+              fullWidth
+              required
+              sx={errors.twelfthSchool ? errorStyle : inputStyle}
+              value={formData.twelfthSchool || ""}
+              onChange={(e) => handleBasicFieldChange("twelfthSchool", e.target.value)}
+              onBlur={() => handleFieldBlur("twelfthSchool")}
+              error={errors.twelfthSchool}
+              helperText={errors.twelfthSchool ? "School name is required" : ""}
+            />
           </Grid>
           <Grid item xs={12} sm={6}>
-            <TextField label="Board" fullWidth sx={inputStyle} />
+            <TextField
+              label="Board"
+              fullWidth
+              required
+              sx={errors.twelfthBoard ? errorStyle : inputStyle}
+              value={formData.twelfthBoard || ""}
+              onChange={(e) => handleBasicFieldChange("twelfthBoard", e.target.value)}
+              onBlur={() => handleFieldBlur("twelfthBoard")}
+              error={errors.twelfthBoard}
+              helperText={errors.twelfthBoard ? "Board is required" : ""}
+            />
           </Grid>
           {subjects.map((subject, index) => (
             <Grid item xs={12} sm={4} key={subject.id}>
@@ -207,7 +400,19 @@ export default function AddStaff4({ formData, setFormData }) {
                 value={subject.name}
                 onChange={(e) => handleSubjectChange(index, e.target.value)}
                 fullWidth
-                sx={inputStyle}
+                required
+                sx={errors.subjects[index] ? errorStyle : inputStyle}
+                error={errors.subjects[index]}
+                helperText={errors.subjects[index] ? "Subject is required" : ""}
+                onBlur={() => {
+                  if (!subject.name) {
+                    setErrors((prev) => {
+                      const newSubjects = [...prev.subjects];
+                      newSubjects[index] = true;
+                      return { ...prev, subjects: newSubjects };
+                    });
+                  }
+                }}
               />
             </Grid>
           ))}
@@ -217,14 +422,33 @@ export default function AddStaff4({ formData, setFormData }) {
         </Button>
         <Grid container spacing={1.5} mt={2}>
           <Grid item xs={12} sm={6}>
-            <TextField label="Percentage" type="number" fullWidth sx={inputStyle} />
+            <TextField
+              label="Percentage"
+              type="number"
+              fullWidth
+              required
+              sx={errors.twelfthPercentage ? errorStyle : inputStyle}
+              value={formData.twelfthPercentage || ""}
+              onChange={(e) => handleBasicFieldChange("twelfthPercentage", e.target.value)}
+              onBlur={() => handleFieldBlur("twelfthPercentage")}
+              error={errors.twelfthPercentage}
+              helperText={errors.twelfthPercentage ? "Percentage is required" : ""}
+            />
           </Grid>
           <Grid item xs={12} sm={6}>
-            <FileInput
-              label="12th Marksheet"
-              fieldName="twelfthMarksheet"
-              accept=".pdf,.jpg,.png"
-            />
+            <Box>
+              <FileInput
+                label="12th Marksheet (Required)"
+                fieldName="twelfthMarksheet"
+                accept=".pdf,.jpg,.png"
+                required
+              />
+              {errors.twelfthMarksheet && (
+                <Typography variant="caption" color="error" sx={{ mt: 0.5, display: "block" }}>
+                  12th marksheet is required
+                </Typography>
+              )}
+            </Box>
           </Grid>
         </Grid>
       </Box>
@@ -247,17 +471,43 @@ export default function AddStaff4({ formData, setFormData }) {
           </Typography>
           <Grid container spacing={1.5}>
             <Grid item xs={12} sm={6}>
-              <TextField label="University/College Name" fullWidth sx={inputStyle} />
+              <TextField
+                label="University/College Name"
+                fullWidth
+                required
+                sx={inputStyle}
+                value={formData.ugCollegeName || ""}
+                onChange={(e) => handleBasicFieldChange("ugCollegeName", e.target.value)}
+              />
             </Grid>
             <Grid item xs={12} sm={6}>
-              <TextField label="Course" fullWidth sx={inputStyle} />
+              <TextField
+                label="Course"
+                fullWidth
+                required
+                sx={inputStyle}
+                value={formData.ugCourse || ""}
+                onChange={(e) => handleBasicFieldChange("ugCourse", e.target.value)}
+              />
             </Grid>
             <Grid item xs={12} sm={6}>
-              <TextField label="Percentage of Final Year" fullWidth type="number" sx={inputStyle} />
+              <TextField
+                label="Percentage of Final Year"
+                fullWidth
+                type="number"
+                required
+                sx={inputStyle}
+                value={formData.ugPercentage || ""}
+                onChange={(e) => handleBasicFieldChange("ugPercentage", e.target.value)}
+              />
             </Grid>
             {[...Array(ugYears)].map((_, i) => (
               <Grid item xs={12} sm={6} key={`ugYear${i + 1}`}>
-                <FileInput label={`UG Marksheet (Year ${i + 1})`} fieldName={`ugYear${i + 1}`} />
+                <FileInput
+                  label={`UG Marksheet (Year ${i + 1})`}
+                  fieldName={`ugYear${i + 1}`}
+                  required={i === ugYears - 1} // Only require final year marksheet
+                />
               </Grid>
             ))}
             <Grid item xs={12}>
@@ -284,16 +534,38 @@ export default function AddStaff4({ formData, setFormData }) {
           </Typography>
           <Grid container spacing={1.5}>
             <Grid item xs={12} sm={6}>
-              <TextField label="University/College Name" fullWidth sx={inputStyle} />
+              <TextField
+                label="University/College Name"
+                fullWidth
+                required
+                sx={inputStyle}
+                value={formData.pgCollegeName || ""}
+                onChange={(e) => handleBasicFieldChange("pgCollegeName", e.target.value)}
+              />
             </Grid>
             <Grid item xs={12} sm={6}>
-              <TextField label="Course" fullWidth sx={inputStyle} />
+              <TextField
+                label="Course"
+                fullWidth
+                required
+                sx={inputStyle}
+                value={formData.pgCourse || ""}
+                onChange={(e) => handleBasicFieldChange("pgCourse", e.target.value)}
+              />
             </Grid>
             <Grid item xs={12} sm={6}>
-              <TextField label="Percentage" type="number" fullWidth sx={inputStyle} />
+              <TextField
+                label="Percentage"
+                type="number"
+                fullWidth
+                required
+                sx={inputStyle}
+                value={formData.pgPercentage || ""}
+                onChange={(e) => handleBasicFieldChange("pgPercentage", e.target.value)}
+              />
             </Grid>
             <Grid item xs={12} sm={6}>
-              <FileInput label="PG Marksheet" fieldName="pgMarksheet" />
+              <FileInput label="PG Marksheet (Required)" fieldName="pgMarksheet" required />
             </Grid>
           </Grid>
         </Box>
@@ -310,16 +582,44 @@ export default function AddStaff4({ formData, setFormData }) {
           </Typography>
           <Grid container spacing={1.5}>
             <Grid item xs={12} sm={6}>
-              <TextField label="University/College Name" fullWidth sx={inputStyle} />
+              <TextField
+                label="University/College Name"
+                fullWidth
+                required
+                sx={inputStyle}
+                value={formData.phdCollegeName || ""}
+                onChange={(e) => handleBasicFieldChange("phdCollegeName", e.target.value)}
+              />
             </Grid>
             <Grid item xs={12} sm={6}>
-              <TextField label="Course" fullWidth sx={inputStyle} />
+              <TextField
+                label="Course"
+                fullWidth
+                required
+                sx={inputStyle}
+                value={formData.phdCourse || ""}
+                onChange={(e) => handleBasicFieldChange("phdCourse", e.target.value)}
+              />
             </Grid>
             <Grid item xs={12} sm={6}>
-              <TextField label="Thesis Title (Optional)" fullWidth sx={inputStyle} />
+              <TextField
+                label="Thesis Title (Optional)"
+                fullWidth
+                sx={inputStyle}
+                value={formData.phdThesisTitle || ""}
+                onChange={(e) => handleBasicFieldChange("phdThesisTitle", e.target.value)}
+              />
             </Grid>
             <Grid item xs={12} sm={6}>
-              <TextField label="Completion Year" type="number" fullWidth sx={inputStyle} />
+              <TextField
+                label="Completion Year"
+                type="number"
+                fullWidth
+                required
+                sx={inputStyle}
+                value={formData.phdCompletionYear || ""}
+                onChange={(e) => handleBasicFieldChange("phdCompletionYear", e.target.value)}
+              />
             </Grid>
             <Grid item xs={12} sm={6}>
               <FileInput label="PhD Thesis (PDF)" fieldName="phdThesis" accept=".pdf" />
@@ -344,7 +644,11 @@ export default function AddStaff4({ formData, setFormData }) {
             <MenuItem value="PhD">PhD</MenuItem>
           </Select>
         </FormControl>
-        <Button variant="contained" onClick={handleAddEducationSection}>
+        <Button
+          variant="contained"
+          onClick={handleAddEducationSection}
+          disabled={!educationLevel || sections.includes(educationLevel)}
+        >
           Add
         </Button>
       </Box>

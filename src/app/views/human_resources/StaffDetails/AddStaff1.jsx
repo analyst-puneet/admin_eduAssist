@@ -24,7 +24,12 @@ import AddPhotoAlternateIcon from "@mui/icons-material/AddPhotoAlternate";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import BackButton from "app/views/material-kit/buttons/BackButton";
 
-export default function Addstaff1({ formData, setFormData, onValidationChange }) {
+export default function Addstaff1({
+  formData,
+  setFormData,
+  onValidationChange,
+  triggerValidation
+}) {
   const navigate = useNavigate();
   const theme = useTheme();
   const isDarkMode = theme.palette.mode === "dark";
@@ -82,6 +87,8 @@ export default function Addstaff1({ formData, setFormData, onValidationChange })
     experiences: []
   });
 
+  const [showErrors, setShowErrors] = useState(false);
+
   // Initialize experiences errors array
   useEffect(() => {
     setErrors((prev) => ({
@@ -122,7 +129,7 @@ export default function Addstaff1({ formData, setFormData, onValidationChange })
   ]);
 
   // Validate all required fields
-  const validateForm = () => {
+  const validateForm = (show = false) => {
     const newErrors = {
       staffId: !basicInfo.staffId,
       role: !role,
@@ -145,9 +152,8 @@ export default function Addstaff1({ formData, setFormData, onValidationChange })
       }))
     };
 
-    setErrors(newErrors);
+    if (show) setErrors(newErrors); // show errors only when asked
 
-    // Check if form is valid
     const isFormValid =
       !newErrors.staffId &&
       !newErrors.role &&
@@ -164,7 +170,6 @@ export default function Addstaff1({ formData, setFormData, onValidationChange })
       !newErrors.aadhaarCard &&
       newErrors.experiences.every((exp) => !exp.company && !exp.position && !exp.from && !exp.to);
 
-    // Notify parent component about validation status
     if (onValidationChange) {
       onValidationChange(isFormValid);
     }
@@ -181,9 +186,20 @@ export default function Addstaff1({ formData, setFormData, onValidationChange })
     }
   }, []);
 
-  // Auto validate on any data change
   useEffect(() => {
-    validateForm();
+    if (triggerValidation) {
+      setShowErrors(true);
+      validateForm(true);
+    }
+  }, [triggerValidation]);
+
+  // ✅ NEW - only validate if user has triggered errors
+  useEffect(() => {
+    if (showErrors) {
+      validateForm(true); // show errors
+    } else {
+      validateForm(false); // silent validation
+    }
   }, [basicInfo, role, address, permanentAddress, documents, experiences]);
 
   // Ultra-compact input styling

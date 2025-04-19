@@ -15,7 +15,12 @@ import {
 } from "@mui/material";
 import { useNavigate } from "react-router-dom";
 
-export default function AddStaff2({ formData, setFormData, onValidationChange }) {
+export default function AddStaff2({
+  formData,
+  setFormData,
+  onValidationChange,
+  triggerValidation
+}) {
   const navigate = useNavigate();
   const theme = useTheme();
   const isDarkMode = theme.palette.mode === "dark";
@@ -65,8 +70,10 @@ export default function AddStaff2({ formData, setFormData, onValidationChange })
     accountType: false
   });
 
+  const [showErrors, setShowErrors] = useState(false);
+
   // Validate form and notify parent
-  const validateForm = () => {
+  const validateForm = (show = false) => {
     const newErrors = {
       epfNo: !payrollInfo.epfNo,
       basicSalary: !payrollInfo.basicSalary,
@@ -80,11 +87,14 @@ export default function AddStaff2({ formData, setFormData, onValidationChange })
       accountType: !bankInfo.accountType
     };
 
-    setErrors(newErrors);
+    if (show) setErrors(newErrors);
 
-    const isValid = !Object.values(newErrors).some((error) => error);
-    onValidationChange(isValid);
-    return isValid;
+    const isFormValid = !Object.values(newErrors).some((error) => error);
+    if (onValidationChange) {
+      onValidationChange(isFormValid);
+    }
+
+    return isFormValid;
   };
 
   // Update formData whenever any field changes
@@ -101,6 +111,13 @@ export default function AddStaff2({ formData, setFormData, onValidationChange })
   useEffect(() => {
     validateForm();
   }, [payrollInfo, bankInfo]);
+
+  useEffect(() => {
+    if (triggerValidation) {
+      setShowErrors(true);
+      validateForm(true);
+    }
+  }, [triggerValidation]);
 
   // Input styling with error state
   const inputStyle = {

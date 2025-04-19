@@ -13,57 +13,10 @@ import {
 } from "@mui/material";
 import React from "react";
 import Addstaff1 from "./AddStaff1";
+import Addstaff4 from "./AddStaff4";
 import Addstaff2 from "./AddStaff2";
 import Addstaff3 from "./AddStaff3";
-import Addstaff4 from "./AddStaff4";
-
-function getSteps() {
-  return [
-    "Personal Information",
-    "Educational Details",
-    "Payroll & Bank Details",
-    "Review & Submit"
-  ];
-}
-
-function getStepContent(stepIndex, formData, setFormData, setStepValid) {
-  switch (stepIndex) {
-    case 0:
-      return (
-        <Addstaff1
-          formData={formData}
-          setFormData={setFormData}
-          onValidationChange={setStepValid}
-        />
-      );
-    case 1:
-      return (
-        <Addstaff4
-          formData={formData}
-          setFormData={setFormData}
-          onValidationChange={setStepValid}
-        />
-      );
-    case 2:
-      return (
-        <Addstaff2
-          formData={formData}
-          setFormData={setFormData}
-          onValidationChange={setStepValid}
-        />
-      );
-    case 3:
-      return (
-        <Addstaff3
-          formData={formData}
-          setFormData={setFormData}
-          onValidationChange={setStepValid}
-        />
-      );
-    default:
-      return "Unknown Step";
-  }
-}
+import PreviewStaffDetails from "./PreviewStaffDetails";
 
 export default function StepperForm() {
   const theme = useTheme();
@@ -74,6 +27,7 @@ export default function StepperForm() {
   const [snackbarMessage, setSnackbarMessage] = React.useState("");
   const [snackbarSeverity, setSnackbarSeverity] = React.useState("error");
   const steps = getSteps();
+  const [previewMode, setPreviewMode] = React.useState(false);
 
   // Initialize form data from sessionStorage or empty object
   const [formData, setFormData] = React.useState(() => {
@@ -86,12 +40,24 @@ export default function StepperForm() {
     sessionStorage.setItem("staffFormData", JSON.stringify(formData));
   }, [formData]);
 
+  const [triggerValidation, setTriggerValidation] = React.useState(false);
+
   const handleNext = () => {
-    if (stepValid) {
-      setActiveStep((prev) => prev + 1);
-    } else {
-      showError("Please fill all required fields before proceeding");
-    }
+    setTriggerValidation(true);
+
+    setTimeout(() => {
+      if (stepValid) {
+        if (activeStep === steps.length - 1) {
+          // Last step, show preview instead of going to 'All steps completed'
+          setPreviewMode(true);
+        } else {
+          setActiveStep((prev) => prev + 1);
+        }
+        setTriggerValidation(false);
+      } else {
+        showError("Please fill all required fields before proceeding");
+      }
+    }, 0);
   };
 
   const handleBack = () => setActiveStep((prev) => prev - 1);
@@ -125,6 +91,58 @@ export default function StepperForm() {
   const handleSnackbarClose = () => {
     setSnackbarOpen(false);
   };
+
+  function getSteps() {
+    return [
+      "Personal Information",
+      "Educational Details",
+      "Payroll & Bank Details",
+      "Review & Submit"
+    ];
+  }
+
+  function getStepContent(stepIndex, formData, setFormData, setStepValid) {
+    switch (stepIndex) {
+      case 0:
+        return (
+          <Addstaff1
+            formData={formData}
+            setFormData={setFormData}
+            onValidationChange={setStepValid}
+            triggerValidation={triggerValidation}
+          />
+        );
+      case 1:
+        return (
+          <Addstaff4
+            formData={formData}
+            setFormData={setFormData}
+            onValidationChange={setStepValid}
+            triggerValidation={triggerValidation}
+          />
+        );
+      case 2:
+        return (
+          <Addstaff2
+            formData={formData}
+            setFormData={setFormData}
+            onValidationChange={setStepValid}
+            triggerValidation={triggerValidation}
+          />
+        );
+      case 3:
+        return (
+          <Addstaff3
+            formData={formData}
+            setFormData={setFormData}
+            onValidationChange={setStepValid}
+            triggerValidation={triggerValidation}
+          />
+        );
+      default:
+        return "Unknown Step";
+    }
+  }
 
   // Back button style that works in both enabled and disabled states
   const backButtonStyle = {
@@ -164,20 +182,12 @@ export default function StepperForm() {
 
       {/* Step Content */}
       <Paper elevation={1} sx={{ p: 4 }}>
-        {activeStep === steps.length ? (
-          <Box textAlign="center">
-            <Typography variant="h6" gutterBottom>
-              🎉 All steps completed – you're done!
-            </Typography>
-            <Box sx={{ display: "flex", justifyContent: "center", gap: 2 }}>
-              <Button variant="contained" color="secondary" onClick={handleSubmit} sx={{ px: 4 }}>
-                Submit
-              </Button>
-              <Button variant="outlined" onClick={handleReset} sx={{ px: 4 }}>
-                Start Over
-              </Button>
-            </Box>
-          </Box>
+        {previewMode ? (
+          <PreviewStaffDetails
+            formData={formData}
+            onSubmit={handleSubmit}
+            onBack={() => setPreviewMode(false)}
+          />
         ) : (
           <Box>
             {getStepContent(activeStep, formData, setFormData, setStepValid)}
@@ -194,7 +204,7 @@ export default function StepperForm() {
               </Button>
 
               <Button variant="contained" sx={nextButtonStyle} onClick={handleNext}>
-                {activeStep === steps.length - 1 ? "Finish" : "Next"}
+                {activeStep === steps.length - 1 ? "Preview And Submit" : "Next"}
               </Button>
             </Box>
           </Box>

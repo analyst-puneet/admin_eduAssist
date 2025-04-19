@@ -159,7 +159,12 @@ const DropzoneBox = ({ label, onDrop, file, error, helperText }) => {
   );
 };
 
-export default function AddStaff3({ formData, setFormData, onValidationChange }) {
+export default function AddStaff3({
+  formData,
+  setFormData,
+  onValidationChange,
+  triggerValidation
+}) {
   const [files, setFiles] = useState(
     formData.files || {
       resume: null,
@@ -174,18 +179,23 @@ export default function AddStaff3({ formData, setFormData, onValidationChange })
     joiningLetter: false
   });
 
+  const [showErrors, setShowErrors] = useState(false);
+
   // Validate form and notify parent
-  const validateForm = () => {
+  const validateForm = (show = false) => {
     const newErrors = {
       resume: !files.resume,
       joiningLetter: !files.joiningLetter
     };
 
-    setErrors(newErrors);
+    if (show) setErrors(newErrors);
 
-    const isValid = !Object.values(newErrors).some((error) => error);
-    onValidationChange(isValid);
-    return isValid;
+    const isFormValid = !Object.values(newErrors).some((error) => error);
+    if (onValidationChange) {
+      onValidationChange(isFormValid);
+    }
+
+    return isFormValid;
   };
 
   // Update formData whenever files change
@@ -196,6 +206,13 @@ export default function AddStaff3({ formData, setFormData, onValidationChange })
     }));
     validateForm();
   }, [files]);
+
+  useEffect(() => {
+    if (triggerValidation) {
+      setShowErrors(true);
+      validateForm(true);
+    }
+  }, [triggerValidation]);
 
   const handleFileUpload = (field) => (acceptedFiles) => {
     const file = acceptedFiles[0];
