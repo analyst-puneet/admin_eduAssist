@@ -94,6 +94,38 @@ const LeaveType = () => {
     handleMenuClose();
   };
 
+  // 🔹 Dummy Data
+  const data = [
+    {
+      code: "LT001",
+      name: "Casual Leave",
+      balance: "Yes",
+      sequence: "1",
+      status: "Active"
+    },
+    {
+      code: "LT002",
+      name: "Sick Leave",
+      balance: "No",
+      sequence: "2",
+      status: "Inactive"
+    },
+    {
+      code: "LT003",
+      name: "Paid Leave",
+      balance: "Yes",
+      sequence: "3",
+      status: "Active"
+    }
+  ];
+
+  // 🔍 Search Filter
+  const filteredData = data.filter(
+    (item) =>
+      item.code.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      item.name.toLowerCase().includes(searchQuery.toLowerCase())
+  );
+
   return (
     <Box p={4}>
       <Breadcrumbs />
@@ -103,7 +135,7 @@ const LeaveType = () => {
         <Button
           variant="contained"
           color="primary"
-         
+          onClick={() => navigate("/leave-master/type/create")}
         >
           Add Leave Type
         </Button>
@@ -116,6 +148,20 @@ const LeaveType = () => {
           variant="outlined"
           value={searchQuery}
           onChange={handleSearchChange}
+          sx={{
+            borderColor: isDarkMode ? "white" : "grey.500",
+            "& .MuiOutlinedInput-notchedOutline": {
+              borderColor: isDarkMode ? "white" : "grey.500"
+            },
+            "&:hover .MuiOutlinedInput-notchedOutline": {
+              borderColor: isDarkMode ? "white" : "grey.700"
+            },
+            "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
+              borderColor: isDarkMode ? "white" : "primary.main"
+            },
+        
+            }
+          }
         />
       </Box>
 
@@ -144,14 +190,41 @@ const LeaveType = () => {
             </TableRow>
           </TableHead>
           <TableBody>
-            {/* Table rows will be rendered here */}
+            {filteredData
+              .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
+              .map((row, index) => (
+                <TableRow key={index}>
+                  <TableCell>{row.code}</TableCell>
+                  <TableCell>{row.name}</TableCell>
+                  <TableCell>
+                    <Chip
+                      label={row.balance}
+                      color={row.balance === "Yes" ? "success" : "default"}
+                      size="small"
+                    />
+                  </TableCell>
+                  <TableCell>{row.sequence}</TableCell>
+                  <TableCell>
+                    <Chip
+                      label={row.status}
+                      color={row.status === "Active" ? "success" : "default"}
+                      size="small"
+                    />
+                  </TableCell>
+                  <TableCell>
+                    <IconButton onClick={(e) => handleMenuOpen(e, row)}>
+                      <MoreVertIcon />
+                    </IconButton>
+                  </TableCell>
+                </TableRow>
+              ))}
           </TableBody>
         </Table>
 
         <TablePagination
           rowsPerPageOptions={[5, 10, 25]}
           component="div"
-          count={0}
+          count={filteredData.length}
           rowsPerPage={rowsPerPage}
           page={page}
           onPageChange={handleChangePage}
@@ -159,11 +232,7 @@ const LeaveType = () => {
         />
       </TableContainer>
 
-      <Menu
-        anchorEl={anchorEl}
-        open={Boolean(anchorEl)}
-        onClose={handleMenuClose}
-      >
+      <Menu anchorEl={anchorEl} open={Boolean(anchorEl)} onClose={handleMenuClose}>
         <MenuItem onClick={handleEdit}>Edit</MenuItem>
         <MenuItem onClick={handleView}>View</MenuItem>
       </Menu>

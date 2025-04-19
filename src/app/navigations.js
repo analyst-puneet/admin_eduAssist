@@ -38,7 +38,7 @@ const navigations = [
     icon: "support_agent",
     children: [
       { name: "Leave Type", path: "/leave-master/type", iconText: "LT" },
-      { name: "Attendance", path: "/student/attendance", iconText: "AT" }
+      { name: "Leave Group", path: "/leave-master/leave-group", iconText: "LG" }
     ]
   },
   {
