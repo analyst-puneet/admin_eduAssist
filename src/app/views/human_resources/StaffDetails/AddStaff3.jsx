@@ -1,12 +1,14 @@
-import React, { useState, useCallback } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { useDropzone } from "react-dropzone";
-import { Box, Grid, Typography, Paper, Button, Modal, IconButton } from "@mui/material";
-import CloudUploadIcon from "@mui/icons-material/CloudUpload";
-import InsertDriveFileIcon from "@mui/icons-material/InsertDriveFile";
-import PictureAsPdfIcon from "@mui/icons-material/PictureAsPdf";
-import ImageIcon from "@mui/icons-material/Image";
-import DescriptionIcon from "@mui/icons-material/Description";
-import CloseIcon from "@mui/icons-material/Close";
+import { Box, Grid, Typography, Paper, Button, Modal, IconButton, useTheme } from "@mui/material";
+import {
+  CloudUpload,
+  InsertDriveFile,
+  PictureAsPdf,
+  Image,
+  Description,
+  Close
+} from "@mui/icons-material";
 
 const FilePreview = ({ file, onClose }) => {
   const getPreviewContent = () => {
@@ -31,7 +33,7 @@ const FilePreview = ({ file, onClose }) => {
     } else {
       return (
         <Box textAlign="center">
-          <DescriptionIcon style={{ fontSize: 100 }} />
+          <Description style={{ fontSize: 100 }} />
           <Typography variant="h6">No preview available</Typography>
           <Typography>File: {file.name}</Typography>
         </Box>
@@ -59,7 +61,7 @@ const FilePreview = ({ file, onClose }) => {
         onClick={onClose}
         sx={{ position: "absolute", right: 8, top: 8, color: "grey.500" }}
       >
-        <CloseIcon />
+        <Close />
       </IconButton>
       {getPreviewContent()}
       <Box mt={2} textAlign="center">
@@ -71,8 +73,9 @@ const FilePreview = ({ file, onClose }) => {
   );
 };
 
-const DropzoneBox = ({ label, onDrop, file }) => {
+const DropzoneBox = ({ label, onDrop, file, error, helperText }) => {
   const [previewOpen, setPreviewOpen] = useState(false);
+  const theme = useTheme();
 
   const { getRootProps, getInputProps, isDragActive } = useDropzone({
     onDrop,
@@ -80,20 +83,20 @@ const DropzoneBox = ({ label, onDrop, file }) => {
   });
 
   const getFileIcon = () => {
-    if (!file) return <CloudUploadIcon />;
+    if (!file) return <CloudUpload />;
 
     if (file.type.startsWith("image/")) {
-      return <ImageIcon />;
+      return <Image />;
     } else if (file.type === "application/pdf") {
-      return <PictureAsPdfIcon />;
+      return <PictureAsPdf />;
     } else if (
       file.type.includes("document") ||
       file.name.endsWith(".docx") ||
       file.name.endsWith(".doc")
     ) {
-      return <DescriptionIcon />;
+      return <Description />;
     } else {
-      return <InsertDriveFileIcon />;
+      return <InsertDriveFile />;
     }
   };
 
@@ -105,7 +108,7 @@ const DropzoneBox = ({ label, onDrop, file }) => {
       <Box
         {...getRootProps()}
         sx={{
-          border: "2px dashed #ccc",
+          border: `2px dashed ${error ? theme.palette.error.main : theme.palette.grey[400]}`,
           p: 2,
           textAlign: "center",
           cursor: "pointer",
@@ -114,7 +117,8 @@ const DropzoneBox = ({ label, onDrop, file }) => {
           alignItems: "center",
           justifyContent: "center",
           gap: 1,
-          flexDirection: "column"
+          flexDirection: "column",
+          backgroundColor: error ? theme.palette.error.light + "20" : undefined
         }}
       >
         <input {...getInputProps()} />
@@ -142,6 +146,11 @@ const DropzoneBox = ({ label, onDrop, file }) => {
           </>
         )}
       </Box>
+      {error && (
+        <Typography variant="caption" color="error" sx={{ mt: 1, display: "block" }}>
+          {helperText}
+        </Typography>
+      )}
 
       <Modal open={previewOpen} onClose={() => setPreviewOpen(false)}>
         <FilePreview file={file} onClose={() => setPreviewOpen(false)} />
@@ -150,7 +159,7 @@ const DropzoneBox = ({ label, onDrop, file }) => {
   );
 };
 
-const Addstaff3 = ({ formData, setFormData }) => {
+export default function AddStaff3({ formData, setFormData, onValidationChange }) {
   const [files, setFiles] = useState(
     formData.files || {
       resume: null,
@@ -160,20 +169,43 @@ const Addstaff3 = ({ formData, setFormData }) => {
     }
   );
 
+  const [errors, setErrors] = useState({
+    resume: false,
+    joiningLetter: false
+  });
+
+  // Validate form and notify parent
+  const validateForm = () => {
+    const newErrors = {
+      resume: !files.resume,
+      joiningLetter: !files.joiningLetter
+    };
+
+    setErrors(newErrors);
+
+    const isValid = !Object.values(newErrors).some((error) => error);
+    onValidationChange(isValid);
+    return isValid;
+  };
+
+  // Update formData whenever files change
   useEffect(() => {
     setFormData((prev) => ({
       ...prev,
       files
     }));
+    validateForm();
   }, [files]);
 
   const handleFileUpload = (field) => (acceptedFiles) => {
     const file = acceptedFiles[0];
-    console.log(`${field} uploaded:`, file);
     setFiles((prev) => ({
       ...prev,
       [field]: file
     }));
+    if (file && errors[field]) {
+      setErrors((prev) => ({ ...prev, [field]: false }));
+    }
   };
 
   return (
@@ -184,25 +216,33 @@ const Addstaff3 = ({ formData, setFormData }) => {
 
       <Grid container spacing={2}>
         <Grid item xs={12} md={6}>
-          <DropzoneBox label="1. Resume" onDrop={handleFileUpload("resume")} file={files.resume} />
-        </Grid>
-        <Grid item xs={12} md={6}>
           <DropzoneBox
-            label="2. Joining Letter"
-            onDrop={handleFileUpload("joiningLetter")}
-            file={files.joiningLetter}
+            label="1. Resume (Required)"
+            onDrop={handleFileUpload("resume")}
+            file={files.resume}
+            error={errors.resume}
+            helperText={errors.resume ? "Resume is required" : ""}
           />
         </Grid>
         <Grid item xs={12} md={6}>
           <DropzoneBox
-            label="3. Resignation Letter"
+            label="2. Joining Letter (Required)"
+            onDrop={handleFileUpload("joiningLetter")}
+            file={files.joiningLetter}
+            error={errors.joiningLetter}
+            helperText={errors.joiningLetter ? "Joining letter is required" : ""}
+          />
+        </Grid>
+        <Grid item xs={12} md={6}>
+          <DropzoneBox
+            label="3. Resignation Letter (Optional)"
             onDrop={handleFileUpload("resignationLetter")}
             file={files.resignationLetter}
           />
         </Grid>
         <Grid item xs={12} md={6}>
           <DropzoneBox
-            label="4. Other Documents"
+            label="4. Other Documents (Optional)"
             onDrop={handleFileUpload("otherDocuments")}
             file={files.otherDocuments}
           />
@@ -210,6 +250,4 @@ const Addstaff3 = ({ formData, setFormData }) => {
       </Grid>
     </Box>
   );
-};
-
-export default Addstaff3;
+}

@@ -14,9 +14,8 @@ import {
   Paper
 } from "@mui/material";
 import { useNavigate } from "react-router-dom";
-import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 
-export default function AddStaff2({ formData, setFormData }) {
+export default function AddStaff2({ formData, setFormData, onValidationChange }) {
   const navigate = useNavigate();
   const theme = useTheme();
   const isDarkMode = theme.palette.mode === "dark";
@@ -52,6 +51,42 @@ export default function AddStaff2({ formData, setFormData }) {
     }
   );
 
+  // Validation states
+  const [errors, setErrors] = useState({
+    epfNo: false,
+    basicSalary: false,
+    contractType: false,
+    workShift: false,
+    workLocation: false,
+    accountHolderName: false,
+    accountNumber: false,
+    bankName: false,
+    ifscCode: false,
+    accountType: false
+  });
+
+  // Validate form and notify parent
+  const validateForm = () => {
+    const newErrors = {
+      epfNo: !payrollInfo.epfNo,
+      basicSalary: !payrollInfo.basicSalary,
+      contractType: !payrollInfo.contractType,
+      workShift: !payrollInfo.workShift,
+      workLocation: !payrollInfo.workLocation,
+      accountHolderName: !bankInfo.accountHolderName,
+      accountNumber: !bankInfo.accountNumber,
+      bankName: !bankInfo.bankName,
+      ifscCode: !bankInfo.ifscCode,
+      accountType: !bankInfo.accountType
+    };
+
+    setErrors(newErrors);
+
+    const isValid = !Object.values(newErrors).some((error) => error);
+    onValidationChange(isValid);
+    return isValid;
+  };
+
   // Update formData whenever any field changes
   useEffect(() => {
     setFormData((prev) => ({
@@ -62,7 +97,12 @@ export default function AddStaff2({ formData, setFormData }) {
     }));
   }, [payrollInfo, leaveAllocation, bankInfo]);
 
-  // Ultra-compact input styling
+  // Validate on mount and when dependencies change
+  useEffect(() => {
+    validateForm();
+  }, [payrollInfo, bankInfo]);
+
+  // Input styling with error state
   const inputStyle = {
     "& .MuiInputBase-root": {
       height: "38px",
@@ -75,17 +115,15 @@ export default function AddStaff2({ formData, setFormData }) {
         transform: "translate(14px, -9px) scale(0.75)"
       }
     },
-    borderColor: isDarkMode ? "white" : "grey.500",
-    "& .MuiOutlinedInput-notchedOutline": {
-      borderColor: isDarkMode ? "white" : "grey.500"
-    },
-    "&:hover .MuiOutlinedInput-notchedOutline": {
-      borderColor: isDarkMode ? "white" : "grey.700"
-    },
-    "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
-      borderColor: isDarkMode ? "white" : "primary.main"
-    },
     margin: "0.25rem 0"
+  };
+
+  const errorStyle = {
+    ...inputStyle,
+    "& .MuiOutlinedInput-notchedOutline": {
+      borderColor: "error.main",
+      borderWidth: "2px"
+    }
   };
 
   const handlePayrollChange = (field, value) => {
@@ -93,6 +131,9 @@ export default function AddStaff2({ formData, setFormData }) {
       ...prev,
       [field]: value
     }));
+    if (value && errors[field]) {
+      setErrors((prev) => ({ ...prev, [field]: false }));
+    }
   };
 
   const handleLeaveChange = (field, value) => {
@@ -107,6 +148,18 @@ export default function AddStaff2({ formData, setFormData }) {
       ...prev,
       [field]: value
     }));
+    if (value && errors[field]) {
+      setErrors((prev) => ({ ...prev, [field]: false }));
+    }
+  };
+
+  // Validate field on blur
+  const handleFieldBlur = (field) => {
+    if (field in payrollInfo) {
+      setErrors((prev) => ({ ...prev, [field]: !payrollInfo[field] }));
+    } else if (field in bankInfo) {
+      setErrors((prev) => ({ ...prev, [field]: !bankInfo[field] }));
+    }
   };
 
   return (
@@ -157,28 +210,42 @@ export default function AddStaff2({ formData, setFormData }) {
             <TextField
               label="EPF No."
               fullWidth
-              sx={inputStyle}
+              required
+              sx={errors.epfNo ? errorStyle : inputStyle}
               value={payrollInfo.epfNo}
               onChange={(e) => handlePayrollChange("epfNo", e.target.value)}
+              onBlur={() => handleFieldBlur("epfNo")}
+              error={errors.epfNo}
+              helperText={errors.epfNo ? "EPF number is required" : ""}
             />
           </Grid>
           <Grid item xs={12} sm={4}>
             <TextField
               label="Basic Salary"
               fullWidth
+              required
               type="number"
-              sx={inputStyle}
+              sx={errors.basicSalary ? errorStyle : inputStyle}
               value={payrollInfo.basicSalary}
               onChange={(e) => handlePayrollChange("basicSalary", e.target.value)}
+              onBlur={() => handleFieldBlur("basicSalary")}
+              error={errors.basicSalary}
+              helperText={errors.basicSalary ? "Basic salary is required" : ""}
             />
           </Grid>
           <Grid item xs={12} sm={4}>
-            <FormControl fullWidth sx={inputStyle}>
+            <FormControl
+              fullWidth
+              required
+              sx={errors.contractType ? errorStyle : inputStyle}
+              error={errors.contractType}
+            >
               <InputLabel>Contract Type</InputLabel>
               <Select
                 value={payrollInfo.contractType}
                 label="Contract Type"
                 onChange={(e) => handlePayrollChange("contractType", e.target.value)}
+                onBlur={() => handleFieldBlur("contractType")}
               >
                 <MenuItem value="Full-Time" sx={{ fontSize: "0.875rem" }}>
                   Full-Time
@@ -190,24 +257,37 @@ export default function AddStaff2({ formData, setFormData }) {
                   Temporary
                 </MenuItem>
               </Select>
+              {errors.contractType && (
+                <Typography variant="caption" color="error" sx={{ ml: 2 }}>
+                  Contract type is required
+                </Typography>
+              )}
             </FormControl>
           </Grid>
           <Grid item xs={12} sm={6}>
             <TextField
               label="Work Shift"
               fullWidth
-              sx={inputStyle}
+              required
+              sx={errors.workShift ? errorStyle : inputStyle}
               value={payrollInfo.workShift}
               onChange={(e) => handlePayrollChange("workShift", e.target.value)}
+              onBlur={() => handleFieldBlur("workShift")}
+              error={errors.workShift}
+              helperText={errors.workShift ? "Work shift is required" : ""}
             />
           </Grid>
           <Grid item xs={12} sm={6}>
             <TextField
               label="Work Location"
               fullWidth
-              sx={inputStyle}
+              required
+              sx={errors.workLocation ? errorStyle : inputStyle}
               value={payrollInfo.workLocation}
               onChange={(e) => handlePayrollChange("workLocation", e.target.value)}
+              onBlur={() => handleFieldBlur("workLocation")}
+              error={errors.workLocation}
+              helperText={errors.workLocation ? "Work location is required" : ""}
             />
           </Grid>
         </Grid>
@@ -306,37 +386,53 @@ export default function AddStaff2({ formData, setFormData }) {
             <TextField
               label="Account Holder Name"
               fullWidth
-              sx={inputStyle}
+              required
+              sx={errors.accountHolderName ? errorStyle : inputStyle}
               value={bankInfo.accountHolderName}
               onChange={(e) => handleBankInfoChange("accountHolderName", e.target.value)}
+              onBlur={() => handleFieldBlur("accountHolderName")}
+              error={errors.accountHolderName}
+              helperText={errors.accountHolderName ? "Account holder name is required" : ""}
             />
           </Grid>
           <Grid item xs={12} sm={4}>
             <TextField
               label="Account Number"
               fullWidth
+              required
               type="number"
-              sx={inputStyle}
+              sx={errors.accountNumber ? errorStyle : inputStyle}
               value={bankInfo.accountNumber}
               onChange={(e) => handleBankInfoChange("accountNumber", e.target.value)}
+              onBlur={() => handleFieldBlur("accountNumber")}
+              error={errors.accountNumber}
+              helperText={errors.accountNumber ? "Account number is required" : ""}
             />
           </Grid>
           <Grid item xs={12} sm={4}>
             <TextField
               label="Bank Name"
               fullWidth
-              sx={inputStyle}
+              required
+              sx={errors.bankName ? errorStyle : inputStyle}
               value={bankInfo.bankName}
               onChange={(e) => handleBankInfoChange("bankName", e.target.value)}
+              onBlur={() => handleFieldBlur("bankName")}
+              error={errors.bankName}
+              helperText={errors.bankName ? "Bank name is required" : ""}
             />
           </Grid>
           <Grid item xs={12} sm={4}>
             <TextField
               label="IFSC Code"
               fullWidth
-              sx={inputStyle}
+              required
+              sx={errors.ifscCode ? errorStyle : inputStyle}
               value={bankInfo.ifscCode}
               onChange={(e) => handleBankInfoChange("ifscCode", e.target.value)}
+              onBlur={() => handleFieldBlur("ifscCode")}
+              error={errors.ifscCode}
+              helperText={errors.ifscCode ? "IFSC code is required" : ""}
             />
           </Grid>
           <Grid item xs={12} sm={4}>
@@ -349,12 +445,18 @@ export default function AddStaff2({ formData, setFormData }) {
             />
           </Grid>
           <Grid item xs={12} sm={4}>
-            <FormControl fullWidth sx={inputStyle}>
+            <FormControl
+              fullWidth
+              required
+              sx={errors.accountType ? errorStyle : inputStyle}
+              error={errors.accountType}
+            >
               <InputLabel>Account Type</InputLabel>
               <Select
                 value={bankInfo.accountType}
                 label="Account Type"
                 onChange={(e) => handleBankInfoChange("accountType", e.target.value)}
+                onBlur={() => handleFieldBlur("accountType")}
               >
                 <MenuItem value="Savings" sx={{ fontSize: "0.875rem" }}>
                   Savings
@@ -366,6 +468,11 @@ export default function AddStaff2({ formData, setFormData }) {
                   Salary
                 </MenuItem>
               </Select>
+              {errors.accountType && (
+                <Typography variant="caption" color="error" sx={{ ml: 2 }}>
+                  Account type is required
+                </Typography>
+              )}
             </FormControl>
           </Grid>
         </Grid>

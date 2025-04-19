@@ -24,7 +24,7 @@ import AddPhotoAlternateIcon from "@mui/icons-material/AddPhotoAlternate";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import BackButton from "app/views/material-kit/buttons/BackButton";
 
-export default function Addstaff1({ formData, setFormData }) {
+export default function Addstaff1({ formData, setFormData, onValidationChange }) {
   const navigate = useNavigate();
   const theme = useTheme();
   const isDarkMode = theme.palette.mode === "dark";
@@ -64,6 +64,37 @@ export default function Addstaff1({ formData, setFormData }) {
     }
   );
 
+  // Validation states
+  const [errors, setErrors] = useState({
+    staffId: false,
+    role: false,
+    designation: false,
+    firstName: false,
+    gender: false,
+    dob: false,
+    phone: false,
+    emergencyContact: false,
+    email: false,
+    address: false,
+    permanentAddress: false,
+    panCard: false,
+    aadhaarCard: false,
+    experiences: []
+  });
+
+  // Initialize experiences errors array
+  useEffect(() => {
+    setErrors((prev) => ({
+      ...prev,
+      experiences: experiences.map(() => ({
+        company: false,
+        position: false,
+        from: false,
+        to: false
+      }))
+    }));
+  }, [experiences.length]);
+
   // Update formData whenever any field changes
   useEffect(() => {
     setFormData((prev) => ({
@@ -90,6 +121,57 @@ export default function Addstaff1({ formData, setFormData }) {
     documents
   ]);
 
+  // Validate all required fields
+  const validateForm = () => {
+    const newErrors = {
+      staffId: !basicInfo.staffId,
+      role: !role,
+      designation: !basicInfo.designation,
+      firstName: !basicInfo.firstName,
+      gender: !basicInfo.gender,
+      dob: !basicInfo.dob,
+      phone: !basicInfo.phone,
+      emergencyContact: !basicInfo.emergencyContact,
+      email: !basicInfo.email,
+      address: !address,
+      permanentAddress: !permanentAddress,
+      panCard: !documents.panCard,
+      aadhaarCard: !documents.aadhaarCard,
+      experiences: experiences.map((exp) => ({
+        company: !exp.company,
+        position: !exp.position,
+        from: !exp.from,
+        to: !exp.to
+      }))
+    };
+
+    setErrors(newErrors);
+
+    // Check if form is valid
+    const isFormValid =
+      !newErrors.staffId &&
+      !newErrors.role &&
+      !newErrors.designation &&
+      !newErrors.firstName &&
+      !newErrors.gender &&
+      !newErrors.dob &&
+      !newErrors.phone &&
+      !newErrors.emergencyContact &&
+      !newErrors.email &&
+      !newErrors.address &&
+      !newErrors.permanentAddress &&
+      !newErrors.panCard &&
+      !newErrors.aadhaarCard &&
+      newErrors.experiences.every((exp) => !exp.company && !exp.position && !exp.from && !exp.to);
+
+    // Notify parent component about validation status
+    if (onValidationChange) {
+      onValidationChange(isFormValid);
+    }
+
+    return isFormValid;
+  };
+
   // Set current date as default for date of joining
   useEffect(() => {
     if (!joiningDate) {
@@ -98,6 +180,11 @@ export default function Addstaff1({ formData, setFormData }) {
       setJoiningDate(formattedDate);
     }
   }, []);
+
+  // Auto validate on any data change
+  useEffect(() => {
+    validateForm();
+  }, [basicInfo, role, address, permanentAddress, documents, experiences]);
 
   // Ultra-compact input styling
   const inputStyle = {
@@ -125,6 +212,14 @@ export default function Addstaff1({ formData, setFormData }) {
     margin: "0.25rem 0"
   };
 
+  const errorStyle = {
+    ...inputStyle,
+    "& .MuiOutlinedInput-notchedOutline": {
+      borderColor: "error.main",
+      borderWidth: "2px"
+    }
+  };
+
   const handleImageChange = (e) => {
     const file = e.target.files[0];
     if (file && file.type.startsWith("image/")) {
@@ -134,6 +229,7 @@ export default function Addstaff1({ formData, setFormData }) {
 
   const handleRoleChange = (e) => {
     setRole(e.target.value);
+    setErrors((prev) => ({ ...prev, role: false }));
   };
 
   const handleBackClick = () => {
@@ -146,13 +242,16 @@ export default function Addstaff1({ formData, setFormData }) {
 
   const handleAddressChange = (e) => {
     setAddress(e.target.value);
+    setErrors((prev) => ({ ...prev, address: false }));
     if (sameAsAddress) {
       setPermanentAddress(e.target.value);
+      setErrors((prev) => ({ ...prev, permanentAddress: false }));
     }
   };
 
   const handlePermanentAddressChange = (e) => {
     setPermanentAddress(e.target.value);
+    setErrors((prev) => ({ ...prev, permanentAddress: false }));
     if (sameAsAddress) {
       setSameAsAddress(false);
     }
@@ -163,6 +262,7 @@ export default function Addstaff1({ formData, setFormData }) {
     setSameAsAddress(checked);
     if (checked) {
       setPermanentAddress(address);
+      setErrors((prev) => ({ ...prev, permanentAddress: false }));
     }
   };
 
@@ -171,12 +271,26 @@ export default function Addstaff1({ formData, setFormData }) {
       ...prev,
       [field]: value
     }));
+
+    // Clear error when field is filled
+    if (value && errors[field]) {
+      setErrors((prev) => ({ ...prev, [field]: false }));
+    }
   };
 
   const handleExperienceChange = (index, field, value) => {
     const updatedExperiences = [...experiences];
     updatedExperiences[index][field] = value;
     setExperiences(updatedExperiences);
+
+    // Clear error when field is filled
+    if (value && errors.experiences[index]?.[field]) {
+      setErrors((prev) => {
+        const newExperiences = [...prev.experiences];
+        newExperiences[index] = { ...newExperiences[index], [field]: false };
+        return { ...prev, experiences: newExperiences };
+      });
+    }
   };
 
   const addExperience = () => {
@@ -184,12 +298,28 @@ export default function Addstaff1({ formData, setFormData }) {
       ...experiences,
       { company: "", position: "", from: "", to: "", description: "" }
     ]);
+
+    // Add new experience error object
+    setErrors((prev) => ({
+      ...prev,
+      experiences: [
+        ...prev.experiences,
+        { company: false, position: false, from: false, to: false }
+      ]
+    }));
   };
 
   const removeExperience = (index) => {
     const updatedExperiences = [...experiences];
     updatedExperiences.splice(index, 1);
     setExperiences(updatedExperiences);
+
+    // Remove corresponding error object
+    setErrors((prev) => {
+      const newExperiences = [...prev.experiences];
+      newExperiences.splice(index, 1);
+      return { ...prev, experiences: newExperiences };
+    });
   };
 
   const handleDocumentChange = (field, value) => {
@@ -197,6 +327,26 @@ export default function Addstaff1({ formData, setFormData }) {
       ...documents,
       [field]: value
     });
+
+    // Clear error when field is filled
+    if (value && errors[field]) {
+      setErrors((prev) => ({ ...prev, [field]: false }));
+    }
+  };
+
+  // Validate field on blur
+  const handleFieldBlur = (field) => {
+    if (field === "role") {
+      setErrors((prev) => ({ ...prev, role: !role }));
+    } else if (field in basicInfo) {
+      setErrors((prev) => ({ ...prev, [field]: !basicInfo[field] }));
+    } else if (field in documents) {
+      setErrors((prev) => ({ ...prev, [field]: !documents[field] }));
+    } else if (field === "address") {
+      setErrors((prev) => ({ ...prev, address: !address }));
+    } else if (field === "permanentAddress") {
+      setErrors((prev) => ({ ...prev, permanentAddress: !permanentAddress }));
+    }
   };
 
   return (
@@ -232,19 +382,28 @@ export default function Addstaff1({ formData, setFormData }) {
               label="Staff ID"
               fullWidth
               required
-              sx={inputStyle}
+              sx={errors.staffId ? errorStyle : inputStyle}
               value={basicInfo.staffId}
               onChange={(e) => handleBasicInfoChange("staffId", e.target.value)}
+              onBlur={() => handleFieldBlur("staffId")}
+              error={errors.staffId}
+              helperText={errors.staffId ? "Staff ID is required" : ""}
             />
           </Grid>
           <Grid item xs={12} sm={4}>
-            <FormControl fullWidth required sx={inputStyle}>
+            <FormControl
+              fullWidth
+              required
+              sx={errors.role ? errorStyle : inputStyle}
+              error={errors.role}
+            >
               <InputLabel id="role-label">Role</InputLabel>
               <Select
                 labelId="role-label"
                 value={role}
                 label="Role"
                 onChange={handleRoleChange}
+                onBlur={() => handleFieldBlur("role")}
                 MenuProps={{
                   PaperProps: {
                     sx: {
@@ -267,15 +426,26 @@ export default function Addstaff1({ formData, setFormData }) {
                   Librarian
                 </MenuItem>
               </Select>
+              {errors.role && (
+                <Typography variant="caption" color="error" sx={{ ml: 2 }}>
+                  Role is required
+                </Typography>
+              )}
             </FormControl>
           </Grid>
           <Grid item xs={12} sm={4}>
-            <FormControl fullWidth required sx={inputStyle}>
+            <FormControl
+              fullWidth
+              required
+              sx={errors.designation ? errorStyle : inputStyle}
+              error={errors.designation}
+            >
               <InputLabel>Designation</InputLabel>
               <Select
                 value={basicInfo.designation}
                 label="Designation"
                 onChange={(e) => handleBasicInfoChange("designation", e.target.value)}
+                onBlur={() => handleFieldBlur("designation")}
               >
                 <MenuItem value="Professor" sx={{ fontSize: "0.875rem" }}>
                   Professor
@@ -284,6 +454,11 @@ export default function Addstaff1({ formData, setFormData }) {
                   Lecturer
                 </MenuItem>
               </Select>
+              {errors.designation && (
+                <Typography variant="caption" color="error" sx={{ ml: 2 }}>
+                  Designation is required
+                </Typography>
+              )}
             </FormControl>
           </Grid>
 
@@ -293,9 +468,12 @@ export default function Addstaff1({ formData, setFormData }) {
               label="First Name"
               fullWidth
               required
-              sx={inputStyle}
+              sx={errors.firstName ? errorStyle : inputStyle}
               value={basicInfo.firstName}
               onChange={(e) => handleBasicInfoChange("firstName", e.target.value)}
+              onBlur={() => handleFieldBlur("firstName")}
+              error={errors.firstName}
+              helperText={errors.firstName ? "First name is required" : ""}
             />
           </Grid>
           <Grid item xs={12} sm={4}>
@@ -308,12 +486,18 @@ export default function Addstaff1({ formData, setFormData }) {
             />
           </Grid>
           <Grid item xs={12} sm={4}>
-            <FormControl fullWidth required sx={inputStyle}>
+            <FormControl
+              fullWidth
+              required
+              sx={errors.gender ? errorStyle : inputStyle}
+              error={errors.gender}
+            >
               <InputLabel>Gender</InputLabel>
               <Select
                 value={basicInfo.gender}
                 label="Gender"
                 onChange={(e) => handleBasicInfoChange("gender", e.target.value)}
+                onBlur={() => handleFieldBlur("gender")}
               >
                 <MenuItem value="Male" sx={{ fontSize: "0.875rem" }}>
                   Male
@@ -325,6 +509,11 @@ export default function Addstaff1({ formData, setFormData }) {
                   Other
                 </MenuItem>
               </Select>
+              {errors.gender && (
+                <Typography variant="caption" color="error" sx={{ ml: 2 }}>
+                  Gender is required
+                </Typography>
+              )}
             </FormControl>
           </Grid>
 
@@ -335,9 +524,12 @@ export default function Addstaff1({ formData, setFormData }) {
               fullWidth
               InputLabelProps={{ shrink: true }}
               required
-              sx={inputStyle}
+              sx={errors.dob ? errorStyle : inputStyle}
               value={basicInfo.dob}
               onChange={(e) => handleBasicInfoChange("dob", e.target.value)}
+              onBlur={() => handleFieldBlur("dob")}
+              error={errors.dob}
+              helperText={errors.dob ? "Date of birth is required" : ""}
             />
           </Grid>
 
@@ -347,9 +539,12 @@ export default function Addstaff1({ formData, setFormData }) {
               label="Phone"
               fullWidth
               required
-              sx={inputStyle}
+              sx={errors.phone ? errorStyle : inputStyle}
               value={basicInfo.phone}
               onChange={(e) => handleBasicInfoChange("phone", e.target.value)}
+              onBlur={() => handleFieldBlur("phone")}
+              error={errors.phone}
+              helperText={errors.phone ? "Phone number is required" : ""}
             />
           </Grid>
           <Grid item xs={12} sm={4}>
@@ -357,9 +552,12 @@ export default function Addstaff1({ formData, setFormData }) {
               label="Emergency Contact"
               fullWidth
               required
-              sx={inputStyle}
+              sx={errors.emergencyContact ? errorStyle : inputStyle}
               value={basicInfo.emergencyContact}
               onChange={(e) => handleBasicInfoChange("emergencyContact", e.target.value)}
+              onBlur={() => handleFieldBlur("emergencyContact")}
+              error={errors.emergencyContact}
+              helperText={errors.emergencyContact ? "Emergency contact is required" : ""}
             />
           </Grid>
           {/* Row 3 */}
@@ -368,9 +566,12 @@ export default function Addstaff1({ formData, setFormData }) {
               label="Email (Login Username)"
               fullWidth
               required
-              sx={inputStyle}
+              sx={errors.email ? errorStyle : inputStyle}
               value={basicInfo.email}
               onChange={(e) => handleBasicInfoChange("email", e.target.value)}
+              onBlur={() => handleFieldBlur("email")}
+              error={errors.email}
+              helperText={errors.email ? "Email is required" : ""}
             />
           </Grid>
           <Grid item xs={12} sm={4}>
@@ -532,8 +733,11 @@ export default function Addstaff1({ formData, setFormData }) {
               rows={2}
               value={address}
               onChange={handleAddressChange}
+              onBlur={() => handleFieldBlur("address")}
+              error={errors.address}
+              helperText={errors.address ? "Current address is required" : ""}
               sx={{
-                ...inputStyle,
+                ...(errors.address ? errorStyle : inputStyle),
                 "& .MuiInputBase-root": {
                   height: "auto",
                   minHeight: "80px"
@@ -550,8 +754,11 @@ export default function Addstaff1({ formData, setFormData }) {
                 rows={2}
                 value={permanentAddress}
                 onChange={handlePermanentAddressChange}
+                onBlur={() => handleFieldBlur("permanentAddress")}
+                error={errors.permanentAddress}
+                helperText={errors.permanentAddress ? "Permanent address is required" : ""}
                 sx={{
-                  ...inputStyle,
+                  ...(errors.permanentAddress ? errorStyle : inputStyle),
                   "& .MuiInputBase-root": {
                     height: "auto",
                     minHeight: "80px"
@@ -596,7 +803,18 @@ export default function Addstaff1({ formData, setFormData }) {
                   required
                   value={exp.company}
                   onChange={(e) => handleExperienceChange(index, "company", e.target.value)}
-                  sx={inputStyle}
+                  onBlur={() => {
+                    if (!exp.company) {
+                      setErrors((prev) => {
+                        const newExperiences = [...prev.experiences];
+                        newExperiences[index] = { ...newExperiences[index], company: true };
+                        return { ...prev, experiences: newExperiences };
+                      });
+                    }
+                  }}
+                  sx={errors.experiences[index]?.company ? errorStyle : inputStyle}
+                  error={errors.experiences[index]?.company}
+                  helperText={errors.experiences[index]?.company ? "Company name is required" : ""}
                 />
               </Grid>
               <Grid item xs={12} sm={6}>
@@ -606,7 +824,18 @@ export default function Addstaff1({ formData, setFormData }) {
                   required
                   value={exp.position}
                   onChange={(e) => handleExperienceChange(index, "position", e.target.value)}
-                  sx={inputStyle}
+                  onBlur={() => {
+                    if (!exp.position) {
+                      setErrors((prev) => {
+                        const newExperiences = [...prev.experiences];
+                        newExperiences[index] = { ...newExperiences[index], position: true };
+                        return { ...prev, experiences: newExperiences };
+                      });
+                    }
+                  }}
+                  sx={errors.experiences[index]?.position ? errorStyle : inputStyle}
+                  error={errors.experiences[index]?.position}
+                  helperText={errors.experiences[index]?.position ? "Position is required" : ""}
                 />
               </Grid>
               <Grid item xs={12} sm={3}>
@@ -617,7 +846,18 @@ export default function Addstaff1({ formData, setFormData }) {
                   InputLabelProps={{ shrink: true }}
                   value={exp.from}
                   onChange={(e) => handleExperienceChange(index, "from", e.target.value)}
-                  sx={inputStyle}
+                  onBlur={() => {
+                    if (!exp.from) {
+                      setErrors((prev) => {
+                        const newExperiences = [...prev.experiences];
+                        newExperiences[index] = { ...newExperiences[index], from: true };
+                        return { ...prev, experiences: newExperiences };
+                      });
+                    }
+                  }}
+                  sx={errors.experiences[index]?.from ? errorStyle : inputStyle}
+                  error={errors.experiences[index]?.from}
+                  helperText={errors.experiences[index]?.from ? "From date is required" : ""}
                 />
               </Grid>
               <Grid item xs={12} sm={3}>
@@ -628,7 +868,18 @@ export default function Addstaff1({ formData, setFormData }) {
                   InputLabelProps={{ shrink: true }}
                   value={exp.to}
                   onChange={(e) => handleExperienceChange(index, "to", e.target.value)}
-                  sx={inputStyle}
+                  onBlur={() => {
+                    if (!exp.to) {
+                      setErrors((prev) => {
+                        const newExperiences = [...prev.experiences];
+                        newExperiences[index] = { ...newExperiences[index], to: true };
+                        return { ...prev, experiences: newExperiences };
+                      });
+                    }
+                  }}
+                  sx={errors.experiences[index]?.to ? errorStyle : inputStyle}
+                  error={errors.experiences[index]?.to}
+                  helperText={errors.experiences[index]?.to ? "To date is required" : ""}
                 />
               </Grid>
               <Grid item xs={12} sm={6}>
@@ -680,7 +931,10 @@ export default function Addstaff1({ formData, setFormData }) {
               required
               value={documents.panCard}
               onChange={(e) => handleDocumentChange("panCard", e.target.value)}
-              sx={inputStyle}
+              onBlur={() => handleFieldBlur("panCard")}
+              sx={errors.panCard ? errorStyle : inputStyle}
+              error={errors.panCard}
+              helperText={errors.panCard ? "PAN card number is required" : ""}
             />
           </Grid>
           <Grid item xs={12} sm={6}>
@@ -690,7 +944,10 @@ export default function Addstaff1({ formData, setFormData }) {
               required
               value={documents.aadhaarCard}
               onChange={(e) => handleDocumentChange("aadhaarCard", e.target.value)}
-              sx={inputStyle}
+              onBlur={() => handleFieldBlur("aadhaarCard")}
+              sx={errors.aadhaarCard ? errorStyle : inputStyle}
+              error={errors.aadhaarCard}
+              helperText={errors.aadhaarCard ? "Aadhaar card number is required" : ""}
             />
           </Grid>
           <Grid item xs={12} sm={6}>
