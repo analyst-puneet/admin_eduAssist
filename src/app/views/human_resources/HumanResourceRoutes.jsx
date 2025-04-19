@@ -14,6 +14,7 @@ const MarkAttendance = Loadable(
 );
 const LeaveIndex = Loadable(lazy(() => import("app/views/human_resources/StaffLeave/LeaveIndex")));
 const ApplyLeave = Loadable(lazy(() => import("app/views/human_resources/StaffLeave/ApplyLeave")));
+const LeaveType = Loadable(lazy(() => import("app/views/human_resources/StaffLeave/LeaveType")));
 
 const humanResourceRoutes = [
   { path: "/human_resources/staff-details", element: <StaffDetails /> },
@@ -22,7 +23,8 @@ const humanResourceRoutes = [
   { path: "/human_resources/staff-attendance", element: <StaffAttendance /> },
   { path: "/human_resources/staff/mark-attendance", element: <MarkAttendance /> },
   { path: "/human_resources/staff-leave", element: <LeaveIndex /> },
-  { path: "/human_resources/staff-leave/apply", element: <ApplyLeave /> }
+  { path: "/human_resources/staff-leave/apply", element: <ApplyLeave /> },
+  { path: "leave-master/type", element: <LeaveType /> }
 ];
 
 export default humanResourceRoutes;

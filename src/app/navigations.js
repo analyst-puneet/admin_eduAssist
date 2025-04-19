@@ -18,7 +18,7 @@ const navigations = [
       {
         name: "Staff Details",
         path: "/human_resources/staff-details",
-        iconText: "VU"
+        iconText: "SD"
       },
       {
         name: "Staff Attendance",
@@ -34,19 +34,19 @@ const navigations = [
   },
 
   {
-    name: "Front Office",
+    name: "Leave Master",
     icon: "support_agent",
     children: [
-      { name: "Admission Enquiry", path: "/front-office/admission-enquiry", iconText: "AE" },
-      { name: "Visitor Book", path: "/front-office/visitor-book", iconText: "VB" }
+      { name: "Leave Type", path: "/leave-master/type", iconText: "LT" },
+      { name: "Attendance", path: "/student/attendance", iconText: "AT" }
     ]
   },
   {
-    name: "Student Information",
+    name: "Front Office",
     icon: "person",
     children: [
-      { name: "Student Details", path: "/student/details", iconText: "SD" },
-      { name: "Attendance", path: "/student/attendance", iconText: "AT" }
+      { name: "Admission Enquiry", path: "/front-office/admission-enquiry", iconText: "AE" },
+      { name: "Visitor Book", path: "/front-office/visitor-book", iconText: "VB" }
     ]
   },
   {
