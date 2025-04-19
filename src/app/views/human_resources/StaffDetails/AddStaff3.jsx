@@ -83,8 +83,8 @@ const DropzoneBox = ({ label, onDrop, file, error, helperText }) => {
   });
 
   const getFileIcon = () => {
-    if (!file) return <CloudUpload />;
-
+    if (!file || !file.type || !file.name) return <CloudUpload />;
+  
     if (file.type.startsWith("image/")) {
       return <Image />;
     } else if (file.type === "application/pdf") {
@@ -99,6 +99,7 @@ const DropzoneBox = ({ label, onDrop, file, error, helperText }) => {
       return <InsertDriveFile />;
     }
   };
+  
 
   return (
     <Paper variant="outlined" sx={{ p: 2, mb: 2 }}>

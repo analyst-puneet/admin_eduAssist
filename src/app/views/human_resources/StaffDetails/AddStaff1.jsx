@@ -16,7 +16,8 @@ import {
   Paper,
   Checkbox,
   FormControlLabel,
-  Divider
+  Divider,
+  CircularProgress
 } from "@mui/material";
 import { useNavigate } from "react-router-dom";
 import CloseIcon from "@mui/icons-material/Close";
@@ -37,10 +38,8 @@ export default function Addstaff1({
   // Initialize state from formData
   const [selectedImage, setSelectedImage] = useState(formData.selectedImage || null);
   const [role, setRole] = useState(formData.role || "");
-  const [address, setAddress] = useState(formData.address || "");
-  const [permanentAddress, setPermanentAddress] = useState(formData.permanentAddress || "");
-  const [sameAsAddress, setSameAsAddress] = useState(formData.sameAsAddress || false);
   const [joiningDate, setJoiningDate] = useState(formData.joiningDate || "");
+  const [sameAsAddress, setSameAsAddress] = useState(formData.sameAsAddress || false);
   const [basicInfo, setBasicInfo] = useState(
     formData.basicInfo || {
       staffId: "",
@@ -53,8 +52,21 @@ export default function Addstaff1({
       emergencyContact: "",
       email: "",
       fatherName: "",
+      fatherTitle: "Shri", // Default title for father
       motherName: "",
+      motherTitle: "Shrimati", // Default title for mother
       maritalStatus: ""
+    }
+  );
+  const [addressInfo, setAddressInfo] = useState(
+    formData.addressInfo || {
+      country: "",
+      state: "",
+      district: "",
+      city: "",
+      pinCode: "",
+      currentAddress: "",
+      permanentAddress: ""
     }
   );
   const [experiences, setExperiences] = useState(
@@ -69,6 +81,13 @@ export default function Addstaff1({
     }
   );
 
+  // States for API data
+  const [countries, setCountries] = useState([]);
+  const [states, setStates] = useState([]);
+  const [districts, setDistricts] = useState([]);
+  const [loadingStates, setLoadingStates] = useState(false);
+  const [loadingDistricts, setLoadingDistricts] = useState(false);
+
   // Validation states
   const [errors, setErrors] = useState({
     staffId: false,
@@ -80,11 +99,25 @@ export default function Addstaff1({
     phone: false,
     emergencyContact: false,
     email: false,
-    address: false,
+    country: false,
+    state: false,
+    district: false,
+    city: false,
+    pinCode: false,
+    currentAddress: false,
     permanentAddress: false,
     panCard: false,
     aadhaarCard: false,
-    experiences: []
+    fatherName: false,
+    motherName: false,
+    maritalStatus: false,
+    experiences: experiences.map(() => ({
+      company: false,
+      position: false,
+      from: false,
+      to: false,
+      description: false // Add description error
+    }))
   });
 
   const [showErrors, setShowErrors] = useState(false);
@@ -108,22 +141,20 @@ export default function Addstaff1({
       ...prev,
       selectedImage,
       role,
-      address,
-      permanentAddress,
-      sameAsAddress,
       joiningDate,
+      sameAsAddress,
       basicInfo,
+      addressInfo,
       experiences,
       documents
     }));
   }, [
     selectedImage,
     role,
-    address,
-    permanentAddress,
-    sameAsAddress,
     joiningDate,
+    sameAsAddress,
     basicInfo,
+    addressInfo,
     experiences,
     documents
   ]);
@@ -140,15 +171,24 @@ export default function Addstaff1({
       phone: !basicInfo.phone,
       emergencyContact: !basicInfo.emergencyContact,
       email: !basicInfo.email,
-      address: !address,
-      permanentAddress: !permanentAddress,
+      fatherName: !basicInfo.fatherName,
+      motherName: !basicInfo.motherName,
+      maritalStatus: !basicInfo.maritalStatus,
+      country: !addressInfo.country,
+      state: !addressInfo.state,
+      district: !addressInfo.district,
+      city: !addressInfo.city,
+      pinCode: !addressInfo.pinCode,
+      currentAddress: !addressInfo.currentAddress,
+      permanentAddress: !addressInfo.permanentAddress,
       panCard: !documents.panCard,
       aadhaarCard: !documents.aadhaarCard,
       experiences: experiences.map((exp) => ({
         company: !exp.company,
         position: !exp.position,
         from: !exp.from,
-        to: !exp.to
+        to: !exp.to,
+        description: !exp.description
       }))
     };
 
@@ -164,7 +204,12 @@ export default function Addstaff1({
       !newErrors.phone &&
       !newErrors.emergencyContact &&
       !newErrors.email &&
-      !newErrors.address &&
+      !newErrors.country &&
+      !newErrors.state &&
+      !newErrors.district &&
+      !newErrors.city &&
+      !newErrors.pinCode &&
+      !newErrors.currentAddress &&
       !newErrors.permanentAddress &&
       !newErrors.panCard &&
       !newErrors.aadhaarCard &&
@@ -200,7 +245,112 @@ export default function Addstaff1({
     } else {
       validateForm(false); // silent validation
     }
-  }, [basicInfo, role, address, permanentAddress, documents, experiences]);
+  }, [basicInfo, role, addressInfo, documents, experiences]);
+
+  // Fetch countries on component mount
+  useEffect(() => {
+    const fetchCountries = async () => {
+      try {
+        const response = await fetch("https://countriesnow.space/api/v0.1/countries/");
+        const data = await response.json();
+        if (!data.error) {
+          setCountries(
+            data.data.map((c) => ({
+              name: c.country,
+              code: c.iso2 || c.country.slice(0, 2).toUpperCase()
+            }))
+          );
+        }
+      } catch (error) {
+        console.error("Error fetching countries:", error);
+        // fallback
+        setCountries([
+          { name: "India", code: "IN" },
+          { name: "United States", code: "US" },
+          { name: "United Kingdom", code: "GB" }
+        ]);
+      }
+    };
+
+    fetchCountries();
+  }, []);
+
+  // Fetch states when country changes
+  useEffect(() => {
+    const fetchStates = async () => {
+      if (!addressInfo.country) return;
+
+      setLoadingStates(true);
+      try {
+        const response = await fetch("https://countriesnow.space/api/v0.1/countries/states", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ country: addressInfo.country })
+        });
+        const data = await response.json();
+        if (!data.error) {
+          setStates(
+            data.data.states.map((state) => ({
+              name: state.name,
+              id: state.name
+            }))
+          );
+        }
+      } catch (error) {
+        console.error("Error fetching states:", error);
+        // fallback
+        setStates([
+          { name: "Maharashtra", id: "MH" },
+          { name: "Delhi", id: "DL" },
+          { name: "Karnataka", id: "KA" }
+        ]);
+      } finally {
+        setLoadingStates(false);
+      }
+    };
+
+    fetchStates();
+  }, [addressInfo.country]);
+
+  // Fetch districts (cities) when state changes
+  useEffect(() => {
+    const fetchDistricts = async () => {
+      if (!addressInfo.country || !addressInfo.state) return;
+
+      setLoadingDistricts(true);
+      try {
+        const response = await fetch("https://countriesnow.space/api/v0.1/countries/state/cities", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            country: addressInfo.country,
+            state: addressInfo.state
+          })
+        });
+        const data = await response.json();
+        if (!data.error) {
+          setDistricts(
+            data.data.map((district) => ({
+              name: district,
+              id: district
+            }))
+          );
+        }
+      } catch (error) {
+        console.error("Error fetching districts:", error);
+        // fallback
+        setDistricts([
+          { name: "Mumbai", id: "MU" },
+          { name: "Pune", id: "PU" },
+          { name: "Nagpur", id: "NA" }
+        ]);
+      } finally {
+        setLoadingDistricts(false);
+      }
+    };
+
+    fetchDistricts();
+  }, [addressInfo.state]);
 
   // Ultra-compact input styling
   const inputStyle = {
@@ -256,20 +406,32 @@ export default function Addstaff1({
   const handlePreviewOpen = () => setOpenPreview(true);
   const handlePreviewClose = () => setOpenPreview(false);
 
-  const handleAddressChange = (e) => {
-    setAddress(e.target.value);
-    setErrors((prev) => ({ ...prev, address: false }));
-    if (sameAsAddress) {
-      setPermanentAddress(e.target.value);
-      setErrors((prev) => ({ ...prev, permanentAddress: false }));
-    }
-  };
+  const handleAddressChange = (field, value) => {
+    setAddressInfo((prev) => ({
+      ...prev,
+      [field]: value
+    }));
 
-  const handlePermanentAddressChange = (e) => {
-    setPermanentAddress(e.target.value);
-    setErrors((prev) => ({ ...prev, permanentAddress: false }));
-    if (sameAsAddress) {
-      setSameAsAddress(false);
+    // Clear error when field is filled
+    if (value && errors[field]) {
+      setErrors((prev) => ({ ...prev, [field]: false }));
+    }
+
+    // Reset dependent fields when country or state changes
+    if (field === "country") {
+      setAddressInfo((prev) => ({
+        ...prev,
+        state: "",
+        district: ""
+      }));
+      setStates([]);
+      setDistricts([]);
+    } else if (field === "state") {
+      setAddressInfo((prev) => ({
+        ...prev,
+        district: ""
+      }));
+      setDistricts([]);
     }
   };
 
@@ -277,7 +439,10 @@ export default function Addstaff1({
     const checked = e.target.checked;
     setSameAsAddress(checked);
     if (checked) {
-      setPermanentAddress(address);
+      setAddressInfo((prev) => ({
+        ...prev,
+        permanentAddress: prev.currentAddress
+      }));
       setErrors((prev) => ({ ...prev, permanentAddress: false }));
     }
   };
@@ -352,16 +517,16 @@ export default function Addstaff1({
 
   // Validate field on blur
   const handleFieldBlur = (field) => {
-    if (field === "role") {
+    if (field === "fatherName" || field === "motherName" || field === "maritalStatus") {
+      setErrors((prev) => ({ ...prev, [field]: !basicInfo[field] }));
+    } else if (field === "role") {
       setErrors((prev) => ({ ...prev, role: !role }));
     } else if (field in basicInfo) {
       setErrors((prev) => ({ ...prev, [field]: !basicInfo[field] }));
     } else if (field in documents) {
       setErrors((prev) => ({ ...prev, [field]: !documents[field] }));
-    } else if (field === "address") {
-      setErrors((prev) => ({ ...prev, address: !address }));
-    } else if (field === "permanentAddress") {
-      setErrors((prev) => ({ ...prev, permanentAddress: !permanentAddress }));
+    } else if (field in addressInfo) {
+      setErrors((prev) => ({ ...prev, [field]: !addressInfo[field] }));
     }
   };
 
@@ -590,34 +755,84 @@ export default function Addstaff1({
               helperText={errors.email ? "Email is required" : ""}
             />
           </Grid>
+
+          {/* Father Name Field */}
           <Grid item xs={12} sm={4}>
-            <TextField
-              label="Father Name"
-              fullWidth
-              sx={inputStyle}
-              value={basicInfo.fatherName}
-              onChange={(e) => handleBasicInfoChange("fatherName", e.target.value)}
-            />
+            <Box sx={{ display: "flex", gap: 1 }}>
+              {/* Dropdown for Title (Mr./Shri) */}
+              <FormControl sx={{ width: "80px" }}>
+                <Select
+                  value={basicInfo.fatherTitle || ""}
+                  onChange={(e) => handleBasicInfoChange("fatherTitle", e.target.value)}
+                  sx={{ height: "38px", fontSize: "0.875rem" }}
+                >
+                  <MenuItem value="Mr.">Mr.</MenuItem>
+                  <MenuItem value="Shri">Shri</MenuItem>
+                </Select>
+              </FormControl>
+
+              {/* Father's Name Input */}
+              <TextField
+                label="Father's Name"
+                fullWidth
+                required
+                sx={errors.fatherName ? errorStyle : inputStyle}
+                value={basicInfo.fatherName}
+                onChange={(e) => handleBasicInfoChange("fatherName", e.target.value)}
+                onBlur={() => handleFieldBlur("fatherName")}
+                error={errors.fatherName}
+                helperText={errors.fatherName ? "Father's name is required" : ""}
+              />
+            </Box>
+          </Grid>
+
+          {/* Mother Name Field */}
+          <Grid item xs={12} sm={4}>
+            <Box sx={{ display: "flex", gap: 1 }}>
+              {/* Dropdown for Title (Mrs./Shrimati) */}
+              <FormControl sx={{ width: "100px" }}>
+                <Select
+                  value={basicInfo.motherTitle || ""}
+                  onChange={(e) => handleBasicInfoChange("motherTitle", e.target.value)}
+                  sx={{ height: "38px", fontSize: "0.875rem" }}
+                >
+                  <MenuItem value="Mrs.">Mrs.</MenuItem>
+                  <MenuItem value="Shrimati">Shrimati</MenuItem>
+                </Select>
+              </FormControl>
+
+              {/* Mother's Name Input */}
+              <TextField
+                label="Mother's Name"
+                fullWidth
+                required
+                sx={errors.motherName ? errorStyle : inputStyle}
+                value={basicInfo.motherName}
+                onChange={(e) => handleBasicInfoChange("motherName", e.target.value)}
+                onBlur={() => handleFieldBlur("motherName")}
+                error={errors.motherName}
+                helperText={errors.motherName ? "Mother's name is required" : ""}
+              />
+            </Box>
           </Grid>
 
           <Grid item xs={12} sm={4}>
-            <TextField
-              label="Mother Name"
+            <FormControl
               fullWidth
-              sx={inputStyle}
-              value={basicInfo.motherName}
-              onChange={(e) => handleBasicInfoChange("motherName", e.target.value)}
-            />
-          </Grid>
-
-          <Grid item xs={12} sm={4}>
-            <FormControl fullWidth sx={inputStyle}>
+              required // Add required prop
+              sx={errors.maritalStatus ? errorStyle : inputStyle} // Add error styling
+              error={errors.maritalStatus} // Add error state
+            >
               <InputLabel>Marital Status</InputLabel>
               <Select
                 value={basicInfo.maritalStatus}
                 label="Marital Status"
                 onChange={(e) => handleBasicInfoChange("maritalStatus", e.target.value)}
+                onBlur={() => handleFieldBlur("maritalStatus")} // Add blur handler
               >
+                <MenuItem value="" sx={{ fontSize: "0.875rem" }}>
+                  Select
+                </MenuItem>
                 <MenuItem value="Single" sx={{ fontSize: "0.875rem" }}>
                   Single
                 </MenuItem>
@@ -628,6 +843,11 @@ export default function Addstaff1({
                   Other
                 </MenuItem>
               </Select>
+              {errors.maritalStatus && (
+                <Typography variant="caption" color="error" sx={{ ml: 2 }}>
+                  Marital status is required
+                </Typography>
+              )}
             </FormControl>
           </Grid>
 
@@ -739,21 +959,171 @@ export default function Addstaff1({
               )}
             </Box>
           </Grid>
+        </Grid>
+      </Box>
 
-          {/* Address Section */}
+      {/* Address Section */}
+      <Box sx={{ mb: 4 }}>
+        <Typography
+          variant="h6"
+          sx={{
+            fontWeight: 600,
+            color: isDarkMode ? theme.palette.common.white : "inherit",
+            mb: 2
+          }}
+        >
+          Address Information
+        </Typography>
+        <Grid container spacing={1.5}>
+          {/* Country */}
+          <Grid item xs={12} sm={4}>
+            <FormControl
+              fullWidth
+              required
+              sx={errors.country ? errorStyle : inputStyle}
+              error={errors.country}
+            >
+              <InputLabel>Country</InputLabel>
+              <Select
+                value={addressInfo.country}
+                label="Country"
+                onChange={(e) => handleAddressChange("country", e.target.value)}
+                onBlur={() => handleFieldBlur("country")}
+              >
+                <MenuItem value="" sx={{ fontSize: "0.875rem" }}>
+                  Select Country
+                </MenuItem>
+                {countries.map((country) => (
+                  <MenuItem key={country.code} value={country.name} sx={{ fontSize: "0.875rem" }}>
+                    {country.name}
+                  </MenuItem>
+                ))}
+              </Select>
+              {errors.country && (
+                <Typography variant="caption" color="error" sx={{ ml: 2 }}>
+                  Country is required
+                </Typography>
+              )}
+            </FormControl>
+          </Grid>
+
+          {/* State */}
+          <Grid item xs={12} sm={4}>
+            <FormControl
+              fullWidth
+              required
+              sx={errors.state ? errorStyle : inputStyle}
+              error={errors.state}
+            >
+              <InputLabel>State</InputLabel>
+              <Select
+                value={addressInfo.state}
+                label="State"
+                onChange={(e) => handleAddressChange("state", e.target.value)}
+                onBlur={() => handleFieldBlur("state")}
+                disabled={!addressInfo.country || loadingStates}
+              >
+                <MenuItem value="" sx={{ fontSize: "0.875rem" }}>
+                  {loadingStates ? "Loading states..." : "Select State"}
+                </MenuItem>
+                {states.map((state) => (
+                  <MenuItem key={state.id} value={state.name} sx={{ fontSize: "0.875rem" }}>
+                    {state.name}
+                  </MenuItem>
+                ))}
+              </Select>
+              {loadingStates && (
+                <CircularProgress size={24} sx={{ position: "absolute", right: 40, top: 8 }} />
+              )}
+              {errors.state && (
+                <Typography variant="caption" color="error" sx={{ ml: 2 }}>
+                  State is required
+                </Typography>
+              )}
+            </FormControl>
+          </Grid>
+
+          {/* District */}
+          <Grid item xs={12} sm={4}>
+            <FormControl
+              fullWidth
+              required
+              sx={errors.district ? errorStyle : inputStyle}
+              error={errors.district}
+            >
+              <InputLabel>District</InputLabel>
+              <Select
+                value={addressInfo.district}
+                label="District"
+                onChange={(e) => handleAddressChange("district", e.target.value)}
+                onBlur={() => handleFieldBlur("district")}
+                disabled={!addressInfo.state || loadingDistricts}
+              >
+                <MenuItem value="" sx={{ fontSize: "0.875rem" }}>
+                  {loadingDistricts ? "Loading districts..." : "Select District"}
+                </MenuItem>
+                {districts.map((district) => (
+                  <MenuItem key={district.id} value={district.name} sx={{ fontSize: "0.875rem" }}>
+                    {district.name}
+                  </MenuItem>
+                ))}
+              </Select>
+              {loadingDistricts && (
+                <CircularProgress size={24} sx={{ position: "absolute", right: 40, top: 8 }} />
+              )}
+              {errors.district && (
+                <Typography variant="caption" color="error" sx={{ ml: 2 }}>
+                  District is required
+                </Typography>
+              )}
+            </FormControl>
+          </Grid>
+
+          {/* City/Town */}
+          <Grid item xs={12} sm={4}>
+            <TextField
+              label="City/Town"
+              fullWidth
+              required
+              value={addressInfo.city}
+              onChange={(e) => handleAddressChange("city", e.target.value)}
+              onBlur={() => handleFieldBlur("city")}
+              error={errors.city}
+              helperText={errors.city ? "City/Town is required" : ""}
+              sx={errors.city ? errorStyle : inputStyle}
+            />
+          </Grid>
+
+          {/* Pin Code */}
+          <Grid item xs={12} sm={4}>
+            <TextField
+              label="Pin Code"
+              fullWidth
+              required
+              value={addressInfo.pinCode}
+              onChange={(e) => handleAddressChange("pinCode", e.target.value)}
+              onBlur={() => handleFieldBlur("pinCode")}
+              error={errors.pinCode}
+              helperText={errors.pinCode ? "Pin code is required" : ""}
+              sx={errors.pinCode ? errorStyle : inputStyle}
+            />
+          </Grid>
+
+          {/* Current Address */}
           <Grid item xs={12} sm={6}>
             <TextField
               label="Current Address"
               fullWidth
               multiline
               rows={2}
-              value={address}
-              onChange={handleAddressChange}
-              onBlur={() => handleFieldBlur("address")}
-              error={errors.address}
-              helperText={errors.address ? "Current address is required" : ""}
+              required
+              value={addressInfo.currentAddress}
+              onChange={(e) => handleAddressChange("currentAddress", e.target.value)}
+              onBlur={() => handleFieldBlur("currentAddress")}
+              error={errors.currentAddress}
+              helperText={errors.currentAddress ? "Current address is required" : ""}
               sx={{
-                ...(errors.address ? errorStyle : inputStyle),
+                ...(errors.currentAddress ? errorStyle : inputStyle),
                 "& .MuiInputBase-root": {
                   height: "auto",
                   minHeight: "80px"
@@ -761,6 +1131,8 @@ export default function Addstaff1({
               }}
             />
           </Grid>
+
+          {/* Permanent Address */}
           <Grid item xs={12} sm={6}>
             <Box sx={{ display: "flex", flexDirection: "column" }}>
               <TextField
@@ -768,8 +1140,9 @@ export default function Addstaff1({
                 fullWidth
                 multiline
                 rows={2}
-                value={permanentAddress}
-                onChange={handlePermanentAddressChange}
+                required
+                value={addressInfo.permanentAddress}
+                onChange={(e) => handleAddressChange("permanentAddress", e.target.value)}
                 onBlur={() => handleFieldBlur("permanentAddress")}
                 error={errors.permanentAddress}
                 helperText={errors.permanentAddress ? "Permanent address is required" : ""}
@@ -898,13 +1271,28 @@ export default function Addstaff1({
                   helperText={errors.experiences[index]?.to ? "To date is required" : ""}
                 />
               </Grid>
+              {/* Description Field in Experience Section */}
               <Grid item xs={12} sm={6}>
                 <TextField
                   label="Description"
                   fullWidth
+                  required // Add required prop
                   value={exp.description}
                   onChange={(e) => handleExperienceChange(index, "description", e.target.value)}
-                  sx={inputStyle}
+                  onBlur={() => {
+                    if (!exp.description) {
+                      setErrors((prev) => {
+                        const newExperiences = [...prev.experiences];
+                        newExperiences[index] = { ...newExperiences[index], description: true };
+                        return { ...prev, experiences: newExperiences };
+                      });
+                    }
+                  }}
+                  sx={errors.experiences[index]?.description ? errorStyle : inputStyle} // Add error styling
+                  error={errors.experiences[index]?.description} // Add error state
+                  helperText={
+                    errors.experiences[index]?.description ? "Description is required" : ""
+                  } // Add helper text
                 />
               </Grid>
             </Grid>

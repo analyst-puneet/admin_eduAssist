@@ -67,7 +67,12 @@ export default function AddStaff2({
     accountNumber: false,
     bankName: false,
     ifscCode: false,
-    accountType: false
+    accountType: false,
+    medicalLeave: false,
+    casualLeave: false,
+    maternityLeave: false,
+    sickLeave: false,
+    branchName: false
   });
 
   const [showErrors, setShowErrors] = useState(false);
@@ -84,7 +89,12 @@ export default function AddStaff2({
       accountNumber: !bankInfo.accountNumber,
       bankName: !bankInfo.bankName,
       ifscCode: !bankInfo.ifscCode,
-      accountType: !bankInfo.accountType
+      accountType: !bankInfo.accountType,
+      medicalLeave: !leaveAllocation.medicalLeave,
+      casualLeave: !leaveAllocation.casualLeave,
+      maternityLeave: !leaveAllocation.maternityLeave,
+      sickLeave: !leaveAllocation.sickLeave,
+      branchName: !bankInfo.branchName
     };
 
     if (show) setErrors(newErrors);
@@ -331,48 +341,79 @@ export default function AddStaff2({
         </Typography>
 
         <Grid container spacing={1.5}>
+          {/* Medical Leave */}
           <Grid item xs={12} sm={3}>
             <TextField
               label="Medical Leave"
               placeholder="Days"
               fullWidth
+              required
               type="number"
-              sx={inputStyle}
+              sx={errors.medicalLeave ? errorStyle : inputStyle}
               value={leaveAllocation.medicalLeave}
               onChange={(e) => handleLeaveChange("medicalLeave", e.target.value)}
+              onBlur={() =>
+                setErrors((prev) => ({ ...prev, medicalLeave: !leaveAllocation.medicalLeave }))
+              }
+              error={errors.medicalLeave}
+              helperText={errors.medicalLeave ? "Medical leave days required" : ""}
             />
           </Grid>
+
+          {/* Casual Leave */}
           <Grid item xs={12} sm={3}>
             <TextField
               label="Casual Leave"
               placeholder="Days"
               fullWidth
+              required
               type="number"
-              sx={inputStyle}
+              sx={errors.casualLeave ? errorStyle : inputStyle}
               value={leaveAllocation.casualLeave}
               onChange={(e) => handleLeaveChange("casualLeave", e.target.value)}
+              onBlur={() =>
+                setErrors((prev) => ({ ...prev, casualLeave: !leaveAllocation.casualLeave }))
+              }
+              error={errors.casualLeave}
+              helperText={errors.casualLeave ? "Casual leave days required" : ""}
             />
           </Grid>
+
+          {/* Maternity Leave */}
           <Grid item xs={12} sm={3}>
             <TextField
               label="Maternity Leave"
               placeholder="Days"
               fullWidth
+              required
               type="number"
-              sx={inputStyle}
+              sx={errors.maternityLeave ? errorStyle : inputStyle}
               value={leaveAllocation.maternityLeave}
               onChange={(e) => handleLeaveChange("maternityLeave", e.target.value)}
+              onBlur={() =>
+                setErrors((prev) => ({ ...prev, maternityLeave: !leaveAllocation.maternityLeave }))
+              }
+              error={errors.maternityLeave}
+              helperText={errors.maternityLeave ? "Maternity leave days required" : ""}
             />
           </Grid>
+
+          {/* Sick Leave */}
           <Grid item xs={12} sm={3}>
             <TextField
               label="Sick Leave"
               placeholder="Days"
               fullWidth
+              required
               type="number"
-              sx={inputStyle}
+              sx={errors.sickLeave ? errorStyle : inputStyle}
               value={leaveAllocation.sickLeave}
               onChange={(e) => handleLeaveChange("sickLeave", e.target.value)}
+              onBlur={() =>
+                setErrors((prev) => ({ ...prev, sickLeave: !leaveAllocation.sickLeave }))
+              }
+              error={errors.sickLeave}
+              helperText={errors.sickLeave ? "Sick leave days required" : ""}
             />
           </Grid>
         </Grid>
@@ -456,9 +497,13 @@ export default function AddStaff2({
             <TextField
               label="Branch Name"
               fullWidth
-              sx={inputStyle}
+              required
+              sx={errors.branchName ? errorStyle : inputStyle}
               value={bankInfo.branchName}
               onChange={(e) => handleBankInfoChange("branchName", e.target.value)}
+              onBlur={() => handleFieldBlur("branchName")}
+              error={errors.branchName}
+              helperText={errors.branchName ? "Branch name is required" : ""}
             />
           </Grid>
           <Grid item xs={12} sm={4}>
