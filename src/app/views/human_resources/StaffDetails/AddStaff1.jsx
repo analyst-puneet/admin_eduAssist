@@ -36,7 +36,13 @@ export default function Addstaff1({
   const isDarkMode = theme.palette.mode === "dark";
 
   // Initialize state from formData
-  const [selectedImage, setSelectedImage] = useState(formData.selectedImage || null);
+  const [selectedImage, setSelectedImage] = useState(
+    formData.selectedImage
+      ? typeof formData.selectedImage === "string"
+        ? formData.selectedImage
+        : URL.createObjectURL(formData.selectedImage)
+      : null
+  );
   const [role, setRole] = useState(formData.role || "");
   const [joiningDate, setJoiningDate] = useState(formData.joiningDate || "");
   const [sameAsAddress, setSameAsAddress] = useState(formData.sameAsAddress || false);
@@ -281,25 +287,21 @@ export default function Addstaff1({
     },
     "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
       borderColor: isDarkMode ? "white" : "primary.main"
-    },
-    margin: "0.25rem 0"
+    }
   };
 
   // Soft error styling
   const errorStyle = {
     ...inputStyle,
     "& .MuiOutlinedInput-notchedOutline": {
-      borderColor: isDarkMode ? theme.palette.grey[500] : theme.palette.grey[400]
-    },
-    "& .MuiInputLabel-root": {
-      color: isDarkMode ? theme.palette.grey[400] : theme.palette.grey[600]
+      borderColor: "error.main"
     },
     "& .MuiFormHelperText-root": {
-      color: isDarkMode ? theme.palette.grey[400] : theme.palette.grey[600],
+      position: "absolute",
+      bottom: "-20px",
+      left: 0,
+      margin: 0,
       fontSize: "0.75rem"
-    },
-    "&:hover .MuiOutlinedInput-notchedOutline": {
-      borderColor: isDarkMode ? theme.palette.grey[400] : theme.palette.grey[500]
     }
   };
 
@@ -316,7 +318,13 @@ export default function Addstaff1({
   const handleImageChange = (e) => {
     const file = e.target.files[0];
     if (file && file.type.startsWith("image/")) {
-      setSelectedImage(URL.createObjectURL(file));
+      const imageUrl = URL.createObjectURL(file);
+      setSelectedImage(imageUrl);
+      // Also store the file object if needed for submission
+      setFormData((prev) => ({
+        ...prev,
+        selectedImage: file // Store the actual file object
+      }));
     }
   };
 
@@ -498,19 +506,19 @@ export default function Addstaff1({
               label="Staff ID"
               fullWidth
               required
-              sx={errors.staffId ? errorStyle : inputStyle}
+              sx={errors.staffId ? { ...errorStyle, mb: 3 } : { ...inputStyle }}
               value={basicInfo.staffId}
               onChange={(e) => handleBasicInfoChange("staffId", e.target.value)}
               onBlur={() => handleFieldBlur("staffId")}
               error={errors.staffId}
-              helperText={errors.staffId ? "Staff ID is required" : ""}
+              helperText={errors.staffId ? "Staff ID is required" : " "}
             />
           </Grid>
           <Grid item xs={12} sm={4}>
             <FormControl
               fullWidth
               required
-              sx={errors.role ? errorStyle : inputStyle}
+              sx={errors.role ? { ...errorStyle, mb: 3 } : { ...inputStyle }}
               error={errors.role}
             >
               <InputLabel id="role-label">Role</InputLabel>
@@ -543,7 +551,16 @@ export default function Addstaff1({
                 </MenuItem>
               </Select>
               {errors.role && (
-                <Typography variant="caption" color="error" sx={{ ml: 2 }}>
+                <Typography
+                  variant="caption"
+                  color="error"
+                  sx={{
+                    position: "absolute",
+                    bottom: "-20px",
+                    left: "14px",
+                    fontSize: "0.75rem"
+                  }}
+                >
                   Role is required
                 </Typography>
               )}
@@ -553,7 +570,7 @@ export default function Addstaff1({
             <FormControl
               fullWidth
               required
-              sx={errors.designation ? errorStyle : inputStyle}
+              sx={errors.designation ? { ...errorStyle, mb: 3 } : { ...inputStyle }}
               error={errors.designation}
             >
               <InputLabel>Designation</InputLabel>
@@ -571,7 +588,16 @@ export default function Addstaff1({
                 </MenuItem>
               </Select>
               {errors.designation && (
-                <Typography variant="caption" color="error" sx={{ ml: 2 }}>
+                <Typography
+                  variant="caption"
+                  color="error"
+                  sx={{
+                    position: "absolute",
+                    bottom: "-20px",
+                    left: "14px",
+                    fontSize: "0.75rem"
+                  }}
+                >
                   Designation is required
                 </Typography>
               )}
@@ -584,19 +610,19 @@ export default function Addstaff1({
               label="First Name"
               fullWidth
               required
-              sx={errors.firstName ? errorStyle : inputStyle}
+              sx={errors.firstName ? { ...errorStyle, mb: 3 } : { ...inputStyle }}
               value={basicInfo.firstName}
               onChange={(e) => handleBasicInfoChange("firstName", e.target.value)}
               onBlur={() => handleFieldBlur("firstName")}
               error={errors.firstName}
-              helperText={errors.firstName ? "First name is required" : ""}
+              helperText={errors.firstName ? "First name is required" : " "}
             />
           </Grid>
           <Grid item xs={12} sm={4}>
             <TextField
               label="Last Name"
               fullWidth
-              sx={inputStyle}
+              sx={{ ...inputStyle, mb: 3 }}
               value={basicInfo.lastName}
               onChange={(e) => handleBasicInfoChange("lastName", e.target.value)}
             />
@@ -605,7 +631,7 @@ export default function Addstaff1({
             <FormControl
               fullWidth
               required
-              sx={errors.gender ? errorStyle : inputStyle}
+              sx={errors.gender ? { ...errorStyle, mb: 3 } : { ...inputStyle }}
               error={errors.gender}
             >
               <InputLabel>Gender</InputLabel>
@@ -626,7 +652,16 @@ export default function Addstaff1({
                 </MenuItem>
               </Select>
               {errors.gender && (
-                <Typography variant="caption" color="error" sx={{ ml: 2 }}>
+                <Typography
+                  variant="caption"
+                  color="error"
+                  sx={{
+                    position: "absolute",
+                    bottom: "-20px",
+                    left: "14px",
+                    fontSize: "0.75rem"
+                  }}
+                >
                   Gender is required
                 </Typography>
               )}
@@ -641,12 +676,12 @@ export default function Addstaff1({
               fullWidth
               InputLabelProps={{ shrink: true }}
               required
-              sx={errors.dob ? errorStyle : inputStyle}
+              sx={errors.dob ? { ...errorStyle, mb: 3 } : { ...inputStyle }}
               value={basicInfo.dob}
               onChange={(e) => handleBasicInfoChange("dob", e.target.value)}
               onBlur={() => handleFieldBlur("dob")}
               error={errors.dob}
-              helperText={errors.dob ? "Date of birth is required" : ""}
+              helperText={errors.dob ? "Date of birth is required" : " "}
             />
           </Grid>
           <Grid item xs={12} sm={4}>
@@ -654,12 +689,12 @@ export default function Addstaff1({
               label="Phone"
               fullWidth
               required
-              sx={errors.phone ? errorStyle : inputStyle}
+              sx={errors.phone ? { ...errorStyle, mb: 3 } : { ...inputStyle }}
               value={basicInfo.phone}
               onChange={(e) => handleBasicInfoChange("phone", e.target.value)}
               onBlur={() => handleFieldBlur("phone")}
               error={errors.phone}
-              helperText={errors.phone ? "Phone number is required" : ""}
+              helperText={errors.phone ? "Phone number is required" : " "}
             />
           </Grid>
           <Grid item xs={12} sm={4}>
@@ -667,12 +702,12 @@ export default function Addstaff1({
               label="Emergency Contact"
               fullWidth
               required
-              sx={errors.emergencyContact ? errorStyle : inputStyle}
+              sx={errors.emergencyContact ? { ...errorStyle, mb: 3 } : { ...inputStyle }}
               value={basicInfo.emergencyContact}
               onChange={(e) => handleBasicInfoChange("emergencyContact", e.target.value)}
               onBlur={() => handleFieldBlur("emergencyContact")}
               error={errors.emergencyContact}
-              helperText={errors.emergencyContact ? "Emergency contact is required" : ""}
+              helperText={errors.emergencyContact ? "Emergency contact is required" : " "}
             />
           </Grid>
 
@@ -682,19 +717,19 @@ export default function Addstaff1({
               label="Email (Login Username)"
               fullWidth
               required
-              sx={errors.email ? errorStyle : inputStyle}
+              sx={errors.email ? { ...errorStyle, mb: 3 } : { ...inputStyle }}
               value={basicInfo.email}
               onChange={(e) => handleBasicInfoChange("email", e.target.value)}
               onBlur={() => handleFieldBlur("email")}
               error={errors.email}
-              helperText={errors.email ? "Email is required" : ""}
+              helperText={errors.email ? "Email is required" : " "}
             />
           </Grid>
           <Grid item xs={12} sm={4}>
             <FormControl
               fullWidth
               required
-              sx={errors.maritalStatus ? errorStyle : inputStyle}
+              sx={errors.maritalStatus ? { ...errorStyle, mb: 3 } : { ...inputStyle }}
               error={errors.maritalStatus}
             >
               <InputLabel>Marital Status</InputLabel>
@@ -718,7 +753,16 @@ export default function Addstaff1({
                 </MenuItem>
               </Select>
               {errors.maritalStatus && (
-                <Typography variant="caption" color="error" sx={{ ml: 2 }}>
+                <Typography
+                  variant="caption"
+                  color="error"
+                  sx={{
+                    position: "absolute",
+                    bottom: "-20px",
+                    left: "14px",
+                    fontSize: "0.75rem"
+                  }}
+                >
                   Marital status is required
                 </Typography>
               )}
@@ -726,99 +770,115 @@ export default function Addstaff1({
           </Grid>
 
           {/* Row 5 - Father's Name, Mother's Name */}
-          {/* Father's Name Field */}
-          <Grid item xs={12} sm={6}>
-            <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-              {/* Father's Title Dropdown */}
-              <FormControl sx={{ minWidth: 80 }}>
-                <Select
-                  value={basicInfo.fatherTitle || "Shri"}
-                  onChange={(e) => handleBasicInfoChange("fatherTitle", e.target.value)}
+          <Grid container spacing={2}>
+            {/* Father's Name */}
+            <Grid item xs={12} sm={6}>
+              <Box sx={{ display: "flex", alignItems: "baseline" }}>
+                {/* Title Dropdown */}
+                <FormControl sx={{ mr: 1, minWidth: 100 }}>
+                  <Select
+                    value={basicInfo.fatherTitle || "Shri"}
+                    onChange={(e) => handleBasicInfoChange("fatherTitle", e.target.value)}
+                    sx={{
+                      height: "40px",
+                      "& .MuiSelect-select": {
+                        display: "flex",
+                        alignItems: "center",
+                        paddingTop: "8px",
+                        paddingBottom: "8px"
+                      },
+                      marginLeft: "11.5px"
+                    }}
+                  >
+                    <MenuItem value="Shri">Shri</MenuItem>
+                    <MenuItem value="Mr.">Mr.</MenuItem>
+                  </Select>
+                </FormControl>
+
+                {/* Name Field */}
+                <TextField
+                  label="Father's Name"
+                  fullWidth
+                  required
+                  variant="outlined"
                   sx={{
-                    height: "38px",
-                    "& .MuiSelect-select": {
-                      paddingTop: "9px",
-                      paddingBottom: "9px",
-                      minHeight: "auto"
+                    flex: 1,
+                    "& .MuiInputBase-root": {
+                      height: "40px"
+                    },
+                    "& .MuiInputLabel-root": {
+                      transform: "translate(14px, 10px) scale(1)",
+                      "&.Mui-focused": {
+                        transform: "translate(14px, -9px) scale(0.75)"
+                      }
+                    },
+                    "& input": {
+                      padding: "10px 14px"
                     }
                   }}
-                >
-                  <MenuItem value="Shri">Shri</MenuItem>
-                  <MenuItem value="Mr.">Mr.</MenuItem>
-                </Select>
-              </FormControl>
+                  value={basicInfo.fatherName}
+                  onChange={(e) => handleBasicInfoChange("fatherName", e.target.value)}
+                  error={errors.fatherName}
+                  helperText={errors.fatherName ? "Father's name is required" : " "}
+                />
+              </Box>
+            </Grid>
 
-              {/* Father's Name Input */}
-              {/* Father's Name Input */}
-              <TextField
-                label="Father's Name"
-                fullWidth
-                required
-                variant="outlined"
-                sx={{
-                  ...(errors.fatherName ? errorStyle : inputStyle),
-                  "& .MuiInputBase-root": {
-                    height: "38px"
-                  }
-                }}
-                value={basicInfo.fatherName}
-                onChange={(e) => handleBasicInfoChange("fatherName", e.target.value)}
-                onFocus={() => setErrors((prev) => ({ ...prev, fatherName: false }))}
-                onBlur={() => handleFieldBlur("fatherName")}
-                error={errors.fatherName}
-                helperText={errors.fatherName ? "Father's name is required" : ""}
-              />
-            </Box>
-          </Grid>
+            {/* Mother's Name */}
+            <Grid item xs={12} sm={6}>
+              <Box sx={{ display: "flex", alignItems: "baseline" }}>
+                {/* Title Dropdown */}
+                <FormControl sx={{ mr: 1, minWidth: 100 }}>
+                  <Select
+                    value={basicInfo.motherTitle || "Shrimati"}
+                    onChange={(e) => handleBasicInfoChange("motherTitle", e.target.value)}
+                    sx={{
+                      height: "40px",
+                      "& .MuiSelect-select": {
+                        display: "flex",
+                        alignItems: "center",
+                        paddingTop: "8px",
+                        paddingBottom: "8px"
+                      }
+                    }}
+                  >
+                    <MenuItem value="Shrimati">Shrimati</MenuItem>
+                    <MenuItem value="Mrs.">Mrs.</MenuItem>
+                  </Select>
+                </FormControl>
 
-          {/* Mother's Name Field */}
-          <Grid item xs={12} sm={6}>
-            <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-              {/* Mother's Title Dropdown */}
-              <FormControl sx={{ minWidth: 100 }}>
-                <Select
-                  value={basicInfo.motherTitle || "Shrimati"}
-                  onChange={(e) => handleBasicInfoChange("motherTitle", e.target.value)}
+                {/* Name Field */}
+                <TextField
+                  label="Mother's Name"
+                  fullWidth
+                  required
+                  variant="outlined"
                   sx={{
-                    height: "38px",
-                    "& .MuiSelect-select": {
-                      paddingTop: "9px",
-                      paddingBottom: "9px",
-                      minHeight: "auto"
+                    flex: 1,
+                    "& .MuiInputBase-root": {
+                      height: "40px"
+                    },
+                    "& .MuiInputLabel-root": {
+                      transform: "translate(14px, 10px) scale(1)",
+                      "&.Mui-focused": {
+                        transform: "translate(14px, -9px) scale(0.75)"
+                      }
+                    },
+                    "& input": {
+                      padding: "10px 14px"
                     }
                   }}
-                >
-                  <MenuItem value="Shrimati">Shrimati</MenuItem>
-                  <MenuItem value="Mrs.">Mrs.</MenuItem>
-                </Select>
-              </FormControl>
-
-              {/* Mother's Name Input */}
-              {/* Mother's Name Input */}
-              <TextField
-                label="Mother's Name"
-                fullWidth
-                required
-                variant="outlined"
-                sx={{
-                  ...(errors.motherName ? errorStyle : inputStyle),
-                  "& .MuiInputBase-root": {
-                    height: "38px"
-                  }
-                }}
-                value={basicInfo.motherName}
-                onChange={(e) => handleBasicInfoChange("motherName", e.target.value)}
-                onFocus={() => setErrors((prev) => ({ ...prev, motherName: false }))}
-                onBlur={() => handleFieldBlur("motherName")}
-                error={errors.motherName}
-                helperText={errors.motherName ? "Mother's name is required" : ""}
-              />
-            </Box>
+                  value={basicInfo.motherName}
+                  onChange={(e) => handleBasicInfoChange("motherName", e.target.value)}
+                  error={errors.motherName}
+                  helperText={errors.motherName ? "Mother's name is required" : " "}
+                />
+              </Box>
+            </Grid>
           </Grid>
 
           {/* Row 6 - Date of Joining, Photo Upload */}
           <Grid container spacing={2} sx={{ mt: 1 }}>
-            {/* Date of Joining */}
             <Grid item xs={12} sm={6}>
               <TextField
                 label="Date of Joining"
@@ -829,7 +889,7 @@ export default function Addstaff1({
                 onChange={(e) => setJoiningDate(e.target.value)}
                 InputProps={{
                   sx: {
-                    height: 40, // match to Upload box height
+                    height: 40,
                     fontSize: "0.875rem"
                   }
                 }}
@@ -841,19 +901,8 @@ export default function Addstaff1({
                 }}
               />
             </Grid>
-
-            {/* Upload Photo */}
-            {/* Upload Photo */}
             <Grid item xs={12} sm={6}>
-              <Box
-                sx={{
-                  display: "flex",
-                  alignItems: "center",
-                  gap: 2,
-                  height: "100%"
-                }}
-              >
-                {/* Upload Button */}
+              <Box sx={{ display: "flex", alignItems: "center", gap: 2, height: "100%" }}>
                 <Box
                   component="label"
                   htmlFor="file-upload"
@@ -891,8 +940,6 @@ export default function Addstaff1({
                   >
                     {selectedImage ? "Photo selected" : "Upload Photo"}
                   </Typography>
-
-                  {/* 👇 This is the missing part causing the issue */}
                   <input
                     id="file-upload"
                     type="file"
@@ -901,8 +948,6 @@ export default function Addstaff1({
                     onChange={handleImageChange}
                   />
                 </Box>
-
-                {/* Preview Thumbnail */}
                 {selectedImage && (
                   <Box
                     onClick={handlePreviewOpen}
@@ -964,9 +1009,9 @@ export default function Addstaff1({
                 onChange={(e) => handleAddressChange("currentFullAddress", e.target.value)}
                 onBlur={() => handleFieldBlur("currentFullAddress")}
                 error={errors.currentFullAddress}
-                helperText={errors.currentFullAddress ? "Full address is required" : ""}
+                helperText={errors.currentFullAddress ? "Full address is required" : " "}
                 sx={{
-                  ...(errors.currentFullAddress ? errorStyle : inputStyle),
+                  ...(errors.currentFullAddress ? { ...errorStyle, mb: 3 } : { ...inputStyle }),
                   "& .MuiInputBase-root": {
                     height: "auto",
                     minHeight: "100px"
@@ -984,7 +1029,6 @@ export default function Addstaff1({
                 value={addressInfo.currentPinCode}
                 onChange={(e) => {
                   handleAddressChange("currentPinCode", e.target.value);
-                  // Clear fields immediately if PIN code is empty
                   if (!e.target.value) {
                     setAddressInfo((prev) => ({
                       ...prev,
@@ -1015,7 +1059,6 @@ export default function Addstaff1({
                       }
                     } catch (error) {
                       console.error("Error fetching PIN code details:", error);
-                      // Clear fields if API fails
                       setAddressInfo((prev) => ({
                         ...prev,
                         currentCountry: "",
@@ -1025,7 +1068,6 @@ export default function Addstaff1({
                       }));
                     }
                   } else if (!addressInfo.currentPinCode) {
-                    // Clear fields if PIN code is empty
                     setAddressInfo((prev) => ({
                       ...prev,
                       currentCountry: "",
@@ -1036,8 +1078,8 @@ export default function Addstaff1({
                   }
                 }}
                 error={errors.currentPinCode}
-                helperText={errors.currentPinCode ? "Valid 6-digit PIN code is required" : ""}
-                sx={errors.currentPinCode ? errorStyle : inputStyle}
+                helperText={errors.currentPinCode ? "Valid 6-digit PIN code is required" : " "}
+                sx={errors.currentPinCode ? { ...errorStyle, mb: 3 } : { ...inputStyle }}
                 inputProps={{ maxLength: 6 }}
               />
             </Grid>
@@ -1049,7 +1091,7 @@ export default function Addstaff1({
                 fullWidth
                 value={addressInfo.currentCountry || ""}
                 InputProps={{ readOnly: true }}
-                sx={inputStyle}
+                sx={{ ...inputStyle }}
               />
             </Grid>
             <Grid item xs={12} sm={3}>
@@ -1058,7 +1100,7 @@ export default function Addstaff1({
                 fullWidth
                 value={addressInfo.currentState || ""}
                 InputProps={{ readOnly: true }}
-                sx={inputStyle}
+                sx={{ ...inputStyle }}
               />
             </Grid>
             <Grid item xs={12} sm={3}>
@@ -1067,7 +1109,7 @@ export default function Addstaff1({
                 fullWidth
                 value={addressInfo.currentDistrict || ""}
                 InputProps={{ readOnly: true }}
-                sx={inputStyle}
+                sx={{ ...inputStyle }}
               />
             </Grid>
             <Grid item xs={12} sm={3}>
@@ -1076,7 +1118,7 @@ export default function Addstaff1({
                 fullWidth
                 value={addressInfo.currentCity || ""}
                 InputProps={{ readOnly: true }}
-                sx={inputStyle}
+                sx={{ ...inputStyle }}
               />
             </Grid>
           </Grid>
@@ -1135,9 +1177,9 @@ export default function Addstaff1({
                 onChange={(e) => handleAddressChange("permanentFullAddress", e.target.value)}
                 onBlur={() => handleFieldBlur("permanentFullAddress")}
                 error={errors.permanentFullAddress}
-                helperText={errors.permanentFullAddress ? "Full address is required" : ""}
+                helperText={errors.permanentFullAddress ? "Full address is required" : " "}
                 sx={{
-                  ...(errors.permanentFullAddress ? errorStyle : inputStyle),
+                  ...(errors.permanentFullAddress ? { ...errorStyle, mb: 3 } : { ...inputStyle }),
                   "& .MuiInputBase-root": {
                     height: "auto",
                     minHeight: "100px"
@@ -1156,7 +1198,6 @@ export default function Addstaff1({
                 value={sameAsAddress ? addressInfo.currentPinCode : addressInfo.permanentPinCode}
                 onChange={(e) => {
                   handleAddressChange("permanentPinCode", e.target.value);
-                  // Clear fields immediately if PIN code is empty
                   if (!e.target.value) {
                     setAddressInfo((prev) => ({
                       ...prev,
@@ -1191,7 +1232,6 @@ export default function Addstaff1({
                       }
                     } catch (error) {
                       console.error("Error fetching PIN code details:", error);
-                      // Clear fields if API fails
                       setAddressInfo((prev) => ({
                         ...prev,
                         permanentCountry: "",
@@ -1201,7 +1241,6 @@ export default function Addstaff1({
                       }));
                     }
                   } else if (!sameAsAddress && !addressInfo.permanentPinCode) {
-                    // Clear fields if PIN code is empty
                     setAddressInfo((prev) => ({
                       ...prev,
                       permanentCountry: "",
@@ -1212,8 +1251,8 @@ export default function Addstaff1({
                   }
                 }}
                 error={errors.permanentPinCode}
-                helperText={errors.permanentPinCode ? "Valid 6-digit PIN code is required" : ""}
-                sx={errors.permanentPinCode ? errorStyle : inputStyle}
+                helperText={errors.permanentPinCode ? "Valid 6-digit PIN code is required" : " "}
+                sx={errors.permanentPinCode ? { ...errorStyle, mb: 3 } : { ...inputStyle }}
                 inputProps={{ maxLength: 6 }}
                 disabled={sameAsAddress}
               />
@@ -1228,7 +1267,7 @@ export default function Addstaff1({
                   sameAsAddress ? addressInfo.currentCountry : addressInfo.permanentCountry || ""
                 }
                 InputProps={{ readOnly: true }}
-                sx={inputStyle}
+                sx={{ ...inputStyle }}
               />
             </Grid>
             <Grid item xs={12} sm={3}>
@@ -1237,7 +1276,7 @@ export default function Addstaff1({
                 fullWidth
                 value={sameAsAddress ? addressInfo.currentState : addressInfo.permanentState || ""}
                 InputProps={{ readOnly: true }}
-                sx={inputStyle}
+                sx={{ ...inputStyle }}
               />
             </Grid>
             <Grid item xs={12} sm={3}>
@@ -1248,7 +1287,7 @@ export default function Addstaff1({
                   sameAsAddress ? addressInfo.currentDistrict : addressInfo.permanentDistrict || ""
                 }
                 InputProps={{ readOnly: true }}
-                sx={inputStyle}
+                sx={{ ...inputStyle }}
               />
             </Grid>
             <Grid item xs={12} sm={3}>
@@ -1257,7 +1296,7 @@ export default function Addstaff1({
                 fullWidth
                 value={sameAsAddress ? addressInfo.currentCity : addressInfo.permanentCity || ""}
                 InputProps={{ readOnly: true }}
-                sx={inputStyle}
+                sx={{ ...inputStyle }}
               />
             </Grid>
           </Grid>
@@ -1295,9 +1334,13 @@ export default function Addstaff1({
                       });
                     }
                   }}
-                  sx={errors.experiences[index]?.company ? errorStyle : inputStyle}
+                  sx={
+                    errors.experiences[index]?.company
+                      ? { ...errorStyle, mb: 3 }
+                      : { ...inputStyle }
+                  }
                   error={errors.experiences[index]?.company}
-                  helperText={errors.experiences[index]?.company ? "Company name is required" : ""}
+                  helperText={errors.experiences[index]?.company ? "Company name is required" : " "}
                 />
               </Grid>
               <Grid item xs={12} sm={6}>
@@ -1316,9 +1359,13 @@ export default function Addstaff1({
                       });
                     }
                   }}
-                  sx={errors.experiences[index]?.position ? errorStyle : inputStyle}
+                  sx={
+                    errors.experiences[index]?.position
+                      ? { ...errorStyle, mb: 3 }
+                      : { ...inputStyle }
+                  }
                   error={errors.experiences[index]?.position}
-                  helperText={errors.experiences[index]?.position ? "Position is required" : ""}
+                  helperText={errors.experiences[index]?.position ? "Position is required" : " "}
                 />
               </Grid>
               <Grid item xs={12} sm={3}>
@@ -1338,9 +1385,11 @@ export default function Addstaff1({
                       });
                     }
                   }}
-                  sx={errors.experiences[index]?.from ? errorStyle : inputStyle}
+                  sx={
+                    errors.experiences[index]?.from ? { ...errorStyle, mb: 3 } : { ...inputStyle }
+                  }
                   error={errors.experiences[index]?.from}
-                  helperText={errors.experiences[index]?.from ? "From date is required" : ""}
+                  helperText={errors.experiences[index]?.from ? "From date is required" : " "}
                 />
               </Grid>
               <Grid item xs={12} sm={3}>
@@ -1360,17 +1409,16 @@ export default function Addstaff1({
                       });
                     }
                   }}
-                  sx={errors.experiences[index]?.to ? errorStyle : inputStyle}
+                  sx={errors.experiences[index]?.to ? { ...errorStyle, mb: 3 } : { ...inputStyle }}
                   error={errors.experiences[index]?.to}
-                  helperText={errors.experiences[index]?.to ? "To date is required" : ""}
+                  helperText={errors.experiences[index]?.to ? "To date is required" : " "}
                 />
               </Grid>
-              {/* Description Field in Experience Section */}
               <Grid item xs={12} sm={6}>
                 <TextField
                   label="Description"
                   fullWidth
-                  required // Add required prop
+                  required
                   value={exp.description}
                   onChange={(e) => handleExperienceChange(index, "description", e.target.value)}
                   onBlur={() => {
@@ -1382,11 +1430,15 @@ export default function Addstaff1({
                       });
                     }
                   }}
-                  sx={errors.experiences[index]?.description ? errorStyle : inputStyle} // Add error styling
-                  error={errors.experiences[index]?.description} // Add error state
+                  sx={
+                    errors.experiences[index]?.description
+                      ? { ...errorStyle, mb: 3 }
+                      : { ...inputStyle }
+                  }
+                  error={errors.experiences[index]?.description}
                   helperText={
-                    errors.experiences[index]?.description ? "Description is required" : ""
-                  } // Add helper text
+                    errors.experiences[index]?.description ? "Description is required" : " "
+                  }
                 />
               </Grid>
             </Grid>
@@ -1430,9 +1482,9 @@ export default function Addstaff1({
               value={documents.panCard}
               onChange={(e) => handleDocumentChange("panCard", e.target.value)}
               onBlur={() => handleFieldBlur("panCard")}
-              sx={errors.panCard ? errorStyle : inputStyle}
+              sx={errors.panCard ? { ...errorStyle, mb: 3 } : { ...inputStyle }}
               error={errors.panCard}
-              helperText={errors.panCard ? "PAN card number is required" : ""}
+              helperText={errors.panCard ? "PAN card number is required" : " "}
             />
           </Grid>
           <Grid item xs={12} sm={6}>
@@ -1443,9 +1495,9 @@ export default function Addstaff1({
               value={documents.aadhaarCard}
               onChange={(e) => handleDocumentChange("aadhaarCard", e.target.value)}
               onBlur={() => handleFieldBlur("aadhaarCard")}
-              sx={errors.aadhaarCard ? errorStyle : inputStyle}
+              sx={errors.aadhaarCard ? { ...errorStyle, mb: 3 } : { ...inputStyle }}
               error={errors.aadhaarCard}
-              helperText={errors.aadhaarCard ? "Aadhaar card number is required" : ""}
+              helperText={errors.aadhaarCard ? "Aadhaar card number is required" : " "}
             />
           </Grid>
           <Grid item xs={12} sm={6}>
@@ -1454,7 +1506,7 @@ export default function Addstaff1({
               fullWidth
               value={documents.passport}
               onChange={(e) => handleDocumentChange("passport", e.target.value)}
-              sx={inputStyle}
+              sx={{ ...inputStyle }}
             />
           </Grid>
           <Grid item xs={12} sm={6}>
@@ -1463,7 +1515,7 @@ export default function Addstaff1({
               fullWidth
               value={documents.drivingLicense}
               onChange={(e) => handleDocumentChange("drivingLicense", e.target.value)}
-              sx={inputStyle}
+              sx={{ ...inputStyle }}
             />
           </Grid>
           <Grid item xs={12}>

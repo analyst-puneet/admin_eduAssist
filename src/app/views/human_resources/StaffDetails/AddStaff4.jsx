@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import {
   Box,
   Grid,
@@ -45,6 +45,45 @@ export default function AddStaff4({
   const [previewFile, setPreviewFile] = useState(null);
   const [openPreview, setOpenPreview] = useState(false);
 
+  const objectUrlsRef = useRef([]);
+
+  useEffect(() => {
+    if (formData && Object.keys(formData).length > 0) {
+      if (formData.educationLevel && !educationLevel) {
+        setEducationLevel(formData.educationLevel);
+      }
+      if (formData.sections && sections.length === 0) {
+        setSections(formData.sections);
+      }
+      if (formData.fileNames && Object.keys(fileNames).length === 0) {
+        setFileNames(formData.fileNames);
+      }
+      if (formData.files && Object.keys(files).length === 0) {
+        const newFiles = { ...formData.files };
+        Object.keys(newFiles).forEach((key) => {
+          if (newFiles[key]?.data && !newFiles[key].preview) {
+            // Recreate object URL from base64 data
+            const blob = dataURLtoBlob(newFiles[key].data);
+            const objectUrl = URL.createObjectURL(blob);
+            objectUrlsRef.current.push(objectUrl);
+            newFiles[key].preview = objectUrl;
+          }
+        });
+        setFiles(newFiles);
+      }
+      if (formData.ugYears && ugYears === 3) {
+        setUgYears(formData.ugYears);
+      }
+    }
+  }, []);
+
+  useEffect(() => {
+    return () => {
+      objectUrlsRef.current.forEach((url) => URL.revokeObjectURL(url));
+      objectUrlsRef.current = [];
+    };
+  }, []);
+
   // Validation states
   const [errors, setErrors] = useState({
     tenthBoard: false,
@@ -54,10 +93,53 @@ export default function AddStaff4({
     twelfthBoard: false,
     twelfthPercentage: false,
     twelfthYear: false,
-    twelfthMarksheet: false
+    twelfthMarksheet: false,
+    ugCollegeName: false,
+    ugCourse: false,
+    ugPercentage: false
   });
 
   const [showErrors, setShowErrors] = useState(false);
+
+  // Input styling with error state
+  const inputStyle = {
+    "& .MuiInputBase-root": {
+      height: "38px",
+      fontSize: "0.875rem"
+    },
+    "& .MuiInputLabel-root": {
+      transform: "translate(14px, 10px) scale(1)",
+      fontSize: "0.875rem",
+      "&.MuiInputLabel-shrink": {
+        transform: "translate(14px, -9px) scale(0.75)"
+      }
+    },
+    "& .MuiOutlinedInput-notchedOutline": {
+      borderColor: isDarkMode ? theme.palette.grey[600] : theme.palette.grey[400]
+    },
+    "&:hover .MuiOutlinedInput-notchedOutline": {
+      borderColor: isDarkMode ? theme.palette.grey[500] : theme.palette.grey[600]
+    },
+    "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
+      borderColor: theme.palette.primary.main
+    }
+  };
+
+  // Error styling - matches AddStaff1
+  const errorStyle = {
+    ...inputStyle,
+    "& .MuiOutlinedInput-notchedOutline": {
+      borderColor: "error.main"
+    },
+    "& .MuiFormHelperText-root": {
+      position: "absolute",
+      bottom: "-20px",
+      left: 0,
+      margin: 0,
+      fontSize: "0.75rem",
+      color: "error.main"
+    }
+  };
 
   // Validate form and notify parent
   const validateForm = (show = false) => {
@@ -69,7 +151,10 @@ export default function AddStaff4({
       twelfthBoard: !formData.twelfthBoard,
       twelfthPercentage: !formData.twelfthPercentage,
       twelfthYear: !formData.twelfthYear,
-      twelfthMarksheet: !fileNames.twelfthMarksheet
+      twelfthMarksheet: !fileNames.twelfthMarksheet,
+      ugCollegeName: sections.includes("UG") && !formData.ugCollegeName,
+      ugCourse: sections.includes("UG") && !formData.ugCourse,
+      ugPercentage: sections.includes("UG") && !formData.ugPercentage
     };
 
     if (show) setErrors(newErrors);
@@ -103,50 +188,31 @@ export default function AddStaff4({
     }
   }, [triggerValidation]);
 
-  // Input styling with error state
-  const inputStyle = {
-    "& .MuiInputBase-root": {
-      height: "38px",
-      fontSize: "0.875rem"
-    },
-    "& .MuiInputLabel-root": {
-      transform: "translate(14px, 10px) scale(1)",
-      fontSize: "0.875rem",
-      "&.MuiInputLabel-shrink": {
-        transform: "translate(14px, -9px) scale(0.75)"
-      }
-    },
-    margin: "0.25rem 0"
-  };
-
-  const errorStyle = {
-    ...inputStyle,
-    "& .MuiOutlinedInput-notchedOutline": {
-      borderColor: isDarkMode ? theme.palette.grey[500] : theme.palette.grey[400]
-    },
-    "& .MuiInputLabel-root": {
-      color: isDarkMode ? theme.palette.grey[400] : theme.palette.grey[600]
-    },
-    "& .MuiFormHelperText-root": {
-      color: isDarkMode ? theme.palette.grey[400] : theme.palette.grey[600],
-      fontSize: "0.75rem"
-    }
-  };
-
   const handleFileChange = (fieldName, e) => {
     const file = e.target.files[0];
     if (file) {
-      setFileNames((prev) => ({
-        ...prev,
-        [fieldName]: file.name
-      }));
-      setFiles((prev) => ({
-        ...prev,
-        [fieldName]: {
-          file: file,
-          preview: URL.createObjectURL(file)
-        }
-      }));
+      const objectUrl = URL.createObjectURL(file);
+      objectUrlsRef.current.push(objectUrl);
+
+      // Convert file to base64 for persistence
+      const reader = new FileReader();
+      reader.onload = () => {
+        setFileNames((prev) => ({
+          ...prev,
+          [fieldName]: file.name
+        }));
+        setFiles((prev) => ({
+          ...prev,
+          [fieldName]: {
+            name: file.name,
+            type: file.type,
+            data: reader.result, // base64 data
+            preview: objectUrl
+          }
+        }));
+      };
+      reader.readAsDataURL(file);
+
       if (errors[fieldName]) {
         setErrors((prev) => ({ ...prev, [fieldName]: false }));
       }
@@ -154,6 +220,14 @@ export default function AddStaff4({
   };
 
   const handleRemoveFile = (fieldName) => {
+    // Revoke the object URL if it exists
+    if (files[fieldName]?.preview) {
+      URL.revokeObjectURL(files[fieldName].preview);
+      objectUrlsRef.current = objectUrlsRef.current.filter(
+        (url) => url !== files[fieldName].preview
+      );
+    }
+
     setFileNames((prev) => {
       const newFiles = { ...prev };
       delete newFiles[fieldName];
@@ -164,14 +238,29 @@ export default function AddStaff4({
       delete newFiles[fieldName];
       return newFiles;
     });
-    setErrors((prev) => ({ ...prev, [fieldName]: true }));
+    if (fieldName === "tenthMarksheet" || fieldName === "twelfthMarksheet") {
+      setErrors((prev) => ({ ...prev, [fieldName]: true }));
+    }
   };
+
+  // Helper function to convert base64 to blob
+  function dataURLtoBlob(dataURL) {
+    const arr = dataURL.split(",");
+    const mime = arr[0].match(/:(.*?);/)[1];
+    const bstr = atob(arr[1]);
+    let n = bstr.length;
+    const u8arr = new Uint8Array(n);
+    while (n--) {
+      u8arr[n] = bstr.charCodeAt(n);
+    }
+    return new Blob([u8arr], { type: mime });
+  }
 
   const handlePreviewFile = (fieldName) => {
     if (files[fieldName]) {
       setPreviewFile({
         name: fileNames[fieldName],
-        file: files[fieldName],
+        url: files[fieldName].preview,
         type: files[fieldName].type
       });
       setOpenPreview(true);
@@ -185,9 +274,7 @@ export default function AddStaff4({
         sx={{
           border: `1px dashed ${
             errors[fieldName]
-              ? isDarkMode
-                ? theme.palette.grey[500]
-                : theme.palette.grey[400]
+              ? "error.main"
               : isDarkMode
               ? theme.palette.grey[600]
               : theme.palette.grey[400]
@@ -312,44 +399,44 @@ export default function AddStaff4({
         <Grid container spacing={1.5}>
           <Grid item xs={12} sm={6} md={4}>
             <TextField
-              label="Board Name"
+              label="Board Name "
               fullWidth
               required
-              sx={errors.tenthBoard ? errorStyle : inputStyle}
+              sx={errors.tenthBoard ? { ...errorStyle, mb: 3 } : { ...inputStyle }}
               value={formData.tenthBoard || ""}
               onChange={(e) => handleBasicFieldChange("tenthBoard", e.target.value)}
               onBlur={() => handleFieldBlur("tenthBoard")}
               error={errors.tenthBoard}
-              helperText={errors.tenthBoard ? "Board name is required" : ""}
+              helperText={errors.tenthBoard ? "Board name is required" : " "}
             />
           </Grid>
           <Grid item xs={12} sm={6} md={4}>
             <TextField
-              label="Percentage"
+              label="Percentage "
               type="number"
               fullWidth
               required
-              sx={errors.tenthPercentage ? errorStyle : inputStyle}
+              sx={errors.tenthPercentage ? { ...errorStyle, mb: 3 } : { ...inputStyle }}
               value={formData.tenthPercentage || ""}
               onChange={(e) => handleBasicFieldChange("tenthPercentage", e.target.value)}
               onBlur={() => handleFieldBlur("tenthPercentage")}
               error={errors.tenthPercentage}
-              helperText={errors.tenthPercentage ? "Percentage is required" : ""}
+              helperText={errors.tenthPercentage ? "Percentage is required" : " "}
               inputProps={{ step: "0.01", min: "0", max: "100" }}
             />
           </Grid>
           <Grid item xs={12} sm={6} md={4}>
             <TextField
-              label="Year of Passing"
+              label="Year of Passing "
               type="number"
               fullWidth
               required
-              sx={errors.tenthYear ? errorStyle : inputStyle}
+              sx={errors.tenthYear ? { ...errorStyle, mb: 3 } : { ...inputStyle }}
               value={formData.tenthYear || ""}
               onChange={(e) => handleBasicFieldChange("tenthYear", e.target.value)}
               onBlur={() => handleFieldBlur("tenthYear")}
               error={errors.tenthYear}
-              helperText={errors.tenthYear ? "Year is required" : ""}
+              helperText={errors.tenthYear ? "Year is required" : " "}
               inputProps={{ min: "1900", max: new Date().getFullYear() }}
             />
           </Grid>
@@ -364,10 +451,11 @@ export default function AddStaff4({
               {errors.tenthMarksheet && (
                 <Typography
                   variant="caption"
+                  color="error"
                   sx={{
                     mt: 0.5,
                     display: "block",
-                    color: isDarkMode ? theme.palette.grey[400] : theme.palette.grey[600]
+                    fontSize: "0.75rem"
                   }}
                 >
                   10th marksheet is required
@@ -394,44 +482,44 @@ export default function AddStaff4({
         <Grid container spacing={1.5}>
           <Grid item xs={12} sm={6} md={4}>
             <TextField
-              label="Board Name"
+              label="Board Name "
               fullWidth
               required
-              sx={errors.twelfthBoard ? errorStyle : inputStyle}
+              sx={errors.twelfthBoard ? { ...errorStyle, mb: 3 } : { ...inputStyle }}
               value={formData.twelfthBoard || ""}
               onChange={(e) => handleBasicFieldChange("twelfthBoard", e.target.value)}
               onBlur={() => handleFieldBlur("twelfthBoard")}
               error={errors.twelfthBoard}
-              helperText={errors.twelfthBoard ? "Board name is required" : ""}
+              helperText={errors.twelfthBoard ? "Board name is required" : " "}
             />
           </Grid>
           <Grid item xs={12} sm={6} md={4}>
             <TextField
-              label="Percentage"
+              label="Percentage "
               type="number"
               fullWidth
               required
-              sx={errors.twelfthPercentage ? errorStyle : inputStyle}
+              sx={errors.twelfthPercentage ? { ...errorStyle, mb: 3 } : { ...inputStyle }}
               value={formData.twelfthPercentage || ""}
               onChange={(e) => handleBasicFieldChange("twelfthPercentage", e.target.value)}
               onBlur={() => handleFieldBlur("twelfthPercentage")}
               error={errors.twelfthPercentage}
-              helperText={errors.twelfthPercentage ? "Percentage is required" : ""}
+              helperText={errors.twelfthPercentage ? "Percentage is required" : " "}
               inputProps={{ step: "0.01", min: "0", max: "100" }}
             />
           </Grid>
           <Grid item xs={12} sm={6} md={4}>
             <TextField
-              label="Year of Passing"
+              label="Year of Passing "
               type="number"
               fullWidth
               required
-              sx={errors.twelfthYear ? errorStyle : inputStyle}
+              sx={errors.twelfthYear ? { ...errorStyle, mb: 3 } : { ...inputStyle }}
               value={formData.twelfthYear || ""}
               onChange={(e) => handleBasicFieldChange("twelfthYear", e.target.value)}
               onBlur={() => handleFieldBlur("twelfthYear")}
               error={errors.twelfthYear}
-              helperText={errors.twelfthYear ? "Year is required" : ""}
+              helperText={errors.twelfthYear ? "Year is required" : " "}
               inputProps={{ min: "1900", max: new Date().getFullYear() }}
             />
           </Grid>
@@ -446,10 +534,11 @@ export default function AddStaff4({
               {errors.twelfthMarksheet && (
                 <Typography
                   variant="caption"
+                  color="error"
                   sx={{
                     mt: 0.5,
                     display: "block",
-                    color: isDarkMode ? theme.palette.grey[400] : theme.palette.grey[600]
+                    fontSize: "0.75rem"
                   }}
                 >
                   12th marksheet is required
@@ -487,33 +576,43 @@ export default function AddStaff4({
           <Grid container spacing={1.5}>
             <Grid item xs={12} sm={6}>
               <TextField
-                label="University/College Name"
+                label="University/College Name *"
                 fullWidth
                 required
-                sx={inputStyle}
+                sx={errors.ugCollegeName ? { ...errorStyle, mb: 3 } : { ...inputStyle }}
                 value={formData.ugCollegeName || ""}
                 onChange={(e) => handleBasicFieldChange("ugCollegeName", e.target.value)}
+                onBlur={() => handleFieldBlur("ugCollegeName")}
+                error={errors.ugCollegeName}
+                helperText={errors.ugCollegeName ? "College name is required" : " "}
               />
             </Grid>
             <Grid item xs={12} sm={6}>
               <TextField
-                label="Course"
+                label="Course "
                 fullWidth
                 required
-                sx={inputStyle}
+                sx={errors.ugCourse ? { ...errorStyle, mb: 3 } : { ...inputStyle }}
                 value={formData.ugCourse || ""}
                 onChange={(e) => handleBasicFieldChange("ugCourse", e.target.value)}
+                onBlur={() => handleFieldBlur("ugCourse")}
+                error={errors.ugCourse}
+                helperText={errors.ugCourse ? "Course is required" : " "}
               />
             </Grid>
             <Grid item xs={12} sm={6}>
               <TextField
-                label="Percentage of Final Year"
+                label="Percentage of Final Year "
                 fullWidth
                 type="number"
                 required
-                sx={inputStyle}
+                sx={errors.ugPercentage ? { ...errorStyle, mb: 3 } : { ...inputStyle }}
                 value={formData.ugPercentage || ""}
                 onChange={(e) => handleBasicFieldChange("ugPercentage", e.target.value)}
+                onBlur={() => handleFieldBlur("ugPercentage")}
+                error={errors.ugPercentage}
+                helperText={errors.ugPercentage ? "Percentage is required" : " "}
+                inputProps={{ step: "0.01", min: "0", max: "100" }}
               />
             </Grid>
 
@@ -608,37 +707,64 @@ export default function AddStaff4({
       </Box>
 
       {/* File Preview Dialog */}
-      <Dialog open={openPreview} onClose={() => setOpenPreview(false)} maxWidth="md" fullWidth>
+      <Dialog
+        open={openPreview}
+        onClose={() => setOpenPreview(false)}
+        maxWidth="md"
+        fullWidth
+        sx={{
+          "& .MuiDialog-paper": {
+            height: "80vh" // Make dialog take 80% of viewport height
+          }
+        }}
+      >
         <DialogTitle>
           <Box display="flex" justifyContent="space-between" alignItems="center">
-            <Typography variant="h6">{previewFile?.name}</Typography>
+            <Typography variant="h6" noWrap sx={{ maxWidth: "calc(100% - 48px)" }}>
+              {previewFile?.name}
+            </Typography>
             <IconButton onClick={() => setOpenPreview(false)}>
               <CloseIcon />
             </IconButton>
           </Box>
         </DialogTitle>
-        <DialogContent dividers>
-          {previewFile && (previewFile.file instanceof File || previewFile.preview) && (
+        <DialogContent
+          dividers
+          sx={{
+            display: "flex",
+            justifyContent: "center",
+            alignItems: "center",
+            backgroundColor: isDarkMode ? theme.palette.grey[800] : theme.palette.grey[100]
+          }}
+        >
+          {previewFile && (
             <Box
               sx={{
+                width: "100%",
+                height: "100%",
                 display: "flex",
+                flexDirection: "column",
                 justifyContent: "center",
-                alignItems: "center",
-                minHeight: "400px"
+                alignItems: "center"
               }}
             >
               {previewFile.type === "application/pdf" ? (
-                <embed
-                  src={previewFile.preview || URL.createObjectURL(previewFile.file)}
-                  type="application/pdf"
+                <iframe
+                  src={previewFile.url}
                   width="100%"
-                  height="500px"
+                  height="100%"
+                  style={{ border: "none" }}
+                  title={previewFile.name}
                 />
               ) : (
                 <img
-                  src={previewFile.preview || URL.createObjectURL(previewFile.file)}
+                  src={previewFile.url}
                   alt={previewFile.name}
-                  style={{ maxWidth: "100%", maxHeight: "500px" }}
+                  style={{
+                    maxWidth: "100%",
+                    maxHeight: "100%",
+                    objectFit: "contain"
+                  }}
                 />
               )}
             </Box>
