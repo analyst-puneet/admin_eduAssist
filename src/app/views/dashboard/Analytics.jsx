@@ -1,6 +1,6 @@
 import { Fragment } from "react";
 import Card from "@mui/material/Card";
-import Grid from "@mui/material/Grid2";
+import Grid from "@mui/material";
 import { styled, useTheme } from "@mui/material/styles";
 
 import RowCards from "./shared/RowCards";

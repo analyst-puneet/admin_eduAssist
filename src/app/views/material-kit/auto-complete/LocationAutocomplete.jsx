@@ -1,5 +1,5 @@
 import { useMemo, useEffect, useState, useRef } from "react";
-import Grid from "@mui/material/Grid2";
+import Grid from "@mui/material";
 import TextField from "@mui/material/TextField";
 import Typography from "@mui/material/Typography";
 import useTheme from "@mui/material/styles/useTheme";
