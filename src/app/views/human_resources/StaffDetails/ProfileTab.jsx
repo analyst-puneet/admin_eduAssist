@@ -1,4 +1,14 @@
 import { Box, Grid, Typography, CircularProgress, Divider, Paper, useTheme } from "@mui/material";
+import {
+  Person,
+  Phone,
+  Badge,
+  Business,
+  Work,
+  LocationOn,
+  CreditCard,
+  Security
+} from "@mui/icons-material";
 import { useState, useEffect } from "react";
 
 const ProfileTab = ({ userData }) => {
@@ -29,111 +39,87 @@ const ProfileTab = ({ userData }) => {
 
   return (
     <Paper
-      elevation={0}
+      elevation={3}
       sx={{
-        p: 3,
-        borderRadius: 2,
+        p: 4,
+        borderRadius: 3,
         backgroundColor: theme.palette.background.paper
       }}
     >
-      {/* Personal Information Section */}
-      <Box mb={4}>
-        <Typography
-          variant="h5"
-          gutterBottom
-          sx={{
-            fontWeight: 600,
-            color: "primary.main",
-            mb: 3
-          }}
-        >
-          Personal Information
-        </Typography>
-        <Grid container spacing={3}>
-          <DetailItem label="Name" value={profileDetails?.name} />
-          <DetailItem label="Phone" value={profileDetails?.contact} />
-        </Grid>
-      </Box>
+      {/* Personal Info */}
+      <SectionTitle title="Personal Information" icon={<Person color="primary" />} />
+
+      <Grid container spacing={3} mb={3}>
+        <DetailItem icon={<Person />} label="Name" value={profileDetails?.name} />
+        <DetailItem icon={<Phone />} label="Phone" value={profileDetails?.contact} />
+      </Grid>
 
       <Divider sx={{ my: 3 }} />
 
-      {/* Professional Details Section */}
-      <Box mb={4}>
-        <Typography
-          variant="h5"
-          gutterBottom
-          sx={{
-            fontWeight: 600,
-            color: "primary.main",
-            mb: 3
-          }}
-        >
-          Professional Details
-        </Typography>
-        <Grid container spacing={3}>
-          <DetailItem label="Employee ID" value={profileDetails?.empId} />
-          <DetailItem label="Department" value={profileDetails?.department} />
-          <DetailItem label="Designation" value={profileDetails?.designation} />
-          <DetailItem label="Location" value={profileDetails?.location} />
-        </Grid>
-      </Box>
+      {/* Professional Info */}
+      <SectionTitle title="Professional Details" icon={<Work color="primary" />} />
+
+      <Grid container spacing={3} mb={3}>
+        <DetailItem icon={<Badge />} label="Employee ID" value={profileDetails?.empId} />
+        <DetailItem icon={<Business />} label="Department" value={profileDetails?.department} />
+        <DetailItem icon={<Work />} label="Designation" value={profileDetails?.designation} />
+        <DetailItem icon={<LocationOn />} label="Location" value={profileDetails?.location} />
+      </Grid>
 
       <Divider sx={{ my: 3 }} />
 
-      {/* Official Information Section */}
-      <Box>
-        <Typography
-          variant="h5"
-          gutterBottom
-          sx={{
-            fontWeight: 600,
-            color: "primary.main",
-            mb: 3
-          }}
-        >
-          Official Information
-        </Typography>
-        <Grid container spacing={3}>
-          <DetailItem label="PAN Number" value={profileDetails?.PanNumber} />
-          <DetailItem label="Roles" value={profileDetails?.roles?.join(", ")} />
-        </Grid>
-      </Box>
+      {/* Official Info */}
+      <SectionTitle title="Official Information" icon={<Security color="primary" />} />
+
+      <Grid container spacing={3}>
+        <DetailItem icon={<CreditCard />} label="PAN Number" value={profileDetails?.PanNumber} />
+        <DetailItem icon={<Security />} label="Roles" value={profileDetails?.roles?.join(", ")} />
+      </Grid>
     </Paper>
   );
 };
 
-const DetailItem = ({ label, value }) => (
+const DetailItem = ({ label, value, icon }) => (
   <Grid item xs={12} sm={6} md={4}>
     <Box
       sx={{
         display: "flex",
-        flexDirection: "column",
+        alignItems: "flex-start",
+        gap: 2,
         p: 2,
-        borderRadius: 1,
-        backgroundColor: "action.hover" // This gives the gray background
+        borderRadius: 2,
+        backgroundColor: "action.hover",
+        height: "100%",
+        boxShadow: 1
       }}
     >
-      <Typography
-        variant="subtitle2"
-        sx={{
-          fontWeight: 500,
-          color: "text.secondary",
-          mb: 1
-        }}
-      >
-        {label}
-      </Typography>
-      <Typography
-        variant="body1"
-        sx={{
-          fontWeight: 500,
-          wordBreak: "break-word"
-        }}
-      >
-        {value || "-"}
-      </Typography>
+      <Box mt={0.5}>{icon}</Box>
+      <Box>
+        <Typography variant="subtitle2" color="text.secondary" sx={{ fontWeight: 600 }}>
+          {label}
+        </Typography>
+        <Typography variant="body1" sx={{ fontWeight: 500, wordBreak: "break-word" }}>
+          {value || "-"}
+        </Typography>
+      </Box>
     </Box>
   </Grid>
+);
+
+const SectionTitle = ({ title, icon }) => (
+  <Box display="flex" alignItems="center" mb={2}>
+    {icon}
+    <Typography
+      variant="h6"
+      sx={{
+        fontWeight: 600,
+        color: "primary.main",
+        ml: 1
+      }}
+    >
+      {title}
+    </Typography>
+  </Box>
 );
 
 export default ProfileTab;

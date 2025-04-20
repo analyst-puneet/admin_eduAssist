@@ -12,13 +12,23 @@ const navigations = [
   },
 
   {
+    name: "HR Master",
+    icon: "support_agent",
+    children: [
+      { name: "Master", path: "/human-resources/master", iconText: "HM" },
+      { name: "Leave Type", path: "/leave-master/type", iconText: "LT" },
+      // { name: "Leave Group", path: "/leave-master/leave-group", iconText: "LG" }
+    ]
+  },
+
+  {
     name: "Human Resources",
     icon: "people", // Changed to more appropriate forms icon
     children: [
       {
         name: "Staff Details",
         path: "/human_resources/staff-details",
-        iconText: "VU"
+        iconText: "SD"
       },
       {
         name: "Staff Attendance",
@@ -30,23 +40,21 @@ const navigations = [
         path: "/human_resources/staff-leave",
         iconText: "SL"
       }
+      ,
+      {
+        name: "Staff Leave Report",
+        path: "/#",
+        iconText: "LR"
+      }
     ]
   },
 
   {
     name: "Front Office",
-    icon: "support_agent",
+    icon: "person",
     children: [
       { name: "Admission Enquiry", path: "/front-office/admission-enquiry", iconText: "AE" },
       { name: "Visitor Book", path: "/front-office/visitor-book", iconText: "VB" }
-    ]
-  },
-  {
-    name: "Student Information",
-    icon: "person",
-    children: [
-      { name: "Student Details", path: "/student/details", iconText: "SD" },
-      { name: "Attendance", path: "/student/attendance", iconText: "AT" }
     ]
   },
   {
