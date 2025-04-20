@@ -40,6 +40,12 @@ const navigations = [
         path: "/human_resources/staff-leave",
         iconText: "SL"
       }
+      ,
+      {
+        name: "Staff Leave Report",
+        path: "/#",
+        iconText: "LR"
+      }
     ]
   },
 
