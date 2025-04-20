@@ -20,9 +20,17 @@ import DeleteIcon from "@mui/icons-material/Delete";
 import { IconButton } from "@mui/material";
 
 const leaveOptions = ["Casual Leave", "Medical Leave", "Earned Leave"];
+const employeeOptions = [
+  "John Doe",
+  "Jane Smith",
+  "Robert Johnson",
+  "Emily Davis",
+  "Michael Wilson"
+];
 
 const ApplyLeave = () => {
   const [formData, setFormData] = useState({
+    employeeName: "",
     applyDate: "",
     leaveType: "",
     fromDate: "",
@@ -31,7 +39,9 @@ const ApplyLeave = () => {
     document: null,
     isOutOfStation: false,
     destinationAddress: "",
-    mobileNumber: ""
+    mobileNumber: "",
+    outOfStationFrom: "",
+    outOfStationTo: ""
   });
 
   const navigate = useNavigate();
@@ -88,7 +98,7 @@ const ApplyLeave = () => {
       <Grid container justifyContent="space-between" alignItems="center">
         <Grid item>
           <Typography variant="h6" gutterBottom>
-            Add Details
+            Add Leave Application
           </Typography>
         </Grid>
         <Grid item>
@@ -99,26 +109,33 @@ const ApplyLeave = () => {
       <Paper sx={{ p: 3, mt: 2 }}>
         <form onSubmit={handleSubmit}>
           <Grid container spacing={2}>
-            {/* Apply Date */}
-            <Grid item xs={12} md={6}>
-              <TextField
-                label="Apply Date"
-                name="applyDate"
-                type="date"
-                fullWidth
-                required
-                InputLabelProps={{ shrink: true }}
-                value={formData.applyDate}
-                onChange={handleChange}
-                sx={inputStyle}
-              />
-            </Grid>
-
-            {/* Available Leave */}
+            {/* Employee Name Dropdown */}
             <Grid item xs={12} md={6}>
               <TextField
                 select
-                label="Available Leave"
+                label="Employee Name"
+                name="employeeName"
+                fullWidth
+                required
+                value={formData.employeeName}
+                onChange={handleChange}
+                sx={inputStyle}
+              >
+                {employeeOptions.map((employee) => (
+                  <MenuItem key={employee} value={employee}>
+                    {employee}
+                  </MenuItem>
+                ))}
+              </TextField>
+            </Grid>
+
+           
+
+            {/* Leave Type */}
+            <Grid item xs={12} md={6}>
+              <TextField
+                select
+                label="Leave Type"
                 name="leaveType"
                 fullWidth
                 required
@@ -187,6 +204,7 @@ const ApplyLeave = () => {
                     label="Destination Address"
                     name="destinationAddress"
                     fullWidth
+                    required
                     value={formData.destinationAddress}
                     onChange={handleChange}
                     sx={inputStyle}
@@ -198,6 +216,7 @@ const ApplyLeave = () => {
                     name="mobileNumber"
                     fullWidth
                     type="tel"
+                    required
                     value={formData.mobileNumber}
                     onChange={handleChange}
                     sx={inputStyle}
@@ -205,6 +224,33 @@ const ApplyLeave = () => {
                       pattern: "[0-9]{10}",
                       title: "Please enter a 10-digit mobile number"
                     }}
+                  />
+                </Grid>
+                {/* Additional Out of Station Dates */}
+                <Grid item xs={12} md={6}>
+                  <TextField
+                    label="Out of Station From Date"
+                    name="outOfStationFrom"
+                    type="date"
+                    fullWidth
+                    required
+                    InputLabelProps={{ shrink: true }}
+                    value={formData.outOfStationFrom}
+                    onChange={handleChange}
+                    sx={inputStyle}
+                  />
+                </Grid>
+                <Grid item xs={12} md={6}>
+                  <TextField
+                    label="Out of Station To Date"
+                    name="outOfStationTo"
+                    type="date"
+                    fullWidth
+                    required
+                    InputLabelProps={{ shrink: true }}
+                    value={formData.outOfStationTo}
+                    onChange={handleChange}
+                    sx={inputStyle}
                   />
                 </Grid>
               </>
@@ -218,6 +264,7 @@ const ApplyLeave = () => {
                 fullWidth
                 multiline
                 rows={3}
+                required
                 value={formData.reason}
                 onChange={handleChange}
                 sx={{
@@ -259,7 +306,7 @@ const ApplyLeave = () => {
                     hidden
                     name="document"
                     onChange={handleChange}
-                    accept=".pdf,.doc,.docx,.jpg,.jpeg,.png" // Specify accepted file types
+                    accept=".pdf,.doc,.docx,.jpg,.jpeg,.png"
                   />
                 </Button>
 
@@ -318,9 +365,10 @@ const ApplyLeave = () => {
                 variant="contained"
                 color="primary"
                 type="submit"
-                sx={{ textTransform: "none" }}
+                size="large"
+                sx={{ textTransform: "none", px: 4 }}
               >
-                Save
+                Submit Application
               </Button>
             </Grid>
           </Grid>

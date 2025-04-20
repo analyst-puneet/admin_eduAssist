@@ -20,16 +20,22 @@ import {
   useTheme,
   Grid,
   Stack,
-  MenuItem
+  MenuItem,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions
 } from "@mui/material";
 import {
   Edit,
   Delete,
   Home as HomeIcon,
   ChevronRight as ChevronRightIcon,
-  Menu as MenuIcon
+  Menu as MenuIcon,
+  Add as AddIcon
 } from "@mui/icons-material";
 import { Link } from "react-router-dom";
+import LeaveStock from "../StaffLeave/LeaveStock";
 
 const modules = ["Leave Group", "Complaint Type", "Source", "Reference"];
 
@@ -53,14 +59,27 @@ const moduleFields = {
   ]
 };
 
-const dummyData = {
+const staticData = {
   "Leave Group": [
     { groupName: "Teaching Staff", status: "Active" },
-    { groupName: "Admin Staff", status: "Inactive" }
+    { groupName: "Admin Staff", status: "Inactive" },
+    { groupName: "Support Staff", status: "Active" }
   ],
-  "Complaint Type": [{ type: "Discipline", severity: "High", notes: "Immediate attention" }],
-  Source: [{ title: "Email", info: "Received via official mail" }],
-  Reference: [{ referenceCode: "REF123", details: "Old case reference" }]
+  "Complaint Type": [
+    { type: "Discipline", severity: "High", notes: "Immediate attention" },
+    { type: "Facilities", severity: "Medium", notes: "Needs resolution" },
+    { type: "Academic", severity: "Low", notes: "General inquiry" }
+  ],
+  Source: [
+    { title: "Email", info: "Received via official mail" },
+    { title: "Phone", info: "Direct call from parent" },
+    { title: "In-person", info: "Walk-in complaint" }
+  ],
+  Reference: [
+    { referenceCode: "REF123", details: "Old case reference" },
+    { referenceCode: "REF456", details: "Previous year record" },
+    { referenceCode: "REF789", details: "Archived document" }
+  ]
 };
 
 export default function Master() {
@@ -73,9 +92,11 @@ export default function Master() {
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(5);
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [openLeaveStock, setOpenLeaveStock] = useState(false);
+  const [selectedLeaveGroup, setSelectedLeaveGroup] = useState(null);
 
   const fields = moduleFields[selectedModule] || [];
-  const fullData = dummyData[selectedModule] || [];
+  const fullData = staticData[selectedModule] || [];
   const tableData = fullData.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage);
 
   const inputStyle = {
@@ -126,6 +147,16 @@ export default function Master() {
     setMobileOpen(!mobileOpen);
   };
 
+  const handleOpenLeaveStock = (group) => {
+    setSelectedLeaveGroup(group);
+    setOpenLeaveStock(true);
+  };
+
+  const handleCloseLeaveStock = () => {
+    setOpenLeaveStock(false);
+    setSelectedLeaveGroup(null);
+  };
+
   const drawer = (
     <Box sx={{ width: 200 }}>
       <List>
@@ -149,7 +180,7 @@ export default function Master() {
 
   return (
     <Box p={isMobile ? 1 : 2}>
-      {/* Top Breadcrumb Bar */}
+      {/* Top Bar */}
       <Box display="flex" alignItems="center" mb={3} flexWrap="wrap">
         {isMobile && (
           <IconButton onClick={handleDrawerToggle} sx={{ mr: 1 }}>
@@ -177,9 +208,7 @@ export default function Master() {
         </Typography>
       </Box>
 
-      {/* Main Content */}
       <Box display="flex" height="100%">
-        {/* Sidebar */}
         {!isMobile ? (
           <Box width="200px" mr={2}>
             {drawer}
@@ -190,17 +219,13 @@ export default function Master() {
             open={mobileOpen}
             onClose={handleDrawerToggle}
             ModalProps={{ keepMounted: true }}
-            sx={{
-              "& .MuiDrawer-paper": { boxSizing: "border-box", width: 200 }
-            }}
+            sx={{ "& .MuiDrawer-paper": { boxSizing: "border-box", width: 200 } }}
           >
             {drawer}
           </Drawer>
         )}
 
-        {/* Form and Table */}
         <Box flex={1} sx={{ overflowX: "auto" }}>
-          {/* Form */}
           <Paper elevation={3} sx={{ p: 2, mb: 3 }}>
             <Typography variant="h6" gutterBottom>
               Add {selectedModule}
@@ -244,7 +269,6 @@ export default function Master() {
             </Grid>
           </Paper>
 
-          {/* Table */}
           <Paper elevation={2} sx={{ p: 2 }}>
             <Stack direction="row" justifyContent="space-between" alignItems="center" mb={2}>
               <Typography variant="h6">{selectedModule} List</Typography>
@@ -269,6 +293,12 @@ export default function Master() {
                     {fields.map((field) => (
                       <TableCell key={field.key}>{field.label}</TableCell>
                     ))}
+                    {selectedModule === "Leave Group" && (
+                      <>
+                        <TableCell>Stock Status</TableCell>
+                        <TableCell>Fill Stock</TableCell>
+                      </>
+                    )}
                     <TableCell>Action</TableCell>
                   </TableRow>
                 </TableHead>
@@ -278,6 +308,21 @@ export default function Master() {
                       {fields.map((field) => (
                         <TableCell key={field.key}>{item[field.key]}</TableCell>
                       ))}
+                      {selectedModule === "Leave Group" && (
+                        <>
+                          <TableCell>Not Filled</TableCell>
+                          <TableCell>
+                            <Button
+                              variant="outlined"
+                              size="small"
+                              startIcon={<AddIcon />}
+                              onClick={() => handleOpenLeaveStock(item)}
+                            >
+                              Add
+                            </Button>
+                          </TableCell>
+                        </>
+                      )}
                       <TableCell>
                         <IconButton size={isMobile ? "small" : "medium"}>
                           <Edit sx={{ color: isDarkMode ? "white" : "#a3a2a2" }} />
@@ -306,6 +351,16 @@ export default function Master() {
           </Paper>
         </Box>
       </Box>
+
+      <Dialog open={openLeaveStock} onClose={handleCloseLeaveStock} fullWidth maxWidth="md">
+        <DialogTitle>Leave Stock for {selectedLeaveGroup?.groupName}</DialogTitle>
+        <DialogContent>
+          <LeaveStock leaveGroup={selectedLeaveGroup} onClose={handleCloseLeaveStock} />
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleCloseLeaveStock}>Close</Button>
+        </DialogActions>
+      </Dialog>
     </Box>
   );
 }

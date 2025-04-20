@@ -269,7 +269,7 @@ const LeaveIndex = () => {
           control={
             <Checkbox
               color="primary"
-              indeterminate={selected.length > 0 && selected.length < paginatedData.length}
+              // indeterminate={selected.length > 0 && selected.length < paginatedData.length}
               checked={paginatedData.length > 0 && selected.length === paginatedData.length}
               onChange={handleSelectAllClick}
             />
@@ -322,7 +322,6 @@ const LeaveIndex = () => {
                 <TableRow
                   key={row.id}
                   hover
-                  onClick={(event) => handleClick(event, row.id)}
                   role="checkbox"
                   aria-checked={isItemSelected}
                   selected={isItemSelected}
@@ -341,7 +340,10 @@ const LeaveIndex = () => {
                     <Checkbox
                       color="primary"
                       checked={isItemSelected}
-                      onClick={(event) => handleClick(event, row.id)}
+                      onClick={(event) => {
+                        event.stopPropagation(); // VERY IMPORTANT to stop row click
+                        handleClick(event, row.id);
+                      }}
                     />
                   </TableCell>
                 </TableRow>

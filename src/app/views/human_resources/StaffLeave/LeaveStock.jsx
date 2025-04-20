@@ -26,10 +26,6 @@ const leaveTypes = [
 const LeaveStockTable = () => {
   return (
     <Box p={2}>
-      <Typography variant="h6" gutterBottom>
-        LEAVES FOR <u style={{ color: "blue", cursor: "pointer" }}>REGULAR TEACHER</u>
-      </Typography>
-
       <TableContainer component={Paper}>
         <Table>
           <TableHead sx={{ backgroundColor: "#007bff" }}>
@@ -75,9 +71,7 @@ const LeaveStockTable = () => {
         <Button variant="contained" color="primary">
           Submit
         </Button>
-        <Button variant="outlined" color="secondary">
-          Cancel
-        </Button>
+        
       </Box>
     </Box>
   );
