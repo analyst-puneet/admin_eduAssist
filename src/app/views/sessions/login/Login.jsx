@@ -100,8 +100,8 @@ export default function Login() {
         }
       );
 
-      if (response.status === 200) {
-        window.location.replace("/");
+      if (response.status == 200) {
+        window.location.replace("/dashboard/default");
       }
     } catch (error) {
       if (error.response) {

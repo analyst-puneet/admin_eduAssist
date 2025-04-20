@@ -26,8 +26,6 @@ export const AuthProvider = ({ children }) => {
       if (response.status === 200) {
         setUserId(response.data.userId);
         setError(null);
-
-        // ✅ Already logged in but on login/signup → redirect to home
         if (isSessionRoute) {
           navigate("/");
         }
@@ -39,11 +37,10 @@ export const AuthProvider = ({ children }) => {
       setUserId(null);
 
       if (!isSessionRoute && errorCode === 401) {
-        // ✅ Unauthorized and not on login → go to login
         navigate("/session/login");
       }
 
-      setError(isSessionRoute ? null : errorCode); // hide error if on login/register
+      setError(isSessionRoute ? null : errorCode);
     } finally {
       setLoading(false);
       fetchedOnce.current = true;
@@ -54,7 +51,7 @@ export const AuthProvider = ({ children }) => {
     if (!fetchedOnce.current) {
       fetchUser();
     } else {
-      setLoading(false); // ensures children render if already fetched
+      setLoading(false); 
     }
   }, [location.pathname]);
 
