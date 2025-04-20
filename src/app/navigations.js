@@ -12,6 +12,16 @@ const navigations = [
   },
 
   {
+    name: "HR Master",
+    icon: "support_agent",
+    children: [
+      { name: "Master", path: "/human-resources/master", iconText: "HM" },
+      { name: "Leave Type", path: "/leave-master/type", iconText: "LT" },
+      // { name: "Leave Group", path: "/leave-master/leave-group", iconText: "LG" }
+    ]
+  },
+
+  {
     name: "Human Resources",
     icon: "people", // Changed to more appropriate forms icon
     children: [
@@ -33,14 +43,6 @@ const navigations = [
     ]
   },
 
-  {
-    name: "Leave Master",
-    icon: "support_agent",
-    children: [
-      { name: "Leave Type", path: "/leave-master/type", iconText: "LT" },
-      { name: "Leave Group", path: "/leave-master/leave-group", iconText: "LG" }
-    ]
-  },
   {
     name: "Front Office",
     icon: "person",

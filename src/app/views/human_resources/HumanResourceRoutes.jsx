@@ -18,6 +18,7 @@ const ApplyLeave = Loadable(lazy(() => import("app/views/human_resources/StaffLe
 const LeaveType = Loadable(lazy(() => import("app/views/human_resources/StaffLeave/LeaveType")));
 const LeaveTypeCreate = Loadable(lazy(() => import("app/views/human_resources/StaffLeave/LeaveTypeCreate")));
 const LeaveGroup= Loadable(lazy(() => import("app/views/human_resources/StaffLeave/LeaveGroup")));
+const Master= Loadable(lazy(() => import("app/views/human_resources/Master/Master")));
 
 const humanResourceRoutes = [
   { path: "/human_resources/staff-details", element: <StaffDetails /> },
@@ -29,7 +30,8 @@ const humanResourceRoutes = [
   { path: "/human_resources/staff-leave/apply", element: <ApplyLeave /> },
   { path: "/leave-master/type", element: <LeaveType /> },
   { path: "/leave-master/type/create", element: <LeaveTypeCreate /> },
-  { path: "/leave-master/leave-group", element: <LeaveGroup /> }
+  { path: "/leave-master/leave-group", element: <LeaveGroup /> },
+  { path: "/human-resources/master", element: <Master/> },
 
 ];
 
