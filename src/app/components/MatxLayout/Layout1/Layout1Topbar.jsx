@@ -93,10 +93,16 @@ const Layout1Topbar = () => {
   const updateSidebarMode = (sidebarSettings) => {
     updateSettings({ layout1Settings: { leftSidebar: { ...sidebarSettings } } });
   };
-  const logout = async () => {
+  const logout = async (req,res) => {
     try {
-        await axios.post(`${BASE_URL}/api/auth/logout`, {}, { withCredentials: true });
+      const response= await axios.post(`${BASE_URL}/api/auth/logout`, {
+           withCredentials: true 
+          });
+          if (response.status === 200) {
         window.location.replace( '/session/signin');
+          }else{
+            res.status(401).json({ message: "Logout Failed" });
+          }
     } catch (error) {
         console.error("Logout failed:", error);
     }
