@@ -60,13 +60,18 @@ export default function Addstaff1({
   );
   const [addressInfo, setAddressInfo] = useState(
     formData.addressInfo || {
-      country: "",
-      state: "",
-      district: "",
-      city: "",
-      pinCode: "",
-      currentAddress: "",
-      permanentAddress: ""
+      currentFullAddress: "",
+      currentPinCode: "",
+      currentCountry: "",
+      currentState: "",
+      currentDistrict: "",
+      currentCity: "",
+      permanentFullAddress: "",
+      permanentPinCode: "",
+      permanentCountry: "",
+      permanentState: "",
+      permanentDistrict: "",
+      permanentCity: ""
     }
   );
   const [experiences, setExperiences] = useState(
@@ -174,15 +179,20 @@ export default function Addstaff1({
       fatherName: !basicInfo.fatherName,
       motherName: !basicInfo.motherName,
       maritalStatus: !basicInfo.maritalStatus,
-      country: !addressInfo.country,
-      state: !addressInfo.state,
-      district: !addressInfo.district,
-      city: !addressInfo.city,
-      pinCode: !addressInfo.pinCode,
-      currentAddress: !addressInfo.currentAddress,
-      permanentAddress: !addressInfo.permanentAddress,
+
+      // Current Address Fields
+      currentFullAddress: !addressInfo.currentFullAddress,
+      currentPinCode: !addressInfo.currentPinCode,
+
+      // Permanent Address Fields (only validate if not same as current address)
+      permanentFullAddress: sameAsAddress ? false : !addressInfo.permanentFullAddress,
+      permanentPinCode: sameAsAddress ? false : !addressInfo.permanentPinCode,
+
+      // Document Fields
       panCard: !documents.panCard,
       aadhaarCard: !documents.aadhaarCard,
+
+      // Experience Fields
       experiences: experiences.map((exp) => ({
         company: !exp.company,
         position: !exp.position,
@@ -204,16 +214,18 @@ export default function Addstaff1({
       !newErrors.phone &&
       !newErrors.emergencyContact &&
       !newErrors.email &&
-      !newErrors.country &&
-      !newErrors.state &&
-      !newErrors.district &&
-      !newErrors.city &&
-      !newErrors.pinCode &&
-      !newErrors.currentAddress &&
-      !newErrors.permanentAddress &&
+      !newErrors.fatherName &&
+      !newErrors.motherName &&
+      !newErrors.maritalStatus &&
+      !newErrors.currentFullAddress &&
+      !newErrors.currentPinCode &&
+      !newErrors.permanentFullAddress &&
+      !newErrors.permanentPinCode &&
       !newErrors.panCard &&
       !newErrors.aadhaarCard &&
-      newErrors.experiences.every((exp) => !exp.company && !exp.position && !exp.from && !exp.to);
+      newErrors.experiences.every(
+        (exp) => !exp.company && !exp.position && !exp.from && !exp.to && !exp.description
+      );
 
     if (onValidationChange) {
       onValidationChange(isFormValid);
@@ -247,111 +259,6 @@ export default function Addstaff1({
     }
   }, [basicInfo, role, addressInfo, documents, experiences]);
 
-  // Fetch countries on component mount
-  useEffect(() => {
-    const fetchCountries = async () => {
-      try {
-        const response = await fetch("https://countriesnow.space/api/v0.1/countries/");
-        const data = await response.json();
-        if (!data.error) {
-          setCountries(
-            data.data.map((c) => ({
-              name: c.country,
-              code: c.iso2 || c.country.slice(0, 2).toUpperCase()
-            }))
-          );
-        }
-      } catch (error) {
-        console.error("Error fetching countries:", error);
-        // fallback
-        setCountries([
-          { name: "India", code: "IN" },
-          { name: "United States", code: "US" },
-          { name: "United Kingdom", code: "GB" }
-        ]);
-      }
-    };
-
-    fetchCountries();
-  }, []);
-
-  // Fetch states when country changes
-  useEffect(() => {
-    const fetchStates = async () => {
-      if (!addressInfo.country) return;
-
-      setLoadingStates(true);
-      try {
-        const response = await fetch("https://countriesnow.space/api/v0.1/countries/states", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ country: addressInfo.country })
-        });
-        const data = await response.json();
-        if (!data.error) {
-          setStates(
-            data.data.states.map((state) => ({
-              name: state.name,
-              id: state.name
-            }))
-          );
-        }
-      } catch (error) {
-        console.error("Error fetching states:", error);
-        // fallback
-        setStates([
-          { name: "Maharashtra", id: "MH" },
-          { name: "Delhi", id: "DL" },
-          { name: "Karnataka", id: "KA" }
-        ]);
-      } finally {
-        setLoadingStates(false);
-      }
-    };
-
-    fetchStates();
-  }, [addressInfo.country]);
-
-  // Fetch districts (cities) when state changes
-  useEffect(() => {
-    const fetchDistricts = async () => {
-      if (!addressInfo.country || !addressInfo.state) return;
-
-      setLoadingDistricts(true);
-      try {
-        const response = await fetch("https://countriesnow.space/api/v0.1/countries/state/cities", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            country: addressInfo.country,
-            state: addressInfo.state
-          })
-        });
-        const data = await response.json();
-        if (!data.error) {
-          setDistricts(
-            data.data.map((district) => ({
-              name: district,
-              id: district
-            }))
-          );
-        }
-      } catch (error) {
-        console.error("Error fetching districts:", error);
-        // fallback
-        setDistricts([
-          { name: "Mumbai", id: "MU" },
-          { name: "Pune", id: "PU" },
-          { name: "Nagpur", id: "NA" }
-        ]);
-      } finally {
-        setLoadingDistricts(false);
-      }
-    };
-
-    fetchDistricts();
-  }, [addressInfo.state]);
-
   // Ultra-compact input styling
   const inputStyle = {
     "& .MuiInputBase-root": {
@@ -378,11 +285,31 @@ export default function Addstaff1({
     margin: "0.25rem 0"
   };
 
+  // Soft error styling
   const errorStyle = {
     ...inputStyle,
     "& .MuiOutlinedInput-notchedOutline": {
-      borderColor: "error.main",
-      borderWidth: "2px"
+      borderColor: isDarkMode ? theme.palette.grey[500] : theme.palette.grey[400]
+    },
+    "& .MuiInputLabel-root": {
+      color: isDarkMode ? theme.palette.grey[400] : theme.palette.grey[600]
+    },
+    "& .MuiFormHelperText-root": {
+      color: isDarkMode ? theme.palette.grey[400] : theme.palette.grey[600],
+      fontSize: "0.75rem"
+    },
+    "&:hover .MuiOutlinedInput-notchedOutline": {
+      borderColor: isDarkMode ? theme.palette.grey[400] : theme.palette.grey[500]
+    }
+  };
+
+  // For select components
+  const selectErrorStyle = {
+    "& .MuiOutlinedInput-notchedOutline": {
+      borderColor: isDarkMode ? theme.palette.grey[500] : theme.palette.grey[400]
+    },
+    "& .MuiInputLabel-root": {
+      color: isDarkMode ? theme.palette.grey[400] : theme.palette.grey[600]
     }
   };
 
@@ -441,9 +368,18 @@ export default function Addstaff1({
     if (checked) {
       setAddressInfo((prev) => ({
         ...prev,
-        permanentAddress: prev.currentAddress
+        permanentFullAddress: prev.currentFullAddress,
+        permanentPinCode: prev.currentPinCode,
+        permanentCountry: prev.currentCountry,
+        permanentState: prev.currentState,
+        permanentDistrict: prev.currentDistrict,
+        permanentCity: prev.currentCity
       }));
-      setErrors((prev) => ({ ...prev, permanentAddress: false }));
+      setErrors((prev) => ({
+        ...prev,
+        permanentFullAddress: false,
+        permanentPinCode: false
+      }));
     }
   };
 
@@ -552,12 +488,11 @@ export default function Addstaff1({
           >
             Basic Information
           </Typography>
-
           <BackButton onClick={handleBackClick} />
         </Box>
 
         <Grid container spacing={1.5}>
-          {/* Row 1 */}
+          {/* Row 1 - Staff ID, Role, Designation */}
           <Grid item xs={12} sm={4}>
             <TextField
               label="Staff ID"
@@ -643,7 +578,7 @@ export default function Addstaff1({
             </FormControl>
           </Grid>
 
-          {/* Row 2 */}
+          {/* Row 2 - First Name, Last Name, Gender */}
           <Grid item xs={12} sm={4}>
             <TextField
               label="First Name"
@@ -698,6 +633,7 @@ export default function Addstaff1({
             </FormControl>
           </Grid>
 
+          {/* Row 3 - Date of Birth, Phone, Emergency Contact */}
           <Grid item xs={12} sm={4}>
             <TextField
               label="Date of Birth"
@@ -713,8 +649,6 @@ export default function Addstaff1({
               helperText={errors.dob ? "Date of birth is required" : ""}
             />
           </Grid>
-
-          {/* Row 4 */}
           <Grid item xs={12} sm={4}>
             <TextField
               label="Phone"
@@ -741,7 +675,8 @@ export default function Addstaff1({
               helperText={errors.emergencyContact ? "Emergency contact is required" : ""}
             />
           </Grid>
-          {/* Row 3 */}
+
+          {/* Row 4 - Email, Marital Status */}
           <Grid item xs={12} sm={4}>
             <TextField
               label="Email (Login Username)"
@@ -755,80 +690,19 @@ export default function Addstaff1({
               helperText={errors.email ? "Email is required" : ""}
             />
           </Grid>
-
-          {/* Father Name Field */}
-          <Grid item xs={12} sm={4}>
-            <Box sx={{ display: "flex", gap: 1 }}>
-              {/* Dropdown for Title (Mr./Shri) */}
-              <FormControl sx={{ width: "80px" }}>
-                <Select
-                  value={basicInfo.fatherTitle || ""}
-                  onChange={(e) => handleBasicInfoChange("fatherTitle", e.target.value)}
-                  sx={{ height: "38px", fontSize: "0.875rem" }}
-                >
-                  <MenuItem value="Mr.">Mr.</MenuItem>
-                  <MenuItem value="Shri">Shri</MenuItem>
-                </Select>
-              </FormControl>
-
-              {/* Father's Name Input */}
-              <TextField
-                label="Father's Name"
-                fullWidth
-                required
-                sx={errors.fatherName ? errorStyle : inputStyle}
-                value={basicInfo.fatherName}
-                onChange={(e) => handleBasicInfoChange("fatherName", e.target.value)}
-                onBlur={() => handleFieldBlur("fatherName")}
-                error={errors.fatherName}
-                helperText={errors.fatherName ? "Father's name is required" : ""}
-              />
-            </Box>
-          </Grid>
-
-          {/* Mother Name Field */}
-          <Grid item xs={12} sm={4}>
-            <Box sx={{ display: "flex", gap: 1 }}>
-              {/* Dropdown for Title (Mrs./Shrimati) */}
-              <FormControl sx={{ width: "100px" }}>
-                <Select
-                  value={basicInfo.motherTitle || ""}
-                  onChange={(e) => handleBasicInfoChange("motherTitle", e.target.value)}
-                  sx={{ height: "38px", fontSize: "0.875rem" }}
-                >
-                  <MenuItem value="Mrs.">Mrs.</MenuItem>
-                  <MenuItem value="Shrimati">Shrimati</MenuItem>
-                </Select>
-              </FormControl>
-
-              {/* Mother's Name Input */}
-              <TextField
-                label="Mother's Name"
-                fullWidth
-                required
-                sx={errors.motherName ? errorStyle : inputStyle}
-                value={basicInfo.motherName}
-                onChange={(e) => handleBasicInfoChange("motherName", e.target.value)}
-                onBlur={() => handleFieldBlur("motherName")}
-                error={errors.motherName}
-                helperText={errors.motherName ? "Mother's name is required" : ""}
-              />
-            </Box>
-          </Grid>
-
           <Grid item xs={12} sm={4}>
             <FormControl
               fullWidth
-              required // Add required prop
-              sx={errors.maritalStatus ? errorStyle : inputStyle} // Add error styling
-              error={errors.maritalStatus} // Add error state
+              required
+              sx={errors.maritalStatus ? errorStyle : inputStyle}
+              error={errors.maritalStatus}
             >
               <InputLabel>Marital Status</InputLabel>
               <Select
                 value={basicInfo.maritalStatus}
                 label="Marital Status"
                 onChange={(e) => handleBasicInfoChange("maritalStatus", e.target.value)}
-                onBlur={() => handleFieldBlur("maritalStatus")} // Add blur handler
+                onBlur={() => handleFieldBlur("maritalStatus")}
               >
                 <MenuItem value="" sx={{ fontSize: "0.875rem" }}>
                   Select
@@ -851,118 +725,212 @@ export default function Addstaff1({
             </FormControl>
           </Grid>
 
-          {/* Row 5 */}
-          <Grid item xs={12} sm={4}>
-            <TextField
-              label="Date of Joining"
-              type="date"
-              fullWidth
-              InputLabelProps={{ shrink: true }}
-              value={joiningDate}
-              onChange={(e) => setJoiningDate(e.target.value)}
-              sx={inputStyle}
-            />
+          {/* Row 5 - Father's Name, Mother's Name */}
+          {/* Father's Name Field */}
+          <Grid item xs={12} sm={6}>
+            <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+              {/* Father's Title Dropdown */}
+              <FormControl sx={{ minWidth: 80 }}>
+                <Select
+                  value={basicInfo.fatherTitle || "Shri"}
+                  onChange={(e) => handleBasicInfoChange("fatherTitle", e.target.value)}
+                  sx={{
+                    height: "38px",
+                    "& .MuiSelect-select": {
+                      paddingTop: "9px",
+                      paddingBottom: "9px",
+                      minHeight: "auto"
+                    }
+                  }}
+                >
+                  <MenuItem value="Shri">Shri</MenuItem>
+                  <MenuItem value="Mr.">Mr.</MenuItem>
+                </Select>
+              </FormControl>
+
+              {/* Father's Name Input */}
+              {/* Father's Name Input */}
+              <TextField
+                label="Father's Name"
+                fullWidth
+                required
+                variant="outlined"
+                sx={{
+                  ...(errors.fatherName ? errorStyle : inputStyle),
+                  "& .MuiInputBase-root": {
+                    height: "38px"
+                  }
+                }}
+                value={basicInfo.fatherName}
+                onChange={(e) => handleBasicInfoChange("fatherName", e.target.value)}
+                onFocus={() => setErrors((prev) => ({ ...prev, fatherName: false }))}
+                onBlur={() => handleFieldBlur("fatherName")}
+                error={errors.fatherName}
+                helperText={errors.fatherName ? "Father's name is required" : ""}
+              />
+            </Box>
           </Grid>
 
-          {/* Upload Image and Preview Section */}
-          <Grid item xs={12} sm={4}>
-            <Box sx={{ display: "flex", alignItems: "center", gap: 1.5, height: "38px" }}>
-              {/* Upload Button */}
-              <Box
-                component="label"
-                htmlFor="file-upload"
+          {/* Mother's Name Field */}
+          <Grid item xs={12} sm={6}>
+            <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+              {/* Mother's Title Dropdown */}
+              <FormControl sx={{ minWidth: 100 }}>
+                <Select
+                  value={basicInfo.motherTitle || "Shrimati"}
+                  onChange={(e) => handleBasicInfoChange("motherTitle", e.target.value)}
+                  sx={{
+                    height: "38px",
+                    "& .MuiSelect-select": {
+                      paddingTop: "9px",
+                      paddingBottom: "9px",
+                      minHeight: "auto"
+                    }
+                  }}
+                >
+                  <MenuItem value="Shrimati">Shrimati</MenuItem>
+                  <MenuItem value="Mrs.">Mrs.</MenuItem>
+                </Select>
+              </FormControl>
+
+              {/* Mother's Name Input */}
+              {/* Mother's Name Input */}
+              <TextField
+                label="Mother's Name"
+                fullWidth
+                required
+                variant="outlined"
                 sx={{
-                  border: "1px dashed",
-                  borderColor: isDarkMode ? theme.palette.grey[600] : theme.palette.grey[400],
-                  borderRadius: "6px",
-                  padding: "6px 10px",
-                  width: "100%",
-                  height: "100%",
+                  ...(errors.motherName ? errorStyle : inputStyle),
+                  "& .MuiInputBase-root": {
+                    height: "38px"
+                  }
+                }}
+                value={basicInfo.motherName}
+                onChange={(e) => handleBasicInfoChange("motherName", e.target.value)}
+                onFocus={() => setErrors((prev) => ({ ...prev, motherName: false }))}
+                onBlur={() => handleFieldBlur("motherName")}
+                error={errors.motherName}
+                helperText={errors.motherName ? "Mother's name is required" : ""}
+              />
+            </Box>
+          </Grid>
+
+          {/* Row 6 - Date of Joining, Photo Upload */}
+          <Grid container spacing={2} sx={{ mt: 1 }}>
+            {/* Date of Joining */}
+            <Grid item xs={12} sm={6}>
+              <TextField
+                label="Date of Joining"
+                type="date"
+                fullWidth
+                InputLabelProps={{ shrink: true }}
+                value={joiningDate}
+                onChange={(e) => setJoiningDate(e.target.value)}
+                InputProps={{
+                  sx: {
+                    height: 40, // match to Upload box height
+                    fontSize: "0.875rem"
+                  }
+                }}
+                sx={{
+                  ml: { sm: 1.5 },
+                  "& .MuiInputLabel-root": {
+                    transform: "translate(14px, -9px) scale(0.75)"
+                  }
+                }}
+              />
+            </Grid>
+
+            {/* Upload Photo */}
+            {/* Upload Photo */}
+            <Grid item xs={12} sm={6}>
+              <Box
+                sx={{
                   display: "flex",
                   alignItems: "center",
-                  justifyContent: "center",
-                  cursor: "pointer",
-                  transition: "all 0.2s ease"
+                  gap: 2,
+                  height: "100%"
                 }}
               >
-                <input
-                  id="file-upload"
-                  type="file"
-                  accept="image/*"
-                  hidden
-                  onChange={handleImageChange}
-                />
+                {/* Upload Button */}
                 <Box
+                  component="label"
+                  htmlFor="file-upload"
                   sx={{
+                    flexGrow: 1,
+                    border: "1px dashed",
+                    borderColor: isDarkMode ? theme.palette.grey[600] : theme.palette.primary,
+                    borderRadius: 1,
+                    px: 2,
+                    py: 1,
                     display: "flex",
                     alignItems: "center",
-                    gap: 0.75,
-                    width: "100%",
-                    overflow: "hidden"
+                    cursor: "pointer",
+                    backgroundColor: isDarkMode ? "rgba(255,255,255,0.05)" : "rgba(0,0,0,0.05)",
+                    "&:hover": {
+                      borderColor: theme.palette.primary.main
+                    }
                   }}
                 >
                   <AddPhotoAlternateIcon
-                    fontSize="small"
                     sx={{
-                      fontSize: "18px",
-                      color: isDarkMode ? theme.palette.grey[400] : theme.palette.grey[600]
+                      color: isDarkMode ? theme.palette.grey[400] : theme.palette.grey[600],
+                      mr: 1,
+                      fontSize: 20
                     }}
                   />
                   <Typography
                     variant="body2"
                     noWrap
                     sx={{
-                      maxWidth: "calc(100% - 30px)",
-                      fontSize: "0.8125rem"
+                      flex: 1,
+                      fontSize: "0.875rem",
+                      lineHeight: 1.5
                     }}
                   >
-                    {selectedImage
-                      ? document.getElementById("file-upload")?.files[0]?.name || "Photo selected"
-                      : "Upload Photo"}
+                    {selectedImage ? "Photo selected" : "Upload Photo"}
                   </Typography>
-                </Box>
-              </Box>
 
-              {/* Thumbnail Preview */}
-              {selectedImage && (
-                <Box
-                  onClick={handlePreviewOpen}
-                  sx={{
-                    width: 38,
-                    height: 38,
-                    borderRadius: "6px",
-                    overflow: "hidden",
-                    border: "1px solid",
-                    borderColor: isDarkMode ? theme.palette.grey[600] : theme.palette.grey[400],
-                    backgroundColor: isDarkMode
-                      ? theme.palette.grey[800]
-                      : theme.palette.background.paper,
-                    cursor: "pointer",
-                    flexShrink: 0,
-                    "&:hover": {
-                      borderColor: theme.palette.primary.main,
-                      transform: "scale(1.05)"
-                    },
-                    transition: "all 0.2s ease"
-                  }}
-                >
-                  <img
-                    src={selectedImage}
-                    alt="Preview"
-                    style={{
-                      width: "100%",
-                      height: "100%",
-                      objectFit: "cover"
-                    }}
+                  {/* 👇 This is the missing part causing the issue */}
+                  <input
+                    id="file-upload"
+                    type="file"
+                    accept="image/*"
+                    hidden
+                    onChange={handleImageChange}
                   />
                 </Box>
-              )}
-            </Box>
+
+                {/* Preview Thumbnail */}
+                {selectedImage && (
+                  <Box
+                    onClick={handlePreviewOpen}
+                    sx={{
+                      width: 38,
+                      height: 38,
+                      borderRadius: 1,
+                      overflow: "hidden",
+                      border: "1px solid",
+                      borderColor: isDarkMode ? theme.palette.grey[600] : theme.palette.grey[400],
+                      flexShrink: 0,
+                      cursor: "pointer"
+                    }}
+                  >
+                    <img
+                      src={selectedImage}
+                      alt="Preview"
+                      style={{ width: "100%", height: "100%", objectFit: "cover" }}
+                    />
+                  </Box>
+                )}
+              </Box>
+            </Grid>
           </Grid>
         </Grid>
       </Box>
 
-      {/* Address Section */}
+      {/* Address Information Section */}
       <Box sx={{ mb: 4 }}>
         <Typography
           variant="h6"
@@ -974,200 +942,326 @@ export default function Addstaff1({
         >
           Address Information
         </Typography>
-        <Grid container spacing={1.5}>
-          {/* Country */}
-          <Grid item xs={12} sm={4}>
-            <FormControl
-              fullWidth
-              required
-              sx={errors.country ? errorStyle : inputStyle}
-              error={errors.country}
-            >
-              <InputLabel>Country</InputLabel>
-              <Select
-                value={addressInfo.country}
-                label="Country"
-                onChange={(e) => handleAddressChange("country", e.target.value)}
-                onBlur={() => handleFieldBlur("country")}
-              >
-                <MenuItem value="" sx={{ fontSize: "0.875rem" }}>
-                  Select Country
-                </MenuItem>
-                {countries.map((country) => (
-                  <MenuItem key={country.code} value={country.name} sx={{ fontSize: "0.875rem" }}>
-                    {country.name}
-                  </MenuItem>
-                ))}
-              </Select>
-              {errors.country && (
-                <Typography variant="caption" color="error" sx={{ ml: 2 }}>
-                  Country is required
-                </Typography>
-              )}
-            </FormControl>
-          </Grid>
 
-          {/* State */}
-          <Grid item xs={12} sm={4}>
-            <FormControl
-              fullWidth
-              required
-              sx={errors.state ? errorStyle : inputStyle}
-              error={errors.state}
-            >
-              <InputLabel>State</InputLabel>
-              <Select
-                value={addressInfo.state}
-                label="State"
-                onChange={(e) => handleAddressChange("state", e.target.value)}
-                onBlur={() => handleFieldBlur("state")}
-                disabled={!addressInfo.country || loadingStates}
-              >
-                <MenuItem value="" sx={{ fontSize: "0.875rem" }}>
-                  {loadingStates ? "Loading states..." : "Select State"}
-                </MenuItem>
-                {states.map((state) => (
-                  <MenuItem key={state.id} value={state.name} sx={{ fontSize: "0.875rem" }}>
-                    {state.name}
-                  </MenuItem>
-                ))}
-              </Select>
-              {loadingStates && (
-                <CircularProgress size={24} sx={{ position: "absolute", right: 40, top: 8 }} />
-              )}
-              {errors.state && (
-                <Typography variant="caption" color="error" sx={{ ml: 2 }}>
-                  State is required
-                </Typography>
-              )}
-            </FormControl>
-          </Grid>
+        {/* Current Address Section */}
+        <Box
+          sx={{ mb: 4, p: 2, border: `1px solid ${theme.palette.divider}`, borderRadius: "8px" }}
+        >
+          <Typography variant="subtitle1" sx={{ mb: 2, fontWeight: 500 }}>
+            Current Address
+          </Typography>
 
-          {/* District */}
-          <Grid item xs={12} sm={4}>
-            <FormControl
-              fullWidth
-              required
-              sx={errors.district ? errorStyle : inputStyle}
-              error={errors.district}
-            >
-              <InputLabel>District</InputLabel>
-              <Select
-                value={addressInfo.district}
-                label="District"
-                onChange={(e) => handleAddressChange("district", e.target.value)}
-                onBlur={() => handleFieldBlur("district")}
-                disabled={!addressInfo.state || loadingDistricts}
-              >
-                <MenuItem value="" sx={{ fontSize: "0.875rem" }}>
-                  {loadingDistricts ? "Loading districts..." : "Select District"}
-                </MenuItem>
-                {districts.map((district) => (
-                  <MenuItem key={district.id} value={district.name} sx={{ fontSize: "0.875rem" }}>
-                    {district.name}
-                  </MenuItem>
-                ))}
-              </Select>
-              {loadingDistricts && (
-                <CircularProgress size={24} sx={{ position: "absolute", right: 40, top: 8 }} />
-              )}
-              {errors.district && (
-                <Typography variant="caption" color="error" sx={{ ml: 2 }}>
-                  District is required
-                </Typography>
-              )}
-            </FormControl>
-          </Grid>
-
-          {/* City/Town */}
-          <Grid item xs={12} sm={4}>
-            <TextField
-              label="City/Town"
-              fullWidth
-              required
-              value={addressInfo.city}
-              onChange={(e) => handleAddressChange("city", e.target.value)}
-              onBlur={() => handleFieldBlur("city")}
-              error={errors.city}
-              helperText={errors.city ? "City/Town is required" : ""}
-              sx={errors.city ? errorStyle : inputStyle}
-            />
-          </Grid>
-
-          {/* Pin Code */}
-          <Grid item xs={12} sm={4}>
-            <TextField
-              label="Pin Code"
-              fullWidth
-              required
-              value={addressInfo.pinCode}
-              onChange={(e) => handleAddressChange("pinCode", e.target.value)}
-              onBlur={() => handleFieldBlur("pinCode")}
-              error={errors.pinCode}
-              helperText={errors.pinCode ? "Pin code is required" : ""}
-              sx={errors.pinCode ? errorStyle : inputStyle}
-            />
-          </Grid>
-
-          {/* Current Address */}
-          <Grid item xs={12} sm={6}>
-            <TextField
-              label="Current Address"
-              fullWidth
-              multiline
-              rows={2}
-              required
-              value={addressInfo.currentAddress}
-              onChange={(e) => handleAddressChange("currentAddress", e.target.value)}
-              onBlur={() => handleFieldBlur("currentAddress")}
-              error={errors.currentAddress}
-              helperText={errors.currentAddress ? "Current address is required" : ""}
-              sx={{
-                ...(errors.currentAddress ? errorStyle : inputStyle),
-                "& .MuiInputBase-root": {
-                  height: "auto",
-                  minHeight: "80px"
-                }
-              }}
-            />
-          </Grid>
-
-          {/* Permanent Address */}
-          <Grid item xs={12} sm={6}>
-            <Box sx={{ display: "flex", flexDirection: "column" }}>
+          <Grid container spacing={1.5}>
+            {/* Full Address */}
+            <Grid item xs={12} sm={6}>
               <TextField
-                label="Permanent Address"
+                label="Full Address"
                 fullWidth
                 multiline
-                rows={2}
+                rows={3}
                 required
-                value={addressInfo.permanentAddress}
-                onChange={(e) => handleAddressChange("permanentAddress", e.target.value)}
-                onBlur={() => handleFieldBlur("permanentAddress")}
-                error={errors.permanentAddress}
-                helperText={errors.permanentAddress ? "Permanent address is required" : ""}
+                value={addressInfo.currentFullAddress}
+                onChange={(e) => handleAddressChange("currentFullAddress", e.target.value)}
+                onBlur={() => handleFieldBlur("currentFullAddress")}
+                error={errors.currentFullAddress}
+                helperText={errors.currentFullAddress ? "Full address is required" : ""}
                 sx={{
-                  ...(errors.permanentAddress ? errorStyle : inputStyle),
+                  ...(errors.currentFullAddress ? errorStyle : inputStyle),
                   "& .MuiInputBase-root": {
                     height: "auto",
-                    minHeight: "80px"
+                    minHeight: "100px"
                   }
                 }}
               />
-              <FormControlLabel
-                control={
-                  <Checkbox
-                    checked={sameAsAddress}
-                    onChange={handleSameAsAddressChange}
-                    size="small"
-                  />
-                }
-                label="Same as Current Address"
-                sx={{ mt: 0.5, fontSize: "0.875rem" }}
+            </Grid>
+
+            {/* PIN Code */}
+            <Grid item xs={12} sm={6}>
+              <TextField
+                label="PIN Code"
+                fullWidth
+                required
+                value={addressInfo.currentPinCode}
+                onChange={(e) => {
+                  handleAddressChange("currentPinCode", e.target.value);
+                  // Clear fields immediately if PIN code is empty
+                  if (!e.target.value) {
+                    setAddressInfo((prev) => ({
+                      ...prev,
+                      currentCountry: "",
+                      currentState: "",
+                      currentDistrict: "",
+                      currentCity: ""
+                    }));
+                  }
+                }}
+                onBlur={async () => {
+                  handleFieldBlur("currentPinCode");
+                  if (addressInfo.currentPinCode && addressInfo.currentPinCode.length === 6) {
+                    try {
+                      const response = await fetch(
+                        `https://api.postalpincode.in/pincode/${addressInfo.currentPinCode}`
+                      );
+                      const data = await response.json();
+                      if (data[0]?.Status === "Success" && data[0]?.PostOffice?.[0]) {
+                        const postOffice = data[0].PostOffice[0];
+                        setAddressInfo((prev) => ({
+                          ...prev,
+                          currentCountry: postOffice.Country,
+                          currentState: postOffice.State,
+                          currentDistrict: postOffice.District,
+                          currentCity: postOffice.Name
+                        }));
+                      }
+                    } catch (error) {
+                      console.error("Error fetching PIN code details:", error);
+                      // Clear fields if API fails
+                      setAddressInfo((prev) => ({
+                        ...prev,
+                        currentCountry: "",
+                        currentState: "",
+                        currentDistrict: "",
+                        currentCity: ""
+                      }));
+                    }
+                  } else if (!addressInfo.currentPinCode) {
+                    // Clear fields if PIN code is empty
+                    setAddressInfo((prev) => ({
+                      ...prev,
+                      currentCountry: "",
+                      currentState: "",
+                      currentDistrict: "",
+                      currentCity: ""
+                    }));
+                  }
+                }}
+                error={errors.currentPinCode}
+                helperText={errors.currentPinCode ? "Valid 6-digit PIN code is required" : ""}
+                sx={errors.currentPinCode ? errorStyle : inputStyle}
+                inputProps={{ maxLength: 6 }}
               />
-            </Box>
+            </Grid>
+
+            {/* Auto-filled fields */}
+            <Grid item xs={12} sm={3}>
+              <TextField
+                label="Country"
+                fullWidth
+                value={addressInfo.currentCountry || ""}
+                InputProps={{ readOnly: true }}
+                sx={inputStyle}
+              />
+            </Grid>
+            <Grid item xs={12} sm={3}>
+              <TextField
+                label="State"
+                fullWidth
+                value={addressInfo.currentState || ""}
+                InputProps={{ readOnly: true }}
+                sx={inputStyle}
+              />
+            </Grid>
+            <Grid item xs={12} sm={3}>
+              <TextField
+                label="District"
+                fullWidth
+                value={addressInfo.currentDistrict || ""}
+                InputProps={{ readOnly: true }}
+                sx={inputStyle}
+              />
+            </Grid>
+            <Grid item xs={12} sm={3}>
+              <TextField
+                label="City/Town"
+                fullWidth
+                value={addressInfo.currentCity || ""}
+                InputProps={{ readOnly: true }}
+                sx={inputStyle}
+              />
+            </Grid>
           </Grid>
-        </Grid>
+        </Box>
+
+        {/* Permanent Address Section */}
+        <Box sx={{ p: 2, border: `1px solid ${theme.palette.divider}`, borderRadius: "8px" }}>
+          <Box display="flex" justifyContent="space-between" alignItems="center" mb={2}>
+            <Typography variant="subtitle1" sx={{ fontWeight: 500 }}>
+              Permanent Address
+            </Typography>
+            <FormControlLabel
+              control={
+                <Checkbox
+                  checked={sameAsAddress}
+                  onChange={(e) => {
+                    const checked = e.target.checked;
+                    setSameAsAddress(checked);
+                    if (checked) {
+                      setAddressInfo((prev) => ({
+                        ...prev,
+                        permanentFullAddress: prev.currentFullAddress,
+                        permanentPinCode: prev.currentPinCode,
+                        permanentCountry: prev.currentCountry,
+                        permanentState: prev.currentState,
+                        permanentDistrict: prev.currentDistrict,
+                        permanentCity: prev.currentCity
+                      }));
+                      setErrors((prev) => ({
+                        ...prev,
+                        permanentFullAddress: false,
+                        permanentPinCode: false
+                      }));
+                    }
+                  }}
+                  size="small"
+                />
+              }
+              label="Same as Current Address"
+              sx={{ fontSize: "0.875rem" }}
+            />
+          </Box>
+
+          <Grid container spacing={1.5}>
+            {/* Full Address */}
+            <Grid item xs={12} sm={6}>
+              <TextField
+                label="Full Address"
+                fullWidth
+                multiline
+                rows={3}
+                required
+                value={
+                  sameAsAddress ? addressInfo.currentFullAddress : addressInfo.permanentFullAddress
+                }
+                onChange={(e) => handleAddressChange("permanentFullAddress", e.target.value)}
+                onBlur={() => handleFieldBlur("permanentFullAddress")}
+                error={errors.permanentFullAddress}
+                helperText={errors.permanentFullAddress ? "Full address is required" : ""}
+                sx={{
+                  ...(errors.permanentFullAddress ? errorStyle : inputStyle),
+                  "& .MuiInputBase-root": {
+                    height: "auto",
+                    minHeight: "100px"
+                  }
+                }}
+                disabled={sameAsAddress}
+              />
+            </Grid>
+
+            {/* PIN Code */}
+            <Grid item xs={12} sm={6}>
+              <TextField
+                label="PIN Code"
+                fullWidth
+                required
+                value={sameAsAddress ? addressInfo.currentPinCode : addressInfo.permanentPinCode}
+                onChange={(e) => {
+                  handleAddressChange("permanentPinCode", e.target.value);
+                  // Clear fields immediately if PIN code is empty
+                  if (!e.target.value) {
+                    setAddressInfo((prev) => ({
+                      ...prev,
+                      permanentCountry: "",
+                      permanentState: "",
+                      permanentDistrict: "",
+                      permanentCity: ""
+                    }));
+                  }
+                }}
+                onBlur={async () => {
+                  handleFieldBlur("permanentPinCode");
+                  if (
+                    !sameAsAddress &&
+                    addressInfo.permanentPinCode &&
+                    addressInfo.permanentPinCode.length === 6
+                  ) {
+                    try {
+                      const response = await fetch(
+                        `https://api.postalpincode.in/pincode/${addressInfo.permanentPinCode}`
+                      );
+                      const data = await response.json();
+                      if (data[0]?.Status === "Success" && data[0]?.PostOffice?.[0]) {
+                        const postOffice = data[0].PostOffice[0];
+                        setAddressInfo((prev) => ({
+                          ...prev,
+                          permanentCountry: postOffice.Country,
+                          permanentState: postOffice.State,
+                          permanentDistrict: postOffice.District,
+                          permanentCity: postOffice.Name
+                        }));
+                      }
+                    } catch (error) {
+                      console.error("Error fetching PIN code details:", error);
+                      // Clear fields if API fails
+                      setAddressInfo((prev) => ({
+                        ...prev,
+                        permanentCountry: "",
+                        permanentState: "",
+                        permanentDistrict: "",
+                        permanentCity: ""
+                      }));
+                    }
+                  } else if (!sameAsAddress && !addressInfo.permanentPinCode) {
+                    // Clear fields if PIN code is empty
+                    setAddressInfo((prev) => ({
+                      ...prev,
+                      permanentCountry: "",
+                      permanentState: "",
+                      permanentDistrict: "",
+                      permanentCity: ""
+                    }));
+                  }
+                }}
+                error={errors.permanentPinCode}
+                helperText={errors.permanentPinCode ? "Valid 6-digit PIN code is required" : ""}
+                sx={errors.permanentPinCode ? errorStyle : inputStyle}
+                inputProps={{ maxLength: 6 }}
+                disabled={sameAsAddress}
+              />
+            </Grid>
+
+            {/* Auto-filled fields */}
+            <Grid item xs={12} sm={3}>
+              <TextField
+                label="Country"
+                fullWidth
+                value={
+                  sameAsAddress ? addressInfo.currentCountry : addressInfo.permanentCountry || ""
+                }
+                InputProps={{ readOnly: true }}
+                sx={inputStyle}
+              />
+            </Grid>
+            <Grid item xs={12} sm={3}>
+              <TextField
+                label="State"
+                fullWidth
+                value={sameAsAddress ? addressInfo.currentState : addressInfo.permanentState || ""}
+                InputProps={{ readOnly: true }}
+                sx={inputStyle}
+              />
+            </Grid>
+            <Grid item xs={12} sm={3}>
+              <TextField
+                label="District"
+                fullWidth
+                value={
+                  sameAsAddress ? addressInfo.currentDistrict : addressInfo.permanentDistrict || ""
+                }
+                InputProps={{ readOnly: true }}
+                sx={inputStyle}
+              />
+            </Grid>
+            <Grid item xs={12} sm={3}>
+              <TextField
+                label="City/Town"
+                fullWidth
+                value={sameAsAddress ? addressInfo.currentCity : addressInfo.permanentCity || ""}
+                InputProps={{ readOnly: true }}
+                sx={inputStyle}
+              />
+            </Grid>
+          </Grid>
+        </Box>
       </Box>
 
       {/* Experience Section */}
@@ -1310,7 +1404,7 @@ export default function Addstaff1({
             {index < experiences.length - 1 && <Divider sx={{ my: 2 }} />}
           </Box>
         ))}
-        <Button variant="outlined" onClick={addExperience} sx={{ mt: 1 }}>
+        <Button variant="outlined" onClick={addExperience}>
           Add Another Experience
         </Button>
       </Box>

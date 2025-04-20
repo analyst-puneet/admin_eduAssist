@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useState, useEffect } from "react";
 import { useDropzone } from "react-dropzone";
 import { Box, Grid, Typography, Paper, Button, Modal, IconButton, useTheme } from "@mui/material";
 import {
@@ -84,7 +84,7 @@ const DropzoneBox = ({ label, onDrop, file, error, helperText }) => {
 
   const getFileIcon = () => {
     if (!file || !file.type || !file.name) return <CloudUpload />;
-  
+
     if (file.type.startsWith("image/")) {
       return <Image />;
     } else if (file.type === "application/pdf") {
@@ -99,7 +99,6 @@ const DropzoneBox = ({ label, onDrop, file, error, helperText }) => {
       return <InsertDriveFile />;
     }
   };
-  
 
   return (
     <Paper variant="outlined" sx={{ p: 2, mb: 2 }}>
@@ -170,14 +169,20 @@ export default function AddStaff3({
     formData.files || {
       resume: null,
       joiningLetter: null,
-      resignationLetter: null,
+      aadharFront: null,
+      aadharBack: null,
+      panCard: null,
+      offerLetter: null,
       otherDocuments: null
     }
   );
 
   const [errors, setErrors] = useState({
     resume: false,
-    joiningLetter: false
+    joiningLetter: false,
+    aadharFront: false,
+    aadharBack: false,
+    panCard: false
   });
 
   const [showErrors, setShowErrors] = useState(false);
@@ -186,7 +191,10 @@ export default function AddStaff3({
   const validateForm = (show = false) => {
     const newErrors = {
       resume: !files.resume,
-      joiningLetter: !files.joiningLetter
+      joiningLetter: !files.joiningLetter,
+      aadharFront: !files.aadharFront,
+      aadharBack: !files.aadharBack,
+      panCard: !files.panCard
     };
 
     if (show) setErrors(newErrors);
@@ -253,14 +261,41 @@ export default function AddStaff3({
         </Grid>
         <Grid item xs={12} md={6}>
           <DropzoneBox
-            label="3. Resignation Letter (Optional)"
-            onDrop={handleFileUpload("resignationLetter")}
-            file={files.resignationLetter}
+            label="3. Aadhar Card (Front) (Required)"
+            onDrop={handleFileUpload("aadharFront")}
+            file={files.aadharFront}
+            error={errors.aadharFront}
+            helperText={errors.aadharFront ? "Aadhar Card front is required" : ""}
           />
         </Grid>
         <Grid item xs={12} md={6}>
           <DropzoneBox
-            label="4. Other Documents (Optional)"
+            label="4. Aadhar Card (Back) (Required)"
+            onDrop={handleFileUpload("aadharBack")}
+            file={files.aadharBack}
+            error={errors.aadharBack}
+            helperText={errors.aadharBack ? "Aadhar Card back is required" : ""}
+          />
+        </Grid>
+        <Grid item xs={12} md={6}>
+          <DropzoneBox
+            label="5. PAN Card (Front) (Required)"
+            onDrop={handleFileUpload("panCard")}
+            file={files.panCard}
+            error={errors.panCard}
+            helperText={errors.panCard ? "PAN Card is required" : ""}
+          />
+        </Grid>
+        <Grid item xs={12} md={6}>
+          <DropzoneBox
+            label="6. Offer Letter (Optional)"
+            onDrop={handleFileUpload("offerLetter")}
+            file={files.offerLetter}
+          />
+        </Grid>
+        <Grid item xs={12}>
+          <DropzoneBox
+            label="7. Other Documents (Optional)"
             onDrop={handleFileUpload("otherDocuments")}
             file={files.otherDocuments}
           />
