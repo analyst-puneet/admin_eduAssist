@@ -1,6 +1,7 @@
 import { lazy } from "react";
 import Loadable from "app/components/Loadable";
 
+
 const StaffDetails = Loadable(lazy(() => import("app/views/human_resources/StaffDetails/Index")));
 const StaffProfileIndex = Loadable(
   lazy(() => import("app/views/human_resources/StaffDetails/StaffProfile"))
@@ -14,6 +15,10 @@ const MarkAttendance = Loadable(
 );
 const LeaveIndex = Loadable(lazy(() => import("app/views/human_resources/StaffLeave/LeaveIndex")));
 const ApplyLeave = Loadable(lazy(() => import("app/views/human_resources/StaffLeave/ApplyLeave")));
+const LeaveType = Loadable(lazy(() => import("app/views/human_resources/StaffLeave/LeaveType")));
+const LeaveTypeCreate = Loadable(lazy(() => import("app/views/human_resources/StaffLeave/LeaveTypeCreate")));
+const LeaveGroup= Loadable(lazy(() => import("app/views/human_resources/StaffLeave/LeaveGroup")));
+const Master= Loadable(lazy(() => import("app/views/human_resources/Master/Master")));
 
 const humanResourceRoutes = [
   { path: "/human_resources/staff-details", element: <StaffDetails /> },
@@ -22,7 +27,12 @@ const humanResourceRoutes = [
   { path: "/human_resources/staff-attendance", element: <StaffAttendance /> },
   { path: "/human_resources/staff/mark-attendance", element: <MarkAttendance /> },
   { path: "/human_resources/staff-leave", element: <LeaveIndex /> },
-  { path: "/apply", element: <ApplyLeave /> }
+  { path: "/human_resources/staff-leave/apply", element: <ApplyLeave /> },
+  { path: "/leave-master/type", element: <LeaveType /> },
+  { path: "/leave-master/type/create", element: <LeaveTypeCreate /> },
+  { path: "/leave-master/leave-group", element: <LeaveGroup /> },
+  { path: "/human-resources/master", element: <Master/> },
+
 ];
 
 export default humanResourceRoutes;

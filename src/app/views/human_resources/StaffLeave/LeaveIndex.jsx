@@ -17,11 +17,13 @@ import {
   TablePagination,
   TextField,
   Menu,
-  MenuItem
+  MenuItem,
+  Checkbox
 } from "@mui/material";
 import MoreVertIcon from "@mui/icons-material/MoreVert";
 import HomeIcon from "@mui/icons-material/Home";
 import ChevronRightIcon from "@mui/icons-material/ChevronRight";
+import FormControlLabel from "@mui/material/FormControlLabel";
 
 const Breadcrumbs = () => {
   return (
@@ -56,6 +58,7 @@ const LeaveIndex = () => {
 
   const leaveData = [
     {
+      id: 1,
       staff: "Joe Black",
       type: "Casual Leave",
       leaveDate: "04/22/2025 - 04/26/2025",
@@ -64,6 +67,7 @@ const LeaveIndex = () => {
       status: "Pending"
     },
     {
+      id: 2,
       staff: "Joe Black",
       type: "Medical Leave",
       leaveDate: "03/10/2025 - 03/15/2025",
@@ -72,6 +76,7 @@ const LeaveIndex = () => {
       status: "Approved"
     },
     {
+      id: 3,
       staff: "Joe Black",
       type: "Casual Leave",
       leaveDate: "02/18/2025 - 02/21/2025",
@@ -80,6 +85,7 @@ const LeaveIndex = () => {
       status: "Pending"
     },
     {
+      id: 4,
       staff: "Joe Black",
       type: "Casual Leave",
       leaveDate: "12/21/2024 - 12/24/2024",
@@ -88,6 +94,7 @@ const LeaveIndex = () => {
       status: "Pending"
     },
     {
+      id: 5,
       staff: "Joe Black",
       type: "Medical Leave",
       leaveDate: "11/01/2024 - 11/05/2024",
@@ -96,6 +103,7 @@ const LeaveIndex = () => {
       status: "Approved"
     },
     {
+      id: 6,
       staff: "Joe Black",
       type: "Casual Leave",
       leaveDate: "10/24/2024 - 10/26/2024",
@@ -104,6 +112,7 @@ const LeaveIndex = () => {
       status: "Disapproved"
     },
     {
+      id: 7,
       staff: "Joe Black",
       type: "Casual Leave",
       leaveDate: "09/10/2024 - 09/12/2024",
@@ -112,6 +121,7 @@ const LeaveIndex = () => {
       status: "Pending"
     },
     {
+      id: 8,
       staff: "Joe Black",
       type: "Medical Leave",
       leaveDate: "05/15/2024 - 05/18/2024",
@@ -139,6 +149,7 @@ const LeaveIndex = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [anchorEl, setAnchorEl] = useState(null);
   const [selectedRow, setSelectedRow] = useState(null);
+  const [selected, setSelected] = useState([]);
 
   const filteredData = leaveData.filter(
     (row) =>
@@ -148,6 +159,37 @@ const LeaveIndex = () => {
   );
 
   const paginatedData = filteredData.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage);
+
+  const handleSelectAllClick = (event) => {
+    if (event.target.checked) {
+      const newSelected = paginatedData.map((n) => n.id);
+      setSelected(newSelected);
+      return;
+    }
+    setSelected([]);
+  };
+
+  const handleClick = (event, id) => {
+    const selectedIndex = selected.indexOf(id);
+    let newSelected = [];
+
+    if (selectedIndex === -1) {
+      newSelected = newSelected.concat(selected, id);
+    } else if (selectedIndex === 0) {
+      newSelected = newSelected.concat(selected.slice(1));
+    } else if (selectedIndex === selected.length - 1) {
+      newSelected = newSelected.concat(selected.slice(0, -1));
+    } else if (selectedIndex > 0) {
+      newSelected = newSelected.concat(
+        selected.slice(0, selectedIndex),
+        selected.slice(selectedIndex + 1)
+      );
+    }
+
+    setSelected(newSelected);
+  };
+
+  const isSelected = (id) => selected.indexOf(id) !== -1;
 
   const handleChangePage = (event, newPage) => {
     setPage(newPage);
@@ -189,7 +231,11 @@ const LeaveIndex = () => {
 
       <Box display="flex" justifyContent="space-between" alignItems="center" mb={2}>
         <Typography variant="h6">Leaves</Typography>
-        <Button variant="contained" color="primary" onClick={() => navigate("/apply")}>
+        <Button
+          variant="contained"
+          color="primary"
+          onClick={() => navigate("/human_resources/staff-leave/apply")}
+        >
           Apply Leave
         </Button>
       </Box>
@@ -218,10 +264,34 @@ const LeaveIndex = () => {
         />
       </Box>
 
+      <Box display="flex" justifyContent="space-between" alignItems="center" mb={2}>
+        <FormControlLabel
+          control={
+            <Checkbox
+              color="primary"
+              // indeterminate={selected.length > 0 && selected.length < paginatedData.length}
+              checked={paginatedData.length > 0 && selected.length === paginatedData.length}
+              onChange={handleSelectAllClick}
+            />
+          }
+          label="Select All"
+        />
+
+        <Box display="flex" gap={1}>
+          <Button variant="contained" color="success">
+            Approved
+          </Button>
+          <Button variant="contained" color="error">
+            Disapproved
+          </Button>
+        </Box>
+      </Box>
+
       <TableContainer component={Paper}>
         <Table>
           <TableHead>
             <TableRow>
+              <TableCell padding="checkbox"></TableCell>
               <TableCell>
                 <strong>Staff</strong>
               </TableCell>
@@ -246,21 +316,39 @@ const LeaveIndex = () => {
             </TableRow>
           </TableHead>
           <TableBody>
-            {paginatedData.map((row, index) => (
-              <TableRow key={index}>
-                <TableCell>{row.staff}</TableCell>
-                <TableCell>{row.type}</TableCell>
-                <TableCell>{row.leaveDate}</TableCell>
-                <TableCell>{row.days}</TableCell>
-                <TableCell>{row.applyDate}</TableCell>
-                <TableCell>{getStatusChip(row.status)}</TableCell>
-                <TableCell>
-                  <IconButton size="small" onClick={(e) => handleMenuOpen(e, row)}>
-                    <MoreVertIcon sx={{ color: isDarkMode ? "white" : "grey.700" }} />
-                  </IconButton>
-                </TableCell>
-              </TableRow>
-            ))}
+            {paginatedData.map((row) => {
+              const isItemSelected = isSelected(row.id);
+              return (
+                <TableRow
+                  key={row.id}
+                  hover
+                  role="checkbox"
+                  aria-checked={isItemSelected}
+                  selected={isItemSelected}
+                >
+                  <TableCell padding="checkbox"></TableCell>
+                  <TableCell>{row.staff}</TableCell>
+                  <TableCell>{row.type}</TableCell>
+                  <TableCell>{row.leaveDate}</TableCell>
+                  <TableCell>{row.days}</TableCell>
+                  <TableCell>{row.applyDate}</TableCell>
+                  <TableCell>{getStatusChip(row.status)}</TableCell>
+                  <TableCell>
+                    <IconButton size="small" onClick={(e) => handleMenuOpen(e, row)}>
+                      <MoreVertIcon sx={{ color: isDarkMode ? "white" : "grey.700" }} />
+                    </IconButton>
+                    <Checkbox
+                      color="primary"
+                      checked={isItemSelected}
+                      onClick={(event) => {
+                        event.stopPropagation(); // VERY IMPORTANT to stop row click
+                        handleClick(event, row.id);
+                      }}
+                    />
+                  </TableCell>
+                </TableRow>
+              );
+            })}
           </TableBody>
         </Table>
 
@@ -275,7 +363,6 @@ const LeaveIndex = () => {
         />
       </TableContainer>
 
-      {/* Action Menu */}
       {/* Action Menu */}
       <Menu
         anchorEl={anchorEl}

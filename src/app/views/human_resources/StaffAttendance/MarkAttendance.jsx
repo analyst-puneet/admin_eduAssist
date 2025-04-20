@@ -29,7 +29,7 @@ import dayjs from "dayjs";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import { LocalizationProvider, DatePicker } from "@mui/x-date-pickers";
 import { useNavigate } from "react-router-dom";
-
+import BackButton from "app/views/material-kit/buttons/BackButton";
 // Mock Data
 const mockStaffData = [
   { id: 9000, name: "Joe Black", role: "Super Admin" },
@@ -41,14 +41,7 @@ const mockStaffData = [
 ];
 
 const roles = ["Super Admin", "Teacher", "Librarian", "Admin", "Accountant"];
-const attendanceStatuses = [
-  "Present",
-  "Late",
-  "Absent",
-  "Half Day",
-  "Holiday",
-  "Half Day Second Shift"
-];
+const attendanceStatuses = ["Present", "Late", "Absent", "Half Day", "Half Day Second Shift"];
 
 const StyledTableCell = styled(TableCell)(({ theme }) => ({
   fontWeight: 600,
@@ -80,9 +73,13 @@ const StyledTableRow = styled(TableRow)(({ theme }) => ({
 
 const MarkAttendance = () => {
   const theme = useTheme();
+  const isDarkMode = theme.palette.mode === "dark";
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
   const navigate = useNavigate();
 
+  const handleBackClick = () => {
+    navigate("/human_resources/staff-attendance");
+  };
   const [selectedRole, setSelectedRole] = useState("");
   const [selectedStaffName, setSelectedStaffName] = useState("");
   const [attendanceDate, setAttendanceDate] = useState(dayjs());
@@ -116,6 +113,20 @@ const MarkAttendance = () => {
       updates[staff.id] = { ...attendance[staff.id], status };
     });
     setAttendance((prev) => ({ ...prev, ...updates }));
+  };
+
+  const inputStyle = {
+    borderColor: isDarkMode ? "white" : "grey.500",
+    "& .MuiOutlinedInput-notchedOutline": {
+      borderColor: isDarkMode ? "white" : "grey.500"
+    },
+    "&:hover .MuiOutlinedInput-notchedOutline": {
+      borderColor: isDarkMode ? "white" : "grey.700"
+    },
+    "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
+      borderColor: isDarkMode ? "white" : "primary.main"
+    },
+    margin: "0.25rem 0"
   };
 
   return (
@@ -165,21 +176,21 @@ const MarkAttendance = () => {
                   </Select>
                 </FormControl>
               </Grid>
-              <Grid item xs={12} sm={3}>
+              <Grid item xs={12} sm={2.7}>
                 <DatePicker
                   label="Attendance Date"
                   value={attendanceDate}
                   onChange={(newDate) => setAttendanceDate(newDate)}
-                  renderInput={(params) => <TextField {...params} fullWidth size="small" />}
+                  slotProps={{
+                    textField: {
+                      fullWidth: true,
+                      size: "small"
+                    }
+                  }}
                 />
               </Grid>
-              <Grid item xs={12} sm={1}>
-                <Button
-                  fullWidth
-                  variant="contained"
-                  onClick={handleSearch}
-                  sx={{ height: "40px" }}
-                >
+              <Grid item xs={12} sm={1.3}>
+                <Button fullWidth variant="contained" onClick={handleSearch}>
                   Search
                 </Button>
               </Grid>
@@ -276,10 +287,10 @@ const MarkAttendance = () => {
         </TableContainer>
 
         <Box mt={3} display="flex" justifyContent="space-between" alignItems="center">
-          <Button
+          {/* <Button
             variant="contained"
             size="large"
-            onClick={() => navigate("/staff-attendance")}
+            onClick={() => navigate("/human_resources/staff-attendance")}
             sx={{
               backgroundColor: "#f57c00",
               color: "#fff",
@@ -288,10 +299,20 @@ const MarkAttendance = () => {
             }}
           >
             Back
-          </Button>
+          </Button> */}
 
-          <Button variant="contained" color="primary" size="large" sx={{ px: 4 }}>
-            Save Attendance
+          <BackButton onClick={handleBackClick}></BackButton>
+
+          <Button
+            variant="contained"
+            sx={{
+              backgroundColor: "#f57c00",
+              color: "#fff",
+              px: 2,
+              "&:hover": { backgroundColor: "#ef6c00" }
+            }}
+          >
+            Mark Attendance
           </Button>
         </Box>
       </Box>
