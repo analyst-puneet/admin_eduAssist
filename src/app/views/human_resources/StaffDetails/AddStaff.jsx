@@ -35,9 +35,21 @@ export default function StepperForm() {
     return savedData ? JSON.parse(savedData) : {};
   });
 
-  // Save to sessionStorage whenever formData changes
+  // Store only non-file data in sessionStorage
   React.useEffect(() => {
-    sessionStorage.setItem("staffFormData", JSON.stringify(formData));
+    // Create a copy of formData without the large file objects
+    const dataToStore = {
+      ...formData,
+      files: undefined, // Exclude files from storage
+      fileNames: formData.fileNames // Keep file names if needed
+    };
+
+    try {
+      sessionStorage.setItem("staffFormData", JSON.stringify(dataToStore));
+    } catch (error) {
+      console.error("Failed to save form data to sessionStorage:", error);
+      // You might want to implement a fallback storage mechanism here
+    }
   }, [formData]);
 
   const [triggerValidation, setTriggerValidation] = React.useState(false);

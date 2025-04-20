@@ -47,6 +47,7 @@ export default function AddStaff4({
 
   const objectUrlsRef = useRef([]);
 
+  // Initialize form data and recreate object URLs when component mounts
   useEffect(() => {
     if (formData && Object.keys(formData).length > 0) {
       if (formData.educationLevel && !educationLevel) {
@@ -77,12 +78,18 @@ export default function AddStaff4({
     }
   }, []);
 
+  // Clean up object URLs when component unmounts
   useEffect(() => {
     return () => {
-      objectUrlsRef.current.forEach((url) => URL.revokeObjectURL(url));
+      // Only revoke URLs that aren't being used in the current files state
+      objectUrlsRef.current.forEach((url) => {
+        if (!Object.values(files).some((file) => file?.preview === url)) {
+          URL.revokeObjectURL(url);
+        }
+      });
       objectUrlsRef.current = [];
     };
-  }, []);
+  }, [files]);
 
   // Validation states
   const [errors, setErrors] = useState({

@@ -294,9 +294,10 @@ export default function Addstaff1({
   const errorStyle = {
     ...inputStyle,
     "& .MuiOutlinedInput-notchedOutline": {
-      borderColor: "error.main"
+      borderColor: theme.palette.error.light // हल्का लाल बॉर्डर
     },
     "& .MuiFormHelperText-root": {
+      color: theme.palette.error.light, // हल्का लाल टेक्स्ट
       position: "absolute",
       bottom: "-20px",
       left: 0,
