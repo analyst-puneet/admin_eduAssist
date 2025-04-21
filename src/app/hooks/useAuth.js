@@ -1,8 +1,11 @@
 import { useState, useEffect } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import axios from "axios";
-const BASE_URL = "https://backend-aufx.onrender.com";
-
+if(window.location.host=="localhost:5173"){
+  const BASE_URL = "http://localhost:5000";
+}else{
+  const BASE_URL = "https://backend-aufx.onrender.com";
+}
 
 const useAuth = () => {
   const [userId, setUserId] = useState(null);
