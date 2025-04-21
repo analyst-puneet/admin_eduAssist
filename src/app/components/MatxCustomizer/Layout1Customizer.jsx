@@ -4,7 +4,7 @@ import get from "lodash/get";
 import Box from "@mui/material/Box";
 import Icon from "@mui/material/Icon";
 import Paper from "@mui/material/Paper";
-import Grid from "@mui/material";
+import Grid from "@mui/material/Grid";
 import Radio from "@mui/material/Radio";
 import Switch from "@mui/material/Switch";
 import Tooltip from "@mui/material/Tooltip";
