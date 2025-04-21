@@ -28,6 +28,10 @@ import {
   Preview as PreviewIcon
 } from "@mui/icons-material";
 
+import { saveFileToDB } from "app/utils/indexedDBUtils";
+import { getAllFilesFromDB } from "app/utils/indexedDBUtils";
+import { deleteFileFromDB } from "app/utils/indexedDBUtils";
+
 export default function AddStaff4({
   formData,
   setFormData,
@@ -49,47 +53,39 @@ export default function AddStaff4({
 
   // Initialize form data and recreate object URLs when component mounts
   useEffect(() => {
-    if (formData && Object.keys(formData).length > 0) {
-      if (formData.educationLevel && !educationLevel) {
-        setEducationLevel(formData.educationLevel);
-      }
-      if (formData.sections && sections.length === 0) {
-        setSections(formData.sections);
-      }
-      if (formData.fileNames && Object.keys(fileNames).length === 0) {
-        setFileNames(formData.fileNames);
-      }
-      if (formData.files && Object.keys(files).length === 0) {
-        const newFiles = { ...formData.files };
-        Object.keys(newFiles).forEach((key) => {
-          if (newFiles[key]?.data && !newFiles[key].preview) {
-            // Recreate object URL from base64 data
-            const blob = dataURLtoBlob(newFiles[key].data);
-            const objectUrl = URL.createObjectURL(blob);
-            objectUrlsRef.current.push(objectUrl);
-            newFiles[key].preview = objectUrl;
-          }
-        });
-        setFiles(newFiles);
-      }
-      if (formData.ugYears && ugYears === 3) {
-        setUgYears(formData.ugYears);
-      }
-    }
-  }, []);
+    const initializeFiles = async () => {
+      const storedFiles = await getAllFilesFromDB();
 
-  // Clean up object URLs when component unmounts
-  useEffect(() => {
+      const reconstructedFiles = {};
+      const fileNamesMap = {};
+
+      for (const [key, fileData] of Object.entries(storedFiles)) {
+        if (!fileData.data) continue;
+
+        const blob = await dataURLtoBlob(fileData.data);
+        const objectUrl = URL.createObjectURL(blob);
+        objectUrlsRef.current.push(objectUrl);
+
+        reconstructedFiles[key] = {
+          name: fileData.name,
+          type: fileData.type,
+          data: fileData.data,
+          preview: objectUrl
+        };
+        fileNamesMap[key] = fileData.name;
+      }
+
+      setFiles(reconstructedFiles);
+      setFileNames(fileNamesMap);
+    };
+
+    initializeFiles();
+
     return () => {
-      // Only revoke URLs that aren't being used in the current files state
-      objectUrlsRef.current.forEach((url) => {
-        if (!Object.values(files).some((file) => file?.preview === url)) {
-          URL.revokeObjectURL(url);
-        }
-      });
+      objectUrlsRef.current.forEach((url) => URL.revokeObjectURL(url));
       objectUrlsRef.current = [];
     };
-  }, [files]);
+  }, []);
 
   // Validation states
   const [errors, setErrors] = useState({
@@ -161,7 +157,20 @@ export default function AddStaff4({
       twelfthMarksheet: !fileNames.twelfthMarksheet,
       ugCollegeName: sections.includes("UG") && !formData.ugCollegeName,
       ugCourse: sections.includes("UG") && !formData.ugCourse,
-      ugPercentage: sections.includes("UG") && !formData.ugPercentage
+      ugPercentage: sections.includes("UG") && !formData.ugPercentage,
+
+      // PG Section validation
+      pgCollegeName: sections.includes("PG") && !formData.pgCollegeName,
+      pgCourse: sections.includes("PG") && !formData.pgCourse,
+      pgPercentage: sections.includes("PG") && !formData.pgPercentage,
+      pgMarksheet1: sections.includes("PG") && !fileNames.pgMarksheet1,
+      pgMarksheet2: sections.includes("PG") && !fileNames.pgMarksheet2,
+
+      // PhD Section validation
+      phdInstitute: sections.includes("PhD") && !formData.phdInstitute,
+      phdSubject: sections.includes("PhD") && !formData.phdSubject,
+      phdThesis: sections.includes("PhD") && !formData.phdThesis,
+      phdCertificate: sections.includes("PhD") && !fileNames.phdCertificate
     };
 
     if (show) setErrors(newErrors);
@@ -195,39 +204,100 @@ export default function AddStaff4({
     }
   }, [triggerValidation]);
 
+  const dataURLtoBlob = (dataURL) => {
+    return new Promise((resolve, reject) => {
+      try {
+        const arr = dataURL.split(",");
+        const mime = arr[0].match(/:(.*?);/)[1];
+        const bstr = atob(arr[1]);
+        let n = bstr.length;
+        const u8arr = new Uint8Array(n);
+
+        while (n--) {
+          u8arr[n] = bstr.charCodeAt(n);
+        }
+
+        resolve(new Blob([u8arr], { type: mime }));
+      } catch (error) {
+        reject(error);
+      }
+    });
+  };
+
+  // Handle file upload - UPDATED to properly track all files
   const handleFileChange = (fieldName, e) => {
     const file = e.target.files[0];
-    if (file) {
-      const objectUrl = URL.createObjectURL(file);
-      objectUrlsRef.current.push(objectUrl);
+    if (!file) return;
 
-      // Convert file to base64 for persistence
-      const reader = new FileReader();
-      reader.onload = () => {
-        setFileNames((prev) => ({
-          ...prev,
-          [fieldName]: file.name
-        }));
-        setFiles((prev) => ({
-          ...prev,
-          [fieldName]: {
-            name: file.name,
-            type: file.type,
-            data: reader.result, // base64 data
-            preview: objectUrl
-          }
-        }));
+    const objectUrl = URL.createObjectURL(file);
+    objectUrlsRef.current.push(objectUrl);
+
+    const reader = new FileReader();
+    reader.onload = async () => {
+      const newFile = {
+        name: file.name,
+        type: file.type,
+        data: reader.result,
+        preview: objectUrl
       };
-      reader.readAsDataURL(file);
 
-      if (errors[fieldName]) {
-        setErrors((prev) => ({ ...prev, [fieldName]: false }));
-      }
+      setFileNames((prev) => ({ ...prev, [fieldName]: file.name }));
+      setFiles((prev) => ({ ...prev, [fieldName]: newFile }));
+
+      // IndexedDB save
+      await saveFileToDB(fieldName, newFile);
+    };
+
+    reader.readAsDataURL(file);
+  };
+
+  // Handle preview - UPDATED to handle missing preview URLs
+  const handlePreviewFile = (fieldName) => {
+    const file = files[fieldName];
+    if (!file) return;
+
+    // If preview URL exists, use it directly
+    if (file.preview) {
+      setPreviewFile({
+        name: fileNames[fieldName] || file.name,
+        url: file.preview,
+        type: file.type
+      });
+      setOpenPreview(true);
+      return;
+    }
+
+    // If no preview URL but has data, recreate it
+    if (file.data) {
+      dataURLtoBlob(file.data)
+        .then((blob) => {
+          const objectUrl = URL.createObjectURL(blob);
+          objectUrlsRef.current.push(objectUrl);
+
+          // Update files state with new preview URL
+          setFiles((prev) => ({
+            ...prev,
+            [fieldName]: {
+              ...prev[fieldName],
+              preview: objectUrl
+            }
+          }));
+
+          setPreviewFile({
+            name: fileNames[fieldName] || file.name,
+            url: objectUrl,
+            type: file.type
+          });
+          setOpenPreview(true);
+        })
+        .catch((error) => {
+          console.error("Error creating preview:", error);
+          // Show error to user if needed
+        });
     }
   };
 
-  const handleRemoveFile = (fieldName) => {
-    // Revoke the object URL if it exists
+  const handleRemoveFile = async (fieldName) => {
     if (files[fieldName]?.preview) {
       URL.revokeObjectURL(files[fieldName].preview);
       objectUrlsRef.current = objectUrlsRef.current.filter(
@@ -235,43 +305,19 @@ export default function AddStaff4({
       );
     }
 
+    await deleteFileFromDB(fieldName);
+
     setFileNames((prev) => {
-      const newFiles = { ...prev };
-      delete newFiles[fieldName];
-      return newFiles;
+      const updated = { ...prev };
+      delete updated[fieldName];
+      return updated;
     });
+
     setFiles((prev) => {
-      const newFiles = { ...prev };
-      delete newFiles[fieldName];
-      return newFiles;
+      const updated = { ...prev };
+      delete updated[fieldName];
+      return updated;
     });
-    if (fieldName === "tenthMarksheet" || fieldName === "twelfthMarksheet") {
-      setErrors((prev) => ({ ...prev, [fieldName]: true }));
-    }
-  };
-
-  // Helper function to convert base64 to blob
-  function dataURLtoBlob(dataURL) {
-    const arr = dataURL.split(",");
-    const mime = arr[0].match(/:(.*?);/)[1];
-    const bstr = atob(arr[1]);
-    let n = bstr.length;
-    const u8arr = new Uint8Array(n);
-    while (n--) {
-      u8arr[n] = bstr.charCodeAt(n);
-    }
-    return new Blob([u8arr], { type: mime });
-  }
-
-  const handlePreviewFile = (fieldName) => {
-    if (files[fieldName]) {
-      setPreviewFile({
-        name: fileNames[fieldName],
-        url: files[fieldName].preview,
-        type: files[fieldName].type
-      });
-      setOpenPreview(true);
-    }
   };
 
   const FileInput = ({ label, fieldName, accept = "*", required = false }) => (
@@ -583,7 +629,7 @@ export default function AddStaff4({
           <Grid container spacing={1.5}>
             <Grid item xs={12} sm={6}>
               <TextField
-                label="University/College Name *"
+                label="University/College Name"
                 fullWidth
                 required
                 sx={errors.ugCollegeName ? { ...errorStyle, mb: 3 } : { ...inputStyle }}
@@ -596,7 +642,7 @@ export default function AddStaff4({
             </Grid>
             <Grid item xs={12} sm={6}>
               <TextField
-                label="Course "
+                label="Course"
                 fullWidth
                 required
                 sx={errors.ugCourse ? { ...errorStyle, mb: 3 } : { ...inputStyle }}
@@ -609,7 +655,7 @@ export default function AddStaff4({
             </Grid>
             <Grid item xs={12} sm={6}>
               <TextField
-                label="Percentage of Final Year "
+                label="CGPA"
                 fullWidth
                 type="number"
                 required
@@ -683,6 +729,153 @@ export default function AddStaff4({
                   Add More Marksheet
                 </Button>
               </Box>
+            </Grid>
+          </Grid>
+        </Box>
+      )}
+
+      {/* PG Section */}
+      {sections.includes("PG") && (
+        <Box mb={3}>
+          <Typography variant="subtitle1" sx={{ fontWeight: 500, mb: 1.5 }}>
+            PG (Postgraduate)
+            <IconButton sx={{ float: "right" }} onClick={() => handleRemoveSection("PG")}>
+              <DeleteIcon />
+            </IconButton>
+          </Typography>
+          <Grid container spacing={1.5}>
+            <Grid item xs={12} sm={6}>
+              <TextField
+                label="University/College Name"
+                fullWidth
+                required
+                sx={errors.pgCollegeName ? errorStyle : inputStyle}
+                value={formData.pgCollegeName || ""}
+                onChange={(e) => handleBasicFieldChange("pgCollegeName", e.target.value)}
+                onBlur={() => handleFieldBlur("pgCollegeName")}
+                error={errors.pgCollegeName}
+                helperText={errors.pgCollegeName ? "College name is required" : " "}
+              />
+            </Grid>
+            <Grid item xs={12} sm={6}>
+              <TextField
+                label="Course"
+                fullWidth
+                required
+                sx={errors.pgCourse ? errorStyle : inputStyle}
+                value={formData.pgCourse || ""}
+                onChange={(e) => handleBasicFieldChange("pgCourse", e.target.value)}
+                onBlur={() => handleFieldBlur("pgCourse")}
+                error={errors.pgCourse}
+                helperText={errors.pgCourse ? "Course is required" : " "}
+              />
+            </Grid>
+            <Grid item xs={12} sm={6}>
+              <TextField
+                label="CGPA"
+                fullWidth
+                type="number"
+                required
+                inputProps={{ step: "0.01", min: "0", max: "100" }}
+                sx={errors.pgPercentage ? errorStyle : inputStyle}
+                value={formData.pgPercentage || ""}
+                onChange={(e) => handleBasicFieldChange("pgPercentage", e.target.value)}
+                onBlur={() => handleFieldBlur("pgPercentage")}
+                error={errors.pgPercentage}
+                helperText={errors.pgPercentage ? "CGPA is required" : " "}
+              />
+            </Grid>
+            <Grid item xs={12} sm={6}>
+              <FileInput
+                label="PG Marksheet (Year 1) (Required)"
+                fieldName="pgMarksheet1"
+                accept=".pdf,.jpg,.png,.jpeg"
+                required
+              />
+              {errors.pgMarksheet1 && (
+                <Typography variant="caption" color="error" sx={{ mt: 0.5, fontSize: "0.75rem" }}>
+                  PG Marksheet Year 1 is required
+                </Typography>
+              )}
+            </Grid>
+            <Grid item xs={12} sm={6}>
+              <FileInput
+                label="PG Marksheet (Year 2) (Required)"
+                fieldName="pgMarksheet2"
+                accept=".pdf,.jpg,.png,.jpeg"
+                required
+              />
+              {errors.pgMarksheet2 && (
+                <Typography variant="caption" color="error" sx={{ mt: 0.5, fontSize: "0.75rem" }}>
+                  PG Marksheet Year 2 is required
+                </Typography>
+              )}
+            </Grid>
+          </Grid>
+        </Box>
+      )}
+
+      {/* PhD Section */}
+      {sections.includes("PhD") && (
+        <Box mb={3}>
+          <Typography variant="subtitle1" sx={{ fontWeight: 500, mb: 1.5 }}>
+            PhD (Doctorate)
+            <IconButton sx={{ float: "right" }} onClick={() => handleRemoveSection("PhD")}>
+              <DeleteIcon />
+            </IconButton>
+          </Typography>
+          <Grid container spacing={1.5}>
+            <Grid item xs={12} sm={6}>
+              <TextField
+                label="University/Institute"
+                fullWidth
+                required
+                sx={errors.phdInstitute ? errorStyle : inputStyle}
+                value={formData.phdInstitute || ""}
+                onChange={(e) => handleBasicFieldChange("phdInstitute", e.target.value)}
+                onBlur={() => handleFieldBlur("phdInstitute")}
+                error={errors.phdInstitute}
+                helperText={errors.phdInstitute ? "Institute is required" : " "}
+              />
+            </Grid>
+            <Grid item xs={12} sm={6}>
+              <TextField
+                label="Subject"
+                fullWidth
+                required
+                sx={errors.phdSubject ? errorStyle : inputStyle}
+                value={formData.phdSubject || ""}
+                onChange={(e) => handleBasicFieldChange("phdSubject", e.target.value)}
+                onBlur={() => handleFieldBlur("phdSubject")}
+                error={errors.phdSubject}
+                helperText={errors.phdSubject ? "Subject is required" : " "}
+              />
+            </Grid>
+            <Grid item xs={12} sm={6}>
+              <TextField
+                label="Thesis Title"
+                fullWidth
+                required
+                sx={errors.phdThesis ? errorStyle : inputStyle}
+                value={formData.phdThesis || ""}
+                onChange={(e) => handleBasicFieldChange("phdThesis", e.target.value)}
+                onBlur={() => handleFieldBlur("phdThesis")}
+                error={errors.phdThesis}
+                helperText={errors.phdThesis ? "Thesis title is required" : " "}
+              />
+            </Grid>
+            <Grid item xs={12} sm={6}>
+              <FileInput
+                label="PhD Certificate (Required)"
+                fieldName="phdCertificate"
+                accept=".pdf,.jpg,.png,.jpeg"
+                required
+              />
+              {errors.phdCertificate && (
+                <Typography variant="caption" color="error" sx={{ mt: 0.5, fontSize: "0.75rem" }}>
+                  PhD certificate is required
+                </Typography>
+              )}
             </Grid>
           </Grid>
         </Box>
