@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Box, Input, Slider, Typography } from "@mui/material";
-import Grid from "@mui/material/Grid2";
+import {Grid} from "@mui/material";
 import VolumeUp from "@mui/icons-material/VolumeUp";
 
 export default function InputSlider() {

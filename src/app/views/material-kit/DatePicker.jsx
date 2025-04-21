@@ -1,6 +1,6 @@
 import { useState } from "react";
 import TextField from "@mui/material/TextField";
-import Grid from "@mui/material/Grid2";
+import Grid from "@mui/material/Grid";
 import { AdapterDateFns } from "@mui/x-date-pickers/AdapterDateFnsV3";
 import { DatePicker, LocalizationProvider, TimePicker } from "@mui/x-date-pickers";
 
