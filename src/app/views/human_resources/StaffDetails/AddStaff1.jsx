@@ -573,8 +573,12 @@ export default function Addstaff1({
               textTransform: "none",
               fontSize: "0.875rem",
               backgroundColor: theme.palette.primary.main,
-              color: "white"
+              color: "white",
+              "&:hover": {
+                backgroundColor: theme.palette.primary.dark
+              }
             }}
+            onClick={() => navigate("/human_resources/staff-details/import-staff")}
           >
             Import Staff
           </Button>
@@ -917,7 +921,8 @@ export default function Addstaff1({
                         paddingTop: "8px",
                         paddingBottom: "8px"
                       },
-                      marginLeft: "11.5px"
+                      marginLeft: "11.5px",
+                      ...inputStyle
                     }}
                   >
                     <MenuItem value="Shri">Shri</MenuItem>
@@ -950,7 +955,8 @@ export default function Addstaff1({
                       },
                     "& input": {
                       padding: "10px 14px"
-                    }
+                    },
+                    ...inputStyle
                   }}
                   value={basicInfo.fatherName}
                   onChange={(e) => handleBasicInfoChange("fatherName", e.target.value)}
@@ -975,7 +981,8 @@ export default function Addstaff1({
                         alignItems: "center",
                         paddingTop: "8px",
                         paddingBottom: "8px"
-                      }
+                      },
+                      ...inputStyle
                     }}
                   >
                     <MenuItem value="Shrimati">Shrimati</MenuItem>
@@ -1008,7 +1015,8 @@ export default function Addstaff1({
                       },
                     "& input": {
                       padding: "10px 14px"
-                    }
+                    },
+                    ...inputStyle
                   }}
                   value={basicInfo.motherName}
                   onChange={(e) => handleBasicInfoChange("motherName", e.target.value)}
