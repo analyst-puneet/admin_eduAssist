@@ -21,7 +21,7 @@ const LeaveTypeCreate = Loadable(
 const LeaveGroup = Loadable(lazy(() => import("app/views/human_resources/StaffLeave/LeaveGroup")));
 const Master = Loadable(lazy(() => import("app/views/human_resources/Master/Master")));
 const ImportSTaff = Loadable(
-  lazy(() => import("app/views/human_resources/StaffDetails/ImportSTaff"))
+  lazy(() => import("app/views/human_resources/StaffDetails/ImportStaff"))
 );
 
 const humanResourceRoutes = [
