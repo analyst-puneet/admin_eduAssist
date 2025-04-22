@@ -573,8 +573,12 @@ export default function Addstaff1({
               textTransform: "none",
               fontSize: "0.875rem",
               backgroundColor: theme.palette.primary.main,
-              color: "white"
+              color: "white",
+              "&:hover": {
+                backgroundColor: theme.palette.primary.dark
+              }
             }}
+            onClick={() => navigate("/human_resources/staff-details/import-staff")}
           >
             Import Staff
           </Button>
