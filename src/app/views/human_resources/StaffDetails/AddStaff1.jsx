@@ -1041,7 +1041,8 @@ export default function Addstaff1({
                   ml: { sm: 1.5 },
                   "& .MuiInputLabel-root": {
                     transform: "translate(14px, -9px) scale(0.75)"
-                  }
+                  },
+                  ...inputStyle
                 }}
                 InputProps={{
                   inputProps: {
