@@ -17,7 +17,8 @@ import {
   Checkbox,
   FormControlLabel,
   Divider,
-  CircularProgress
+  Snackbar,
+  Alert
 } from "@mui/material";
 import { useNavigate } from "react-router-dom";
 import CloseIcon from "@mui/icons-material/Close";
@@ -40,6 +41,25 @@ export default function Addstaff1({
   // Initialize state from formData
   const [selectedImage, setSelectedImage] = useState(null);
   const objectUrlsRef = useRef([]);
+  // Create refs for all required fields
+  const staffIdRef = useRef(null);
+  const roleRef = useRef(null);
+  const designationRef = useRef(null);
+  const firstNameRef = useRef(null);
+  const genderRef = useRef(null);
+  const dobRef = useRef(null);
+  const phoneRef = useRef(null);
+  const emailRef = useRef(null);
+  const fatherNameRef = useRef(null);
+  const motherNameRef = useRef(null);
+  const maritalStatusRef = useRef(null);
+  const currentAddressRef = useRef(null);
+  const currentPinCodeRef = useRef(null);
+  const permanentAddressRef = useRef(null);
+  const permanentPinCodeRef = useRef(null);
+  const panCardRef = useRef(null);
+  const aadhaarCardRef = useRef(null);
+  const experienceRefs = useRef([]);
   const [role, setRole] = useState(formData.role || "");
   const [joiningDate, setJoiningDate] = useState(formData.joiningDate || "");
   const [sameAsAddress, setSameAsAddress] = useState(formData.sameAsAddress || false);
@@ -88,6 +108,104 @@ export default function Addstaff1({
       drivingLicense: ""
     }
   );
+
+  const findFirstEmptyField = () => {
+    if (!basicInfo.staffId) {
+      staffIdRef.current?.focus();
+      return "Staff ID";
+    }
+    if (!role) {
+      roleRef.current?.focus();
+      return "Role";
+    }
+    if (!basicInfo.designation) {
+      designationRef.current?.focus();
+      return "Designation";
+    }
+    if (!basicInfo.firstName) {
+      firstNameRef.current?.focus();
+      return "First Name";
+    }
+    if (!basicInfo.gender) {
+      genderRef.current?.focus();
+      return "Gender";
+    }
+    if (!basicInfo.dob) {
+      dobRef.current?.focus();
+      return "Date of Birth";
+    }
+    if (!basicInfo.phone) {
+      phoneRef.current?.focus();
+      return "Phone";
+    }
+    if (!basicInfo.email) {
+      emailRef.current?.focus();
+      return "Email";
+    }
+    if (!basicInfo.fatherName) {
+      fatherNameRef.current?.focus();
+      return "Father's Name";
+    }
+    if (!basicInfo.motherName) {
+      motherNameRef.current?.focus();
+      return "Mother's Name";
+    }
+    if (!basicInfo.maritalStatus) {
+      maritalStatusRef.current?.focus();
+      return "Marital Status";
+    }
+    if (!addressInfo.currentFullAddress) {
+      currentAddressRef.current?.focus();
+      return "Current Address";
+    }
+    if (!addressInfo.currentPinCode) {
+      currentPinCodeRef.current?.focus();
+      return "Current PIN Code";
+    }
+    if (!sameAsAddress && !addressInfo.permanentFullAddress) {
+      permanentAddressRef.current?.focus();
+      return "Permanent Address";
+    }
+    if (!sameAsAddress && !addressInfo.permanentPinCode) {
+      permanentPinCodeRef.current?.focus();
+      return "Permanent PIN Code";
+    }
+    if (!documents.panCard) {
+      panCardRef.current?.focus();
+      return "PAN Card";
+    }
+    if (!documents.aadhaarCard) {
+      aadhaarCardRef.current?.focus();
+      return "Aadhaar Card";
+    }
+
+    // Check experiences
+    for (let i = 0; i < experiences.length; i++) {
+      const exp = experiences[i];
+      if (!exp.company) {
+        experienceRefs.current[i]?.companyRef?.focus();
+        return `Experience ${i + 1} Company`;
+      }
+      if (!exp.position) {
+        experienceRefs.current[i]?.positionRef?.focus();
+        return `Experience ${i + 1} Position`;
+      }
+      if (!exp.from) {
+        experienceRefs.current[i]?.fromRef?.focus();
+        return `Experience ${i + 1} From Date`;
+      }
+      if (!exp.to) {
+        experienceRefs.current[i]?.toRef?.focus();
+        return `Experience ${i + 1} To Date`;
+      }
+      if (!exp.description) {
+        experienceRefs.current[i]?.descriptionRef?.focus();
+        return `Experience ${i + 1} Description`;
+      }
+    }
+
+    return null;
+  };
 
   // States for API data
   const [countries, setCountries] = useState([]);
@@ -191,6 +309,14 @@ export default function Addstaff1({
     const phoneValid = !validatePhone(basicInfo.phone);
     const emailValid = !validateEmail(basicInfo.email);
 
+    const firstEmptyField = findFirstEmptyField();
+    if (firstEmptyField && show) {
+      setSnackbarOpen(true);
+      setSnackbarMessage(`Please fill the ${firstEmptyField} field`);
+      setSnackbarSeverity("error");
+      return false;
+    }
+
     const newErrors = {
       staffId: !basicInfo.staffId,
       role: !role,
@@ -236,6 +362,7 @@ export default function Addstaff1({
     }
 
     const isFormValid =
+      !firstEmptyField &&
       !newErrors.staffId &&
       !newErrors.role &&
       !newErrors.designation &&
@@ -266,6 +393,10 @@ export default function Addstaff1({
 
     return isFormValid;
   };
+
+  const [snackbarOpen, setSnackbarOpen] = useState(false);
+  const [snackbarMessage, setSnackbarMessage] = useState("");
+  const [snackbarSeverity, setSnackbarSeverity] = useState("error");
 
   // Set current date as default for date of joining
   useEffect(() => {
@@ -627,6 +758,7 @@ export default function Addstaff1({
           {/* Row 1 - Staff ID, Role, Designation */}
           <Grid item xs={12} sm={4}>
             <TextField
+              inputRef={staffIdRef}
               label="Staff ID"
               fullWidth
               required
@@ -640,6 +772,7 @@ export default function Addstaff1({
           </Grid>
           <Grid item xs={12} sm={4}>
             <FormControl
+              inputRef={roleRef}
               fullWidth
               required
               sx={errors.role ? { ...errorStyle, mb: 3 } : { ...inputStyle }}
@@ -692,6 +825,7 @@ export default function Addstaff1({
           </Grid>
           <Grid item xs={12} sm={4}>
             <FormControl
+              inputRef={designationRef}
               fullWidth
               required
               sx={errors.designation ? { ...errorStyle, mb: 3 } : { ...inputStyle }}
@@ -731,6 +865,7 @@ export default function Addstaff1({
           {/* Row 2 - First Name, Last Name, Gender */}
           <Grid item xs={12} sm={4}>
             <TextField
+              inputRef={firstNameRef}
               label="First Name"
               fullWidth
               required
@@ -753,6 +888,7 @@ export default function Addstaff1({
           </Grid>
           <Grid item xs={12} sm={4}>
             <FormControl
+              inputRef={genderRef}
               fullWidth
               required
               sx={errors.gender ? { ...errorStyle, mb: 3 } : { ...inputStyle }}
@@ -795,6 +931,7 @@ export default function Addstaff1({
           {/* Row 3 - Date of Birth, Phone, Emergency Contact */}
           <Grid item xs={12} sm={4}>
             <TextField
+              inputRef={dobRef}
               label="Date of Birth"
               type="date"
               fullWidth
@@ -848,6 +985,7 @@ export default function Addstaff1({
           </Grid>
           <Grid item xs={12} sm={4}>
             <TextField
+              inputRef={phoneRef}
               label="Phone"
               fullWidth
               required
@@ -869,19 +1007,16 @@ export default function Addstaff1({
             <TextField
               label="Emergency Contact"
               fullWidth
-              required
-              sx={errors.emergencyContact ? { ...errorStyle, mb: 3 } : { ...inputStyle }}
+              sx={{ ...inputStyle }}
               value={basicInfo.emergencyContact}
               onChange={(e) => handleBasicInfoChange("emergencyContact", e.target.value)}
-              onBlur={() => handleFieldBlur("emergencyContact")}
-              error={errors.emergencyContact}
-              helperText={errors.emergencyContact ? "Emergency contact is required" : " "}
             />
           </Grid>
 
           {/* Row 4 - Email, Marital Status */}
           <Grid item xs={12} sm={4}>
             <TextField
+              inputRef={emailRef}
               label="Email (Login Username)"
               fullWidth
               required
@@ -900,6 +1035,7 @@ export default function Addstaff1({
           </Grid>
           <Grid item xs={12} sm={4}>
             <FormControl
+              inputRef={maritalStatusRef}
               fullWidth
               required
               sx={errors.maritalStatus ? { ...errorStyle, mb: 3 } : { ...inputStyle }}
@@ -971,6 +1107,7 @@ export default function Addstaff1({
 
                 {/* Name Field */}
                 <TextField
+                  inputRef={fatherNameRef}
                   label="Father's Name"
                   fullWidth
                   required
@@ -1031,6 +1168,7 @@ export default function Addstaff1({
 
                 {/* Name Field */}
                 <TextField
+                  inputRef={motherNameRef}
                   label="Mother's Name"
                   fullWidth
                   required
@@ -1222,6 +1360,7 @@ export default function Addstaff1({
             {/* Full Address */}
             <Grid item xs={12} sm={6}>
               <TextField
+                inputRef={currentAddressRef}
                 label="Full Address"
                 fullWidth
                 multiline
@@ -1250,6 +1389,7 @@ export default function Addstaff1({
             {/* PIN Code */}
             <Grid item xs={12} sm={6}>
               <TextField
+                inputRef={currentPinCodeRef}
                 label="PIN Code"
                 fullWidth
                 required
@@ -1400,6 +1540,7 @@ export default function Addstaff1({
             {/* Full Address */}
             <Grid item xs={12} sm={6}>
               <TextField
+                inputRef={permanentAddressRef}
                 label="Full Address"
                 fullWidth
                 multiline
@@ -1431,6 +1572,7 @@ export default function Addstaff1({
             {/* PIN Code */}
             <Grid item xs={12} sm={6}>
               <TextField
+                inputRef={permanentPinCodeRef}
                 label="PIN Code"
                 fullWidth
                 required
@@ -1561,208 +1703,229 @@ export default function Addstaff1({
         >
           Work Experience
         </Typography>
-        {experiences.map((exp, index) => (
-          <Box key={index} sx={{ mb: 2 }}>
-            <Grid container spacing={1.5}>
-              <Grid item xs={12} sm={6}>
-                <TextField
-                  label="Company Name"
-                  fullWidth
-                  required
-                  value={exp.company}
-                  onChange={(e) => handleExperienceChange(index, "company", e.target.value)}
-                  onBlur={() => {
-                    if (!exp.company) {
-                      setErrors((prev) => {
-                        const newExperiences = [...prev.experiences];
-                        newExperiences[index] = { ...newExperiences[index], company: true };
-                        return { ...prev, experiences: newExperiences };
-                      });
-                    }
-                  }}
-                  sx={
-                    errors.experiences[index]?.company
-                      ? { ...errorStyle, mb: 3 }
-                      : { ...inputStyle }
-                  }
-                  error={errors.experiences[index]?.company}
-                  helperText={errors.experiences[index]?.company ? "Company name is required" : " "}
-                />
-              </Grid>
+        {experiences.map((exp, index) => {
+          if (!experienceRefs.current[index]) {
+            experienceRefs.current[index] = {
+              companyRef: React.createRef(),
+              positionRef: React.createRef(),
+              fromRef: React.createRef(),
+              toRef: React.createRef(),
+              descriptionRef: React.createRef()
+            };
+          }
 
-              <Grid item xs={12} sm={6}>
-                <TextField
-                  label="Position"
-                  fullWidth
-                  required
-                  value={exp.position}
-                  onChange={(e) => handleExperienceChange(index, "position", e.target.value)}
-                  onBlur={() => {
-                    if (!exp.position) {
-                      setErrors((prev) => {
-                        const newExperiences = [...prev.experiences];
-                        newExperiences[index] = { ...newExperiences[index], position: true };
-                        return { ...prev, experiences: newExperiences };
-                      });
-                    }
-                  }}
-                  sx={
-                    errors.experiences[index]?.position
-                      ? { ...errorStyle, mb: 3 }
-                      : { ...inputStyle }
-                  }
-                  error={errors.experiences[index]?.position}
-                  helperText={errors.experiences[index]?.position ? "Position is required" : " "}
-                />
-              </Grid>
-
-              <Grid item xs={12} sm={3} key={`from-${index}`}>
-                <TextField
-                  label="From Date"
-                  type="date"
-                  fullWidth
-                  InputLabelProps={{ shrink: true }}
-                  value={exp.from}
-                  onChange={(e) => handleExperienceChange(index, "from", e.target.value)}
-                  sx={
-                    errors.experiences[index]?.from ? { ...errorStyle, mb: 3 } : { ...inputStyle }
-                  }
-                  InputProps={{
-                    inputProps: {
-                      style: {
-                        // For Chrome/Safari
-                        "::-webkit-calendar-picker-indicator": {
-                          display: "none",
-                          "-webkit-appearance": "none"
-                        },
-                        // For Firefox
-                        "::-moz-calendar-picker-indicator": {
-                          display: "none"
-                        },
-                        // For Edge
-                        "::-ms-clear": {
-                          display: "none"
-                        }
+          return (
+            <Box key={index} sx={{ mb: 2 }}>
+              <Grid container spacing={1.5}>
+                <Grid item xs={12} sm={6}>
+                  <TextField
+                    inputRef={experienceRefs.current[index].companyRef}
+                    label="Company Name"
+                    fullWidth
+                    required
+                    value={exp.company}
+                    onChange={(e) => handleExperienceChange(index, "company", e.target.value)}
+                    onBlur={() => {
+                      if (!exp.company) {
+                        setErrors((prev) => {
+                          const newExperiences = [...prev.experiences];
+                          newExperiences[index] = { ...newExperiences[index], company: true };
+                          return { ...prev, experiences: newExperiences };
+                        });
                       }
-                    },
-                    endAdornment: (
-                      <IconButton
-                        edge="end"
-                        onClick={(e) => {
-                          e.preventDefault();
-                          e.stopPropagation();
-                          const input = e.currentTarget
-                            .closest(".MuiTextField-root")
-                            .querySelector('input[type="date"]');
-                          input.showPicker();
-                        }}
-                        sx={{ padding: "8px", color: theme.palette.text.secondary }}
-                      >
-                        <SlCalender />
-                      </IconButton>
-                    )
-                  }}
-                  onClick={(e) => {
-                    const input = e.currentTarget.querySelector('input[type="date"]');
-                    input.showPicker();
-                  }}
-                />
-              </Grid>
-
-              <Grid item xs={12} sm={3} key={`to-${index}`}>
-                <TextField
-                  label="To Date"
-                  type="date"
-                  fullWidth
-                  InputLabelProps={{ shrink: true }}
-                  value={exp.to}
-                  onChange={(e) => handleExperienceChange(index, "to", e.target.value)}
-                  sx={errors.experiences[index]?.to ? { ...errorStyle, mb: 3 } : { ...inputStyle }}
-                  InputProps={{
-                    // This completely removes the default calendar icon
-                    inputProps: {
-                      style: {
-                        // For Chrome/Safari
-                        "::-webkit-calendar-picker-indicator": {
-                          display: "none",
-                          "-webkit-appearance": "none"
-                        },
-                        // For Firefox
-                        "::-moz-calendar-picker-indicator": {
-                          display: "none"
-                        },
-                        // For Edge
-                        "::-ms-clear": {
-                          display: "none"
-                        }
-                      }
-                    },
-                    endAdornment: (
-                      <IconButton
-                        edge="end"
-                        onClick={(e) => {
-                          e.preventDefault();
-                          e.stopPropagation();
-                          const input = e.currentTarget
-                            .closest(".MuiTextField-root")
-                            .querySelector('input[type="date"]');
-                          input.showPicker();
-                        }}
-                        sx={{ padding: "8px", color: theme.palette.text.secondary }}
-                      >
-                        <SlCalender />
-                      </IconButton>
-                    )
-                  }}
-                  onClick={(e) => {
-                    const input = e.currentTarget.querySelector('input[type="date"]');
-                    input.showPicker();
-                  }}
-                />
-              </Grid>
-
-              <Grid item xs={12} sm={6}>
-                <TextField
-                  label="Description"
-                  fullWidth
-                  required
-                  value={exp.description}
-                  onChange={(e) => handleExperienceChange(index, "description", e.target.value)}
-                  onBlur={() => {
-                    if (!exp.description) {
-                      setErrors((prev) => {
-                        const newExperiences = [...prev.experiences];
-                        newExperiences[index] = { ...newExperiences[index], description: true };
-                        return { ...prev, experiences: newExperiences };
-                      });
+                    }}
+                    sx={
+                      errors.experiences[index]?.company
+                        ? { ...errorStyle, mb: 3 }
+                        : { ...inputStyle }
                     }
-                  }}
-                  sx={
-                    errors.experiences[index]?.description
-                      ? { ...errorStyle, mb: 3 }
-                      : { ...inputStyle }
-                  }
-                  error={errors.experiences[index]?.description}
-                  helperText={
-                    errors.experiences[index]?.description ? "Description is required" : " "
-                  }
-                />
+                    error={errors.experiences[index]?.company}
+                    helperText={
+                      errors.experiences[index]?.company ? "Company name is required" : " "
+                    }
+                  />
+                </Grid>
+
+                <Grid item xs={12} sm={6}>
+                  <TextField
+                    inputRef={experienceRefs.current[index].positionRef}
+                    label="Position"
+                    fullWidth
+                    required
+                    value={exp.position}
+                    onChange={(e) => handleExperienceChange(index, "position", e.target.value)}
+                    onBlur={() => {
+                      if (!exp.position) {
+                        setErrors((prev) => {
+                          const newExperiences = [...prev.experiences];
+                          newExperiences[index] = { ...newExperiences[index], position: true };
+                          return { ...prev, experiences: newExperiences };
+                        });
+                      }
+                    }}
+                    sx={
+                      errors.experiences[index]?.position
+                        ? { ...errorStyle, mb: 3 }
+                        : { ...inputStyle }
+                    }
+                    error={errors.experiences[index]?.position}
+                    helperText={errors.experiences[index]?.position ? "Position is required" : " "}
+                  />
+                </Grid>
+
+                <Grid item xs={12} sm={3} key={`from-${index}`}>
+                  <TextField
+                    inputRef={experienceRefs.current[index].fromRef}
+                    label="From Date"
+                    type="date"
+                    fullWidth
+                    InputLabelProps={{ shrink: true }}
+                    value={exp.from}
+                    onChange={(e) => handleExperienceChange(index, "from", e.target.value)}
+                    sx={
+                      errors.experiences[index]?.from ? { ...errorStyle, mb: 3 } : { ...inputStyle }
+                    }
+                    InputProps={{
+                      inputProps: {
+                        style: {
+                          // For Chrome/Safari
+                          "::-webkit-calendar-picker-indicator": {
+                            display: "none",
+                            "-webkit-appearance": "none"
+                          },
+                          // For Firefox
+                          "::-moz-calendar-picker-indicator": {
+                            display: "none"
+                          },
+                          // For Edge
+                          "::-ms-clear": {
+                            display: "none"
+                          }
+                        }
+                      },
+                      endAdornment: (
+                        <IconButton
+                          edge="end"
+                          onClick={(e) => {
+                            e.preventDefault();
+                            e.stopPropagation();
+                            const input = e.currentTarget
+                              .closest(".MuiTextField-root")
+                              .querySelector('input[type="date"]');
+                            input.showPicker();
+                          }}
+                          sx={{ padding: "8px", color: theme.palette.text.secondary }}
+                        >
+                          <SlCalender />
+                        </IconButton>
+                      )
+                    }}
+                    onClick={(e) => {
+                      const input = e.currentTarget.querySelector('input[type="date"]');
+                      input.showPicker();
+                    }}
+                  />
+                </Grid>
+
+                <Grid item xs={12} sm={3} key={`to-${index}`}>
+                  <TextField
+                    inputRef={experienceRefs.current[index].toRef}
+                    label="To Date"
+                    type="date"
+                    fullWidth
+                    InputLabelProps={{ shrink: true }}
+                    value={exp.to}
+                    onChange={(e) => handleExperienceChange(index, "to", e.target.value)}
+                    sx={
+                      errors.experiences[index]?.to ? { ...errorStyle, mb: 3 } : { ...inputStyle }
+                    }
+                    InputProps={{
+                      // This completely removes the default calendar icon
+                      inputProps: {
+                        style: {
+                          // For Chrome/Safari
+                          "::-webkit-calendar-picker-indicator": {
+                            display: "none",
+                            "-webkit-appearance": "none"
+                          },
+                          // For Firefox
+                          "::-moz-calendar-picker-indicator": {
+                            display: "none"
+                          },
+                          // For Edge
+                          "::-ms-clear": {
+                            display: "none"
+                          }
+                        }
+                      },
+                      endAdornment: (
+                        <IconButton
+                          edge="end"
+                          onClick={(e) => {
+                            e.preventDefault();
+                            e.stopPropagation();
+                            const input = e.currentTarget
+                              .closest(".MuiTextField-root")
+                              .querySelector('input[type="date"]');
+                            input.showPicker();
+                          }}
+                          sx={{ padding: "8px", color: theme.palette.text.secondary }}
+                        >
+                          <SlCalender />
+                        </IconButton>
+                      )
+                    }}
+                    onClick={(e) => {
+                      const input = e.currentTarget.querySelector('input[type="date"]');
+                      input.showPicker();
+                    }}
+                  />
+                </Grid>
+
+                <Grid item xs={12} sm={6}>
+                  <TextField
+                    inputRef={experienceRefs.current[index].descriptionRef}
+                    label="Description"
+                    fullWidth
+                    required
+                    value={exp.description}
+                    onChange={(e) => handleExperienceChange(index, "description", e.target.value)}
+                    onBlur={() => {
+                      if (!exp.description) {
+                        setErrors((prev) => {
+                          const newExperiences = [...prev.experiences];
+                          newExperiences[index] = { ...newExperiences[index], description: true };
+                          return { ...prev, experiences: newExperiences };
+                        });
+                      }
+                    }}
+                    sx={
+                      errors.experiences[index]?.description
+                        ? { ...errorStyle, mb: 3 }
+                        : { ...inputStyle }
+                    }
+                    error={errors.experiences[index]?.description}
+                    helperText={
+                      errors.experiences[index]?.description ? "Description is required" : " "
+                    }
+                  />
+                </Grid>
               </Grid>
-            </Grid>
-            <Box sx={{ display: "flex", justifyContent: "flex-end", mt: 1 }}>
-              <Button
-                variant="outlined"
-                color="error"
-                size="small"
-                onClick={() => removeExperience(index)}
-                disabled={experiences.length <= 1}
-              >
-                Remove
-              </Button>
+              <Box sx={{ display: "flex", justifyContent: "flex-end", mt: 1 }}>
+                <Button
+                  variant="outlined"
+                  color="error"
+                  size="small"
+                  onClick={() => removeExperience(index)}
+                  disabled={experiences.length <= 1}
+                >
+                  Remove
+                </Button>
+              </Box>
+              {index < experiences.length - 1 && <Divider sx={{ my: 2 }} />}
             </Box>
-            {index < experiences.length - 1 && <Divider sx={{ my: 2 }} />}
-          </Box>
-        ))}
+          );
+        })}
         <Button variant="outlined" onClick={addExperience}>
           Add Another Experience
         </Button>
@@ -1783,6 +1946,7 @@ export default function Addstaff1({
         <Grid container spacing={1.5}>
           <Grid item xs={12} sm={6}>
             <TextField
+              inputRef={panCardRef}
               label="PAN Card Number"
               fullWidth
               required
@@ -1796,6 +1960,7 @@ export default function Addstaff1({
           </Grid>
           <Grid item xs={12} sm={6}>
             <TextField
+              inputRef={aadhaarCardRef}
               label="Aadhaar Card Number"
               fullWidth
               required
@@ -1866,6 +2031,21 @@ export default function Addstaff1({
           </Box>
         </DialogContent>
       </Dialog>
+
+      <Snackbar
+        open={snackbarOpen}
+        autoHideDuration={6000}
+        onClose={() => setSnackbarOpen(false)}
+        anchorOrigin={{ vertical: "top", horizontal: "center" }}
+      >
+        <Alert
+          onClose={() => setSnackbarOpen(false)}
+          severity={snackbarSeverity}
+          sx={{ width: "100%" }}
+        >
+          {snackbarMessage}
+        </Alert>
+      </Snackbar>
     </Box>
   );
 }
