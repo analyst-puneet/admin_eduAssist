@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import {
   Box,
   Grid,
@@ -39,6 +39,7 @@ export default function Addstaff1({
 
   // Initialize state from formData
   const [selectedImage, setSelectedImage] = useState(null);
+  const objectUrlsRef = useRef([]);
   const [role, setRole] = useState(formData.role || "");
   const [joiningDate, setJoiningDate] = useState(formData.joiningDate || "");
   const [sameAsAddress, setSameAsAddress] = useState(formData.sameAsAddress || false);
@@ -344,13 +345,30 @@ export default function Addstaff1({
 
   useEffect(() => {
     const loadImageFromIndexedDB = async () => {
+      // Fresh start detection: if formData doesn't have selectedImage
+      const isNewForm = !formData.selectedImage;
+
+      if (isNewForm) {
+        // Don't preload image for new form
+        return;
+      }
+
       try {
         const files = await getAllFilesFromDB();
         const file = files["staff-photo"];
 
-        if (file && formData.selectedImage && formData.selectedImage.key === "staff-photo") {
+        if (file) {
           const imageUrl = URL.createObjectURL(file);
           setSelectedImage(imageUrl);
+
+          // setFormData to keep selectedImage always in sync
+          setFormData((prev) => ({
+            ...prev,
+            selectedImage: {
+              key: "staff-photo",
+              name: file.name
+            }
+          }));
         }
       } catch (err) {
         console.error("Failed to load image from IndexedDB:", err);
@@ -360,28 +378,49 @@ export default function Addstaff1({
     loadImageFromIndexedDB();
 
     return () => {
-      if (selectedImage) URL.revokeObjectURL(selectedImage);
+      // Cleanup object URLs when component unmounts
+      objectUrlsRef.current.forEach((url) => URL.revokeObjectURL(url));
+      objectUrlsRef.current = [];
     };
   }, []);
 
   const handleImageChange = async (e) => {
     const file = e.target.files[0];
     if (file && file.type.startsWith("image/")) {
+      if (selectedImage) {
+        URL.revokeObjectURL(selectedImage);
+        objectUrlsRef.current = objectUrlsRef.current.filter((url) => url !== selectedImage);
+      }
       const imageUrl = URL.createObjectURL(file);
       setSelectedImage(imageUrl);
 
-      // Save file to IndexedDB
       await saveFileToDB("staff-photo", file);
 
-      // Update formData with just key reference (not the file itself)
       setFormData((prev) => ({
         ...prev,
         selectedImage: {
           key: "staff-photo",
-          url: imageUrl,
           name: file.name
         }
       }));
+    }
+  };
+
+  const handleRemoveImage = async () => {
+    if (selectedImage) {
+      URL.revokeObjectURL(selectedImage);
+      objectUrlsRef.current = objectUrlsRef.current.filter((url) => url !== selectedImage);
+      setSelectedImage(null);
+
+      try {
+        await deleteFileFromDB("staff-photo");
+        setFormData((prev) => ({
+          ...prev,
+          selectedImage: null
+        }));
+      } catch (err) {
+        console.error("Failed to delete image from IndexedDB:", err);
+      }
     }
   };
 

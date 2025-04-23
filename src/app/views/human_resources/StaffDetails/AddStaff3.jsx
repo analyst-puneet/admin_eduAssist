@@ -189,6 +189,24 @@ export default function AddStaff3({
   // ✅ Load files from IndexedDB on mount
   useEffect(() => {
     const loadFilesFromIndexedDB = async () => {
+      // Check if we're editing an existing record (formData.files exists)
+      const isEditing = formData.files && Object.keys(formData.files).length > 0;
+
+      if (!isEditing) {
+        // For new form, clear any existing files from IndexedDB
+        await Promise.all([
+          deleteFileFromDB("resume"),
+          deleteFileFromDB("joiningLetter"),
+          deleteFileFromDB("aadharFront"),
+          deleteFileFromDB("aadharBack"),
+          deleteFileFromDB("panCard"),
+          deleteFileFromDB("offerLetter"),
+          deleteFileFromDB("otherDocuments")
+        ]);
+        return;
+      }
+
+      // Only load files if we're editing an existing record
       const storedFiles = await getAllFilesFromDB();
       const updated = {};
 

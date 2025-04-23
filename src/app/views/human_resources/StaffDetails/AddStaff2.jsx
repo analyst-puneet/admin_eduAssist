@@ -142,7 +142,16 @@ export default function AddStaff2({
         transform: "translate(14px, -9px) scale(0.75)"
       }
     },
-    margin: "0.25rem 0"
+    borderColor: isDarkMode ? "white" : "grey.500",
+    "& .MuiOutlinedInput-notchedOutline": {
+      borderColor: isDarkMode ? "white" : "grey.500"
+    },
+    "&:hover .MuiOutlinedInput-notchedOutline": {
+      borderColor: isDarkMode ? "white" : "grey.700"
+    },
+    "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
+      borderColor: isDarkMode ? "white" : "primary.main"
+    }
   };
 
   const errorStyle = {
@@ -238,7 +247,7 @@ export default function AddStaff2({
               label="EPF No."
               fullWidth
               required
-              sx={errors.epfNo ? errorStyle : inputStyle}
+              sx={errors.epfNo ? { ...errorStyle } : { ...inputStyle }}
               value={payrollInfo.epfNo}
               onChange={(e) => handlePayrollChange("epfNo", e.target.value)}
               onBlur={() => handleFieldBlur("epfNo")}
