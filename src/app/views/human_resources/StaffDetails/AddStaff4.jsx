@@ -922,7 +922,7 @@ export default function AddStaff4({
       <Dialog
         open={openPreview}
         onClose={() => setOpenPreview(false)}
-        maxWidth="md"
+        maxWidth="sm"
         fullWidth
         sx={{
           "& .MuiDialog-paper": {

@@ -73,6 +73,24 @@
         transform: rotate(360deg);
       }
     }
+
+    input[type="date"] {
+      appearance: none;
+      -webkit-appearance: none;
+      -moz-appearance: none;
+      background: none;
+      position: relative;
+      padding-right: 0.5rem;
+    }
+
+    input[type="date"]::-webkit-calendar-picker-indicator {
+      display: none;
+      -webkit-appearance: none;
+    }
+
+    input[type="date"]::-moz-focus-inner {
+      border: 0;
+    }
   </style>
 </head>
 
