@@ -101,24 +101,38 @@ export default function PreviewStaffDetails({ formData, onSubmit, onBack }) {
 
   const handleSubmit = async () => {
     try {
-      // Call the original onSubmit function if it exists
-      if (onSubmit) {
-        await onSubmit();
-      }
-
-      // Show success message
-      await Swal.fire({
-        title: "Success!",
-        text: "Your data has been submitted successfully",
-        icon: "success",
-        confirmButtonText: "OK",
-        confirmButtonColor: theme.palette.primary.main
+      // Show confirmation dialog first
+      const result = await Swal.fire({
+        title: "Are you sure?",
+        text: "You're about to submit the staff details",
+        icon: "question",
+        showCancelButton: true,
+        confirmButtonColor: theme.palette.primary.main,
+        cancelButtonColor: theme.palette.error.main,
+        confirmButtonText: "Yes, submit it!",
+        cancelButtonText: "No, cancel"
       });
 
-      // Redirect after confirmation
-      navigate("/human_resources/staff-details");
+      if (result.isConfirmed) {
+        // Call the original onSubmit function if it exists
+        if (onSubmit) {
+          await onSubmit();
+        }
+
+        // Show success message
+        await Swal.fire({
+          title: "Success!",
+          text: "Staff details submitted successfully",
+          icon: "success",
+          confirmButtonText: "OK",
+          confirmButtonColor: theme.palette.primary.main
+        });
+
+        // Redirect after confirmation
+        navigate("/human_resources/staff-details");
+      }
     } catch (error) {
-      Swal.fire({
+      await Swal.fire({
         title: "Error!",
         text: error.message || "Failed to submit data",
         icon: "error",
@@ -1113,17 +1127,19 @@ export default function PreviewStaffDetails({ formData, onSubmit, onBack }) {
           </Typography>
         </Box>
         <Button
-          variant="outlined"
-          startIcon={<ArrowBack />}
+          variant="contained"
+          // startIcon={<ArrowBack />}
           onClick={onBack}
           sx={{
-            backgroundColor: isDarkMode ? theme.palette.grey[800] : "white",
+            px: 3,
+            backgroundColor: isDarkMode ? theme.palette.grey[700] : theme.palette.secondary.main,
+            color: "white",
             "&:hover": {
-              backgroundColor: isDarkMode ? theme.palette.grey[700] : theme.palette.grey[100]
+              backgroundColor: isDarkMode ? theme.palette.grey[600] : theme.palette.secondary.dark
             }
           }}
         >
-          Back to Edit
+          BACK TO EDIT
         </Button>
       </Box>
 
@@ -1134,22 +1150,13 @@ export default function PreviewStaffDetails({ formData, onSubmit, onBack }) {
       <DocumentsSection />
       <PayrollBankSection />
 
-      <Box sx={{ display: "flex", justifyContent: "flex-end", mt: 3, gap: 2 }}>
-        <Button
-          variant="outlined"
-          onClick={onBack}
-          sx={{
-            px: 4,
-            backgroundColor: isDarkMode ? theme.palette.grey[800] : "white"
-          }}
-        >
-          Back
-        </Button>
+      <Box sx={{ display: "flex", justifyContent: "flex-end", mt: 3 }}>
         <Button
           variant="contained"
           onClick={handleSubmit}
+          fullWidth
           sx={{
-            px: 4,
+            py: 1.5,
             backgroundColor: theme.palette.primary.main,
             "&:hover": {
               backgroundColor: theme.palette.primary.dark

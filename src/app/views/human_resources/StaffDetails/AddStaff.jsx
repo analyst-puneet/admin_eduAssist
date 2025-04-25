@@ -17,9 +17,11 @@ import Addstaff4 from "./AddStaff4";
 import Addstaff2 from "./AddStaff2";
 import Addstaff3 from "./AddStaff3";
 import PreviewStaffDetails from "./PreviewStaffDetails";
+import { useNavigate } from "react-router-dom";
 
 export default function StepperForm() {
   const theme = useTheme();
+  const navigate = useNavigate();
   const isDarkMode = theme.palette.mode === "dark";
   const [activeStep, setActiveStep] = React.useState(0);
   const [stepValid, setStepValid] = React.useState(false);
@@ -31,24 +33,44 @@ export default function StepperForm() {
 
   // Initialize form data from sessionStorage or empty object
   const [formData, setFormData] = React.useState(() => {
-    const savedData = sessionStorage.getItem("staffFormData");
-    return savedData ? JSON.parse(savedData) : {};
+    try {
+      const savedData = sessionStorage.getItem("staffFormData");
+      return savedData ? JSON.parse(savedData) : {};
+    } catch (error) {
+      console.error("Error parsing saved form data:", error);
+      return {};
+    }
   });
 
-  // Store only non-file data in sessionStorage
+  // Update the useEffect for storing form data:
   React.useEffect(() => {
-    // Create a copy of formData without the large file objects
-    const dataToStore = {
-      ...formData,
-      files: undefined, // Exclude files from storage
-      fileNames: formData.fileNames // Keep file names if needed
-    };
+    const dataToStore = JSON.parse(
+      JSON.stringify({
+        ...formData,
+        files: Object.fromEntries(
+          Object.entries(formData.files || {}).map(([key, file]) => [
+            key,
+            {
+              name: file.name,
+              type: file.type,
+              data: file.data
+            }
+          ])
+        )
+      })
+    );
 
     try {
       sessionStorage.setItem("staffFormData", JSON.stringify(dataToStore));
     } catch (error) {
-      console.error("Failed to save form data to sessionStorage:", error);
-      // You might want to implement a fallback storage mechanism here
+      console.error("Failed to save form data:", error);
+      if (error.name === "QuotaExceededError") {
+        const simplifiedData = {
+          ...formData,
+          files: undefined
+        };
+        sessionStorage.setItem("staffFormData", JSON.stringify(simplifiedData));
+      }
     }
   }, [formData]);
 
@@ -72,7 +94,15 @@ export default function StepperForm() {
     }, 0);
   };
 
-  const handleBack = () => setActiveStep((prev) => prev - 1);
+  const handleBack = () => {
+    if (activeStep === 0) {
+      // When on first step (AddStaff1), navigate to staff-details
+      navigate("/human_resources/staff-details");
+    } else {
+      // For other steps, go to previous step
+      setActiveStep((prev) => prev - 1);
+    }
+  };
 
   const handleReset = () => {
     setActiveStep(0);
@@ -109,7 +139,7 @@ export default function StepperForm() {
       "Personal Information",
       "Educational Details",
       "Payroll & Bank Details",
-      "Review & Submit"
+      "Upload Documents"
     ];
   }
 
@@ -206,13 +236,8 @@ export default function StepperForm() {
 
             {/* Navigation Buttons */}
             <Box mt={4} display="flex" justifyContent="space-between">
-              <Button
-                variant="contained"
-                sx={backButtonStyle}
-                disabled={activeStep === 0}
-                onClick={handleBack}
-              >
-                Back
+              <Button variant="contained" sx={backButtonStyle} onClick={handleBack}>
+                {activeStep === 0 ? "Back to Staff List" : "Back"}
               </Button>
 
               <Button variant="contained" sx={nextButtonStyle} onClick={handleNext}>
@@ -222,18 +247,6 @@ export default function StepperForm() {
           </Box>
         )}
       </Paper>
-
-      {/* Snackbar for notifications */}
-      <Snackbar
-        open={snackbarOpen}
-        autoHideDuration={6000}
-        onClose={handleSnackbarClose}
-        anchorOrigin={{ vertical: "top", horizontal: "center" }}
-      >
-        <Alert onClose={handleSnackbarClose} severity={snackbarSeverity} sx={{ width: "100%" }}>
-          {snackbarMessage}
-        </Alert>
-      </Snackbar>
     </Container>
   );
 }

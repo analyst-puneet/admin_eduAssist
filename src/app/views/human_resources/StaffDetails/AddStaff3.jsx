@@ -10,6 +10,9 @@ import {
   Close
 } from "@mui/icons-material";
 
+// IndexedDB utils
+import { saveFileToDB, getAllFilesFromDB, deleteFileFromDB } from "app/utils/indexedDBUtils";
+
 const FilePreview = ({ file, onClose }) => {
   const getPreviewContent = () => {
     if (file.type.startsWith("image/")) {
@@ -84,20 +87,16 @@ const DropzoneBox = ({ label, onDrop, file, error, helperText }) => {
 
   const getFileIcon = () => {
     if (!file || !file.type || !file.name) return <CloudUpload />;
-
-    if (file.type.startsWith("image/")) {
-      return <Image />;
-    } else if (file.type === "application/pdf") {
-      return <PictureAsPdf />;
-    } else if (
+    if (file.type.startsWith("image/")) return <Image />;
+    if (file.type === "application/pdf") return <PictureAsPdf />;
+    if (
       file.type.includes("document") ||
       file.name.endsWith(".docx") ||
       file.name.endsWith(".doc")
     ) {
       return <Description />;
-    } else {
-      return <InsertDriveFile />;
     }
+    return <InsertDriveFile />;
   };
 
   return (
@@ -187,6 +186,43 @@ export default function AddStaff3({
 
   const [showErrors, setShowErrors] = useState(false);
 
+  // ✅ Load files from IndexedDB on mount
+  useEffect(() => {
+    const loadFilesFromIndexedDB = async () => {
+      const storedFiles = await getAllFilesFromDB();
+      const updated = {};
+
+      for (const key of Object.keys(files)) {
+        const file = storedFiles[key];
+        if (file && file.data) {
+          const blob = await dataURLtoBlob(file.data);
+          const reconstructedFile = new File([blob], file.name, {
+            type: file.type
+          });
+          updated[key] = reconstructedFile;
+        }
+      }
+
+      setFiles((prev) => ({
+        ...prev,
+        ...updated
+      }));
+    };
+
+    loadFilesFromIndexedDB();
+  }, []);
+
+  // Helper to convert base64 to blob
+  const dataURLtoBlob = (dataURL) => {
+    const arr = dataURL.split(",");
+    const mime = arr[0].match(/:(.*?);/)[1];
+    const bstr = atob(arr[1]);
+    let n = bstr.length;
+    const u8arr = new Uint8Array(n);
+    while (n--) u8arr[n] = bstr.charCodeAt(n);
+    return new Blob([u8arr], { type: mime });
+  };
+
   // Validate form and notify parent
   const validateForm = (show = false) => {
     const newErrors = {
@@ -207,7 +243,7 @@ export default function AddStaff3({
     return isFormValid;
   };
 
-  // Update formData whenever files change
+  // 🔄 Update formData
   useEffect(() => {
     setFormData((prev) => ({
       ...prev,
@@ -223,14 +259,30 @@ export default function AddStaff3({
     }
   }, [triggerValidation]);
 
+  // 📤 Upload and save to IndexedDB
   const handleFileUpload = (field) => (acceptedFiles) => {
     const file = acceptedFiles[0];
-    setFiles((prev) => ({
-      ...prev,
-      [field]: file
-    }));
-    if (file && errors[field]) {
-      setErrors((prev) => ({ ...prev, [field]: false }));
+
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = async () => {
+        await saveFileToDB(field, {
+          name: file.name,
+          type: file.type,
+          data: reader.result
+        });
+
+        setFiles((prev) => ({
+          ...prev,
+          [field]: file
+        }));
+
+        if (errors[field]) {
+          setErrors((prev) => ({ ...prev, [field]: false }));
+        }
+      };
+
+      reader.readAsDataURL(file);
     }
   };
 
@@ -247,7 +299,7 @@ export default function AddStaff3({
             onDrop={handleFileUpload("resume")}
             file={files.resume}
             error={errors.resume}
-            helperText={errors.resume ? "Resume is required" : ""}
+            helperText="Resume is required"
           />
         </Grid>
         <Grid item xs={12} md={6}>
@@ -256,7 +308,7 @@ export default function AddStaff3({
             onDrop={handleFileUpload("joiningLetter")}
             file={files.joiningLetter}
             error={errors.joiningLetter}
-            helperText={errors.joiningLetter ? "Joining letter is required" : ""}
+            helperText="Joining letter is required"
           />
         </Grid>
         <Grid item xs={12} md={6}>
@@ -265,7 +317,7 @@ export default function AddStaff3({
             onDrop={handleFileUpload("aadharFront")}
             file={files.aadharFront}
             error={errors.aadharFront}
-            helperText={errors.aadharFront ? "Aadhar Card front is required" : ""}
+            helperText="Aadhar Card front is required"
           />
         </Grid>
         <Grid item xs={12} md={6}>
@@ -274,7 +326,7 @@ export default function AddStaff3({
             onDrop={handleFileUpload("aadharBack")}
             file={files.aadharBack}
             error={errors.aadharBack}
-            helperText={errors.aadharBack ? "Aadhar Card back is required" : ""}
+            helperText="Aadhar Card back is required"
           />
         </Grid>
         <Grid item xs={12} md={6}>
@@ -283,7 +335,7 @@ export default function AddStaff3({
             onDrop={handleFileUpload("panCard")}
             file={files.panCard}
             error={errors.panCard}
-            helperText={errors.panCard ? "PAN Card is required" : ""}
+            helperText="PAN Card is required"
           />
         </Grid>
         <Grid item xs={12} md={6}>
