@@ -89,8 +89,7 @@ export default function Login() {
 
   const handleFormSubmit = async (values, { setSubmitting }) => {
     try {
-      const response = await axios.post(
-        `${BASE_URL}/api/auth/login`,
+      const response = await axios.post(`${BASE_URL}/api/auth/login`,
         {
           username: values.username,
           password: values.password,
@@ -219,11 +218,11 @@ export default function Login() {
                    <Button
                       type="submit"
                       color="primary"
-                      loading={isSubmitting}
+                      disabled={isSubmitting}
                       variant="contained"
                       sx={{ my: 2 }}
                     >
-                      Login
+                      {isSubmitting ? "Logging in..." : "Login"}
                     </Button>
 
                     <Paragraph>

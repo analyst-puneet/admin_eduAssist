@@ -98,7 +98,8 @@ const Layout1Topbar = () => {
       const response= await axios.post(`${BASE_URL}/api/auth/logout`, {
            withCredentials: true 
           });
-          if (response.status === 200) {
+          console.log(response.status);
+          if (response.status == 200) {
         window.location.replace( '/session/signin');
           }else{
             res.status(401).json({ message: "Logout Failed" });
