@@ -1,47 +1,54 @@
+import { useState } from "react";
 import { NavLink, useNavigate } from "react-router-dom";
+import { useSnackbar } from "notistack";
 import { Formik } from "formik";
 import * as Yup from "yup";
+import axios from "axios";
 
 import Box from "@mui/material/Box";
 import Card from "@mui/material/Card";
-import Grid from "@mui/material/Grid2";
+import Grid from "@mui/material/Grid";
+import Button from "@mui/material/Button";
 import Checkbox from "@mui/material/Checkbox";
 import TextField from "@mui/material/TextField";
 import styled from "@mui/material/styles/styled";
 import useTheme from "@mui/material/styles/useTheme";
-import LoadingButton from "@mui/lab/LoadingButton";
-
-import useAuth from "app/hooks/useAuth";
+// GLOBAL CUSTOM COMPONENTS
+import MatxDivider from "app/components/MatxDivider";
 import { Paragraph } from "app/components/Typography";
 
 // STYLED COMPONENTS
-const ContentBox = styled("div")(() => ({
+const ContentBox = styled("div")(({ theme }) => ({
   height: "100%",
   padding: "32px",
   display: "flex",
   alignItems: "center",
   justifyContent: "center",
-  background: "rgba(0, 0, 0, 0.01)"
+  backgroundColor: theme.palette.background.default
 }));
 
-const JWTRegister = styled(JustifyBox)(() => ({
+const IMG = styled("img")({ width: "100%" });
+
+// const GoogleButton = styled(Button)(({ theme }) => ({
+//   color: "rgba(0, 0, 0, 0.87)",
+//   backgroundColor: "#e0e0e0",
+//   boxShadow: theme.shadows[0],
+//   "&:hover": { backgroundColor: "#d5d5d5" }
+// }));
+
+const RegisterRoot = styled("div")({
+  display: "flex",
+  alignItems: "center",
+  justifyContent: "center",
   background: "#1A2038",
   minHeight: "100vh !important",
-  "& .card": {
-    maxWidth: 800,
-    minHeight: 400,
-    margin: "1rem",
-    display: "flex",
-    borderRadius: 12,
-    alignItems: "center"
-  }
-}));
+  "& .card": { maxWidth: 750, margin: 16, borderRadius: 12 }
+});
 
 // initial login credentials
 const initialValues = {
   email: "",
   password: "",
-  username: "",
   remember: true
 };
 
@@ -53,65 +60,62 @@ const validationSchema = Yup.object().shape({
   email: Yup.string().email("Invalid Email address").required("Email is required!")
 });
 
-export default function JwtRegister() {
+export default function Register() {
   const theme = useTheme();
-  const { register } = useAuth();
   const navigate = useNavigate();
+  const { enqueueSnackbar } = useSnackbar();
+  const [loading, setLoading] = useState(false);
 
-  const handleFormSubmit = (values) => {
+  const handleFormSubmit = async (values) => {
     try {
-      register(values.email, values.username, values.password);
-      navigate("/");
-    } catch (e) {
-      console.log(e);
+      setLoading(true);
+      const response = await axios.post('BaseUrl/api/user/register', {
+        email: values.email,
+        password: values.password
+      });
+       
+      if (response.data.success) {
+        navigate("/");
+        enqueueSnackbar("Registered Successfully!", { variant: "success" });
+      } else {
+        throw new Error(response.data.message || "Registration failed");
+      }
+    } catch (error) {
+      setLoading(false);
+      enqueueSnackbar(error.response?.data?.message || error.message, { variant: "error" });
     }
   };
 
   return (
-    <JWTRegister>
+    <RegisterRoot>
       <Card className="card">
         <Grid container>
           <Grid size={{ md: 6, xs: 12 }}>
             <ContentBox>
-              <img
-                width="100%"
-                alt="Register"
-                src="/assets/images/illustrations/posting_photo.svg"
-              />
+              <IMG src="/assets/images/illustrations/posting_photo.svg" alt="Photo" />
             </ContentBox>
           </Grid>
 
           <Grid size={{ md: 6, xs: 12 }}>
+            <Box px={4} pt={4}>
+              <Button
+                fullWidth
+                variant="contained"
+                disabled
+                startIcon={<img src="/assets/images/logos/google.svg" alt="google" />}>
+                Google Sign In (Disabled)
+              </Button>
+            </Box>
+
+            <MatxDivider sx={{ mt: 3, px: 4 }} text="Or" />
+
             <Box p={4} height="100%">
               <Formik
                 onSubmit={handleFormSubmit}
                 initialValues={initialValues}
                 validationSchema={validationSchema}>
-                {({
-                  values,
-                  errors,
-                  touched,
-                  isSubmitting,
-                  handleChange,
-                  handleBlur,
-                  handleSubmit
-                }) => (
+                {({ values, errors, touched, handleChange, handleBlur, handleSubmit }) => (
                   <form onSubmit={handleSubmit}>
-                    <TextField
-                      fullWidth
-                      size="small"
-                      type="text"
-                      name="username"
-                      label="Username"
-                      variant="outlined"
-                      onBlur={handleBlur}
-                      value={values.username}
-                      onChange={handleChange}
-                      helperText={touched.username && errors.username}
-                      error={Boolean(errors.username && touched.username)}
-                      sx={{ mb: 3 }}
-                    />
-
                     <TextField
                       fullWidth
                       size="small"
@@ -138,7 +142,7 @@ export default function JwtRegister() {
                       onChange={handleChange}
                       helperText={touched.password && errors.password}
                       error={Boolean(errors.password && touched.password)}
-                      sx={{ mb: 2 }}
+                      sx={{ mb: 1.5 }}
                     />
 
                     <Box display="flex" alignItems="center" gap={1}>
@@ -155,14 +159,14 @@ export default function JwtRegister() {
                       </Paragraph>
                     </Box>
 
-                    <LoadingButton
+                    <Button
                       type="submit"
                       color="primary"
+                      loading={loading}
                       variant="contained"
-                      loading={isSubmitting}
-                      sx={{ mb: 2, mt: 3 }}>
+                      sx={{ my: 2 }}>
                       Register
-                    </LoadingButton>
+                    </Button>
 
                     <Paragraph>
                       Already have an account?
@@ -179,6 +183,6 @@ export default function JwtRegister() {
           </Grid>
         </Grid>
       </Card>
-    </JWTRegister>
+    </RegisterRoot>
   );
 }

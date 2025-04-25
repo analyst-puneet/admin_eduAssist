@@ -1,6 +1,6 @@
 import Fab from "@mui/material/Fab";
 import Card from "@mui/material/Card";
-import Grid from "@mui/material/Grid2";
+import Grid from "@mui/material/Grid";
 import { lighten, styled, useTheme } from "@mui/material/styles";
 import ExpandLess from "@mui/icons-material/ExpandLess";
 import StarOutline from "@mui/icons-material/StarOutline";

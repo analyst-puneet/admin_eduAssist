@@ -3,7 +3,7 @@ import { Fragment } from "react";
 import Box from "@mui/material/Box";
 import Fab from "@mui/material/Fab";
 import Card from "@mui/material/Card";
-import Grid from "@mui/material/Grid2";
+import Grid from "@mui/material/Grid";
 import Avatar from "@mui/material/Avatar";
 import Checkbox from "@mui/material/Checkbox";
 import IconButton from "@mui/material/IconButton";

@@ -4,23 +4,21 @@ import CssBaseline from "@mui/material/CssBaseline";
 import { MatxTheme } from "./components";
 // ALL CONTEXTS
 import SettingsProvider from "./contexts/SettingsContext";
-import { AuthProvider } from "./contexts/FirebaseAuthContext";
 // ROUTES
-import routes from "./routes";
-// FAKE SERVER
-import "../__api__";
+import { AuthProvider } from "./contexts/AuthContext";
+import Routes from "./routes";
 
-export default function App() {
-  const content = useRoutes(routes);
+ function App() {
+  const content = useRoutes(Routes);
 
   return (
     <SettingsProvider>
-      <AuthProvider>
         <MatxTheme>
           <CssBaseline />
           {content}
         </MatxTheme>
-      </AuthProvider>
     </SettingsProvider>
   );
 }
+
+export default App;
