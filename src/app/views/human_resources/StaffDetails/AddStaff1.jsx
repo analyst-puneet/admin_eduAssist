@@ -622,31 +622,16 @@ export default function Addstaff1({
 
     try {
       // Fetch cookies dynamically
-      const getCookie = (name) => {
-        const match = document.cookie.match(new RegExp("(^| )" + name + "=([^;]+)"));
-        return match ? match[2] : null;
-      };
+      const getCookie = document.cookie;
+      console.log('getCookie---',getCookie);
 
-      const token = getCookie("token");
-      const userId = getCookie("UserId");
-      const rememberToken = getCookie("remember_token");
-
-      // Handle missing cookies
-      if (!token || !userId || !rememberToken) {
-        throw new Error("Missing required cookies. Please log in again.");
-      }
-
-      // API request to fetch gender options
       const response = await fetch("https://backend-aufx.onrender.com/api/master/gender", {
         method: "GET", // Changed method to GET
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}` // Adding token in the Authorization header
-        },
+        
         withCredentials: true // Include cookies in the request
       });
 
-      console.log("Response status:", response.status); // Log the response status
+      console.log("Response status:", response); // Log the response status
 
       if (response.status === 401) {
         throw new Error("Token expired. Please log in again.");
