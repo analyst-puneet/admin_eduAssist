@@ -54,3 +54,11 @@ export const deleteFileFromDB = async (key) => {
   await tx.complete;
   db.close();
 };
+
+export const clearAllFilesFromDB = async () => {
+  const db = await openDB();
+  const tx = db.transaction(STORE_NAME, "readwrite");
+  tx.objectStore(STORE_NAME).clear();
+  await tx.complete;
+  db.close();
+};

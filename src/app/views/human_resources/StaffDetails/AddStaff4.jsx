@@ -54,7 +54,19 @@ export default function AddStaff4({
   // Initialize form data and recreate object URLs when component mounts
   useEffect(() => {
     const initializeFiles = async () => {
+      // Fresh start detection: if formData.files is empty
+      const isNewForm =
+        (!formData.files || Object.keys(formData.files).length === 0) &&
+        (!formData.fileNames || Object.keys(formData.fileNames).length === 0);
+
+      if (isNewForm) {
+        // Don't preload files for new form
+        return;
+      }
+
+      // Else: resume session → load saved files
       const storedFiles = await getAllFilesFromDB();
+      if (!storedFiles || Object.keys(storedFiles).length === 0) return;
 
       const reconstructedFiles = {};
       const fileNamesMap = {};
@@ -910,7 +922,7 @@ export default function AddStaff4({
       <Dialog
         open={openPreview}
         onClose={() => setOpenPreview(false)}
-        maxWidth="md"
+        maxWidth="sm"
         fullWidth
         sx={{
           "& .MuiDialog-paper": {

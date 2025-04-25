@@ -38,14 +38,10 @@ import { styled } from "@mui/material/styles";
 
 const StyledPaper = styled(Paper)(({ theme }) => ({
   padding: theme.spacing(4),
-  borderRadius: "16px",
-  boxShadow: theme.shadows[10],
+  borderRadius: "10px",
   background: theme.palette.background.paper,
   border: `1px solid ${theme.palette.divider}`,
-  transition: "all 0.3s ease",
-  "&:hover": {
-    boxShadow: theme.shadows[15]
-  }
+  transition: "all 0.3s ease"
 }));
 
 const StyledTable = styled(Table)(({ theme }) => ({
@@ -190,14 +186,15 @@ export default function ImportStaff() {
         transform: "translate(14px, -9px) scale(0.75)"
       }
     },
+    borderColor: isDarkMode ? "white" : "grey.500",
     "& .MuiOutlinedInput-notchedOutline": {
-      borderColor: isDarkMode ? theme.palette.grey[600] : theme.palette.grey[400]
+      borderColor: isDarkMode ? "white" : "grey.500"
     },
     "&:hover .MuiOutlinedInput-notchedOutline": {
-      borderColor: isDarkMode ? theme.palette.grey[500] : theme.palette.grey[600]
+      borderColor: isDarkMode ? "white" : "grey.700"
     },
     "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
-      borderColor: theme.palette.primary.main
+      borderColor: isDarkMode ? "white" : "primary.main"
     }
   };
 
@@ -293,7 +290,7 @@ export default function ImportStaff() {
       <Breadcrumbs />
 
       <Fade in={true} timeout={500}>
-        <StyledPaper elevation={3}>
+        <StyledPaper>
           <Box
             sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", mb: 4 }}
           >
@@ -303,9 +300,8 @@ export default function ImportStaff() {
                 gutterBottom
                 sx={{
                   fontWeight: "bold",
-                  background: "linear-gradient(45deg, #6200ee 30%, #bb86fc 90%)",
-                  WebkitBackgroundClip: "text",
-                  WebkitTextFillColor: "transparent",
+                  background: isDarkMode ? "theme.palette.common.primary" : "inherit",
+                  
                   display: "inline-block"
                 }}
               >
@@ -352,10 +348,11 @@ export default function ImportStaff() {
 
             <Box
               sx={{
-                backgroundColor: isDarkMode ? theme.palette.grey[900] : theme.palette.grey[100],
                 borderRadius: "12px",
                 p: 3,
-                border: `1px solid ${isDarkMode ? theme.palette.grey[700] : theme.palette.divider}`,
+                border: `1px solid ${
+                  isDarkMode ? theme.palette.palette.white : theme.palette.divider
+                }`,
                 "& ol": {
                   margin: 0,
                   paddingLeft: theme.spacing(4),
@@ -368,7 +365,8 @@ export default function ImportStaff() {
                       color: isDarkMode ? theme.palette.grey[100] : theme.palette.text.primary
                     }
                   }
-                }
+                },
+                ...inputStyle
               }}
             >
               <ol>
@@ -407,21 +405,13 @@ export default function ImportStaff() {
                 sx={{
                   overflowX: "auto",
                   borderRadius: "12px",
-                  border: `1px solid ${theme.palette.divider}`
+                  border: `1px solid ${theme.palette.divider}`,
+                  ...inputStyle
                 }}
               >
                 <StyledTable sx={{ minWidth: "1000px" }}>
                   <TableHead>
-                    <TableRow
-                      sx={{
-                        background: isDarkMode ? theme.palette.grey[800] : theme.palette.grey[100],
-                        "& .MuiTableCell-root": {
-                          color: isDarkMode ? theme.palette.common.white : "inherit",
-                          borderColor: isDarkMode ? theme.palette.grey[700] : theme.palette.divider,
-                          fontWeight: 600 // Consistent font weight
-                        }
-                      }}
-                    >
+                    <TableRow>
                       <TableCell>Staff ID</TableCell>
                       <TableCell>First Name</TableCell>
                       <TableCell>Last Name</TableCell>
