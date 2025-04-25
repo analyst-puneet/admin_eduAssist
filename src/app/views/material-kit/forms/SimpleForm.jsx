@@ -6,7 +6,7 @@ import Icon from "@mui/material/Icon";
 import Radio from "@mui/material/Radio";
 import RadioGroup from "@mui/material/RadioGroup";
 import TextField from "@mui/material/TextField";
-import Grid from "@mui/material/Grid2";
+import {Grid} from "@mui/material";
 import Stack from "@mui/material/Stack";
 import { Span } from "app/components/Typography";
 
