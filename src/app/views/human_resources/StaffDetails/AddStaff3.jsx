@@ -186,11 +186,22 @@ export default function AddStaff3({
 
   const [showErrors, setShowErrors] = useState(false);
 
-  // ✅ Load files from IndexedDB on mount
+  // Helper to convert base64 to blob
+  const dataURLtoBlob = (dataURL) => {
+    const arr = dataURL.split(",");
+    const mime = arr[0].match(/:(.*?);/)[1];
+    const bstr = atob(arr[1]);
+    let n = bstr.length;
+    const u8arr = new Uint8Array(n);
+    while (n--) u8arr[n] = bstr.charCodeAt(n);
+    return new Blob([u8arr], { type: mime });
+  };
+
+  // ✅ Load files from IndexedDB only when editing existing record
   useEffect(() => {
     const loadFilesFromIndexedDB = async () => {
-      // Check if we're editing an existing record (formData.files exists)
-      const isEditing = formData.files && Object.keys(formData.files).length > 0;
+      // Check if we're editing an existing record by checking for formData.id or other identifier
+      const isEditing = formData.id; // Assuming formData has an id when editing
 
       if (!isEditing) {
         // For new form, clear any existing files from IndexedDB
@@ -207,39 +218,34 @@ export default function AddStaff3({
       }
 
       // Only load files if we're editing an existing record
-      const storedFiles = await getAllFilesFromDB();
-      const updated = {};
+      try {
+        const storedFiles = await getAllFilesFromDB();
+        if (!storedFiles) return;
 
-      for (const key of Object.keys(files)) {
-        const file = storedFiles[key];
-        if (file && file.data) {
-          const blob = await dataURLtoBlob(file.data);
-          const reconstructedFile = new File([blob], file.name, {
-            type: file.type
-          });
-          updated[key] = reconstructedFile;
+        const updated = {};
+
+        for (const key of Object.keys(files)) {
+          const file = storedFiles[key];
+          if (file && file.data) {
+            const blob = await dataURLtoBlob(file.data);
+            const reconstructedFile = new File([blob], file.name, {
+              type: file.type
+            });
+            updated[key] = reconstructedFile;
+          }
         }
-      }
 
-      setFiles((prev) => ({
-        ...prev,
-        ...updated
-      }));
+        setFiles((prev) => ({
+          ...prev,
+          ...updated
+        }));
+      } catch (error) {
+        console.error("Error loading files from IndexedDB:", error);
+      }
     };
 
     loadFilesFromIndexedDB();
-  }, []);
-
-  // Helper to convert base64 to blob
-  const dataURLtoBlob = (dataURL) => {
-    const arr = dataURL.split(",");
-    const mime = arr[0].match(/:(.*?);/)[1];
-    const bstr = atob(arr[1]);
-    let n = bstr.length;
-    const u8arr = new Uint8Array(n);
-    while (n--) u8arr[n] = bstr.charCodeAt(n);
-    return new Blob([u8arr], { type: mime });
-  };
+  }, [formData.id]); // Only run when formData.id changes
 
   // Validate form and notify parent
   const validateForm = (show = false) => {
@@ -316,7 +322,7 @@ export default function AddStaff3({
             label="1. Resume (Required)"
             onDrop={handleFileUpload("resume")}
             file={files.resume}
-            error={errors.resume}
+            error={showErrors && errors.resume}
             helperText="Resume is required"
           />
         </Grid>
@@ -325,7 +331,7 @@ export default function AddStaff3({
             label="2. Joining Letter (Required)"
             onDrop={handleFileUpload("joiningLetter")}
             file={files.joiningLetter}
-            error={errors.joiningLetter}
+            error={showErrors && errors.joiningLetter}
             helperText="Joining letter is required"
           />
         </Grid>
@@ -334,7 +340,7 @@ export default function AddStaff3({
             label="3. Aadhar Card (Front) (Required)"
             onDrop={handleFileUpload("aadharFront")}
             file={files.aadharFront}
-            error={errors.aadharFront}
+            error={showErrors && errors.aadharFront}
             helperText="Aadhar Card front is required"
           />
         </Grid>
@@ -343,7 +349,7 @@ export default function AddStaff3({
             label="4. Aadhar Card (Back) (Required)"
             onDrop={handleFileUpload("aadharBack")}
             file={files.aadharBack}
-            error={errors.aadharBack}
+            error={showErrors && errors.aadharBack}
             helperText="Aadhar Card back is required"
           />
         </Grid>
@@ -352,7 +358,7 @@ export default function AddStaff3({
             label="5. PAN Card (Front) (Required)"
             onDrop={handleFileUpload("panCard")}
             file={files.panCard}
-            error={errors.panCard}
+            error={showErrors && errors.panCard}
             helperText="PAN Card is required"
           />
         </Grid>

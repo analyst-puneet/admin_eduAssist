@@ -17,7 +17,6 @@ import {
   Checkbox,
   FormControlLabel,
   Divider,
-  Snackbar,
   Alert
 } from "@mui/material";
 import { useNavigate } from "react-router-dom";
@@ -41,28 +40,10 @@ export default function Addstaff1({
   // Initialize state from formData
   const [selectedImage, setSelectedImage] = useState(null);
   const objectUrlsRef = useRef([]);
-  // Create refs for all required fields
-  const staffIdRef = useRef(null);
-  const roleRef = useRef(null);
-  const designationRef = useRef(null);
-  const firstNameRef = useRef(null);
-  const genderRef = useRef(null);
-  const dobRef = useRef(null);
-  const phoneRef = useRef(null);
-  const emailRef = useRef(null);
-  const fatherNameRef = useRef(null);
-  const motherNameRef = useRef(null);
-  const maritalStatusRef = useRef(null);
-  const currentAddressRef = useRef(null);
-  const currentPinCodeRef = useRef(null);
-  const permanentAddressRef = useRef(null);
-  const permanentPinCodeRef = useRef(null);
-  const panCardRef = useRef(null);
-  const aadhaarCardRef = useRef(null);
-  const experienceRefs = useRef([]);
   const [role, setRole] = useState(formData.role || "");
   const [joiningDate, setJoiningDate] = useState(formData.joiningDate || "");
   const [sameAsAddress, setSameAsAddress] = useState(formData.sameAsAddress || false);
+
   const [basicInfo, setBasicInfo] = useState(
     formData.basicInfo || {
       staffId: "",
@@ -75,12 +56,16 @@ export default function Addstaff1({
       emergencyContact: "",
       email: "",
       fatherName: "",
-      fatherTitle: "Shri", // Default title for father
+      fatherTitle: "Shri",
       motherName: "",
-      motherTitle: "Shrimati", // Default title for mother
-      maritalStatus: ""
+      motherTitle: "Shrimati",
+      maritalStatus: "",
+      bloodGroup: "",
+      category: "",
+      religion: ""
     }
   );
+
   const [addressInfo, setAddressInfo] = useState(
     formData.addressInfo || {
       currentFullAddress: "",
@@ -109,103 +94,7 @@ export default function Addstaff1({
     }
   );
 
-  const findFirstEmptyField = () => {
-    if (!basicInfo.staffId) {
-      staffIdRef.current?.focus();
-      return "Staff ID";
-    }
-    if (!role) {
-      roleRef.current?.focus();
-      return "Role";
-    }
-    if (!basicInfo.designation) {
-      designationRef.current?.focus();
-      return "Designation";
-    }
-    if (!basicInfo.firstName) {
-      firstNameRef.current?.focus();
-      return "First Name";
-    }
-    if (!basicInfo.gender) {
-      genderRef.current?.focus();
-      return "Gender";
-    }
-    if (!basicInfo.dob) {
-      dobRef.current?.focus();
-      return "Date of Birth";
-    }
-    if (!basicInfo.phone) {
-      phoneRef.current?.focus();
-      return "Phone";
-    }
-    if (!basicInfo.email) {
-      emailRef.current?.focus();
-      return "Email";
-    }
-    if (!basicInfo.fatherName) {
-      fatherNameRef.current?.focus();
-      return "Father's Name";
-    }
-    if (!basicInfo.motherName) {
-      motherNameRef.current?.focus();
-      return "Mother's Name";
-    }
-    if (!basicInfo.maritalStatus) {
-      maritalStatusRef.current?.focus();
-      return "Marital Status";
-    }
-    if (!addressInfo.currentFullAddress) {
-      currentAddressRef.current?.focus();
-      return "Current Address";
-    }
-    if (!addressInfo.currentPinCode) {
-      currentPinCodeRef.current?.focus();
-      return "Current PIN Code";
-    }
-    if (!sameAsAddress && !addressInfo.permanentFullAddress) {
-      permanentAddressRef.current?.focus();
-      return "Permanent Address";
-    }
-    if (!sameAsAddress && !addressInfo.permanentPinCode) {
-      permanentPinCodeRef.current?.focus();
-      return "Permanent PIN Code";
-    }
-    if (!documents.panCard) {
-      panCardRef.current?.focus();
-      return "PAN Card";
-    }
-    if (!documents.aadhaarCard) {
-      aadhaarCardRef.current?.focus();
-      return "Aadhaar Card";
-    }
-
-    // Check experiences
-    for (let i = 0; i < experiences.length; i++) {
-      const exp = experiences[i];
-      if (!exp.company) {
-        experienceRefs.current[i]?.companyRef?.focus();
-        return `Experience ${i + 1} Company`;
-      }
-      if (!exp.position) {
-        experienceRefs.current[i]?.positionRef?.focus();
-        return `Experience ${i + 1} Position`;
-      }
-      if (!exp.from) {
-        experienceRefs.current[i]?.fromRef?.focus();
-        return `Experience ${i + 1} From Date`;
-      }
-      if (!exp.to) {
-        experienceRefs.current[i]?.toRef?.focus();
-        return `Experience ${i + 1} To Date`;
-      }
-      if (!exp.description) {
-        experienceRefs.current[i]?.descriptionRef?.focus();
-        return `Experience ${i + 1} Description`;
-      }
-    }
-
-    return null;
-  };
+  const [formInteracted, setFormInteracted] = useState(false);
 
   // States for API data
   const [countries, setCountries] = useState([]);
@@ -237,6 +126,9 @@ export default function Addstaff1({
     fatherName: false,
     motherName: false,
     maritalStatus: false,
+    bloodGroup: false,
+    category: false,
+    religion: false,
     experiences: experiences.map(() => ({
       company: false,
       position: false,
@@ -280,6 +172,23 @@ export default function Addstaff1({
     }));
   }, [experiences.length]);
 
+  useEffect(() => {
+    const handleInteraction = () => {
+      setFormInteracted(true);
+      // Remove the event listener after first interaction
+      window.removeEventListener("click", handleInteraction);
+      window.removeEventListener("keydown", handleInteraction);
+    };
+
+    window.addEventListener("click", handleInteraction);
+    window.addEventListener("keydown", handleInteraction);
+
+    return () => {
+      window.removeEventListener("click", handleInteraction);
+      window.removeEventListener("keydown", handleInteraction);
+    };
+  }, []);
+
   // Update formData whenever any field changes
   useEffect(() => {
     setFormData((prev) => ({
@@ -308,14 +217,6 @@ export default function Addstaff1({
   const validateForm = (show = false) => {
     const phoneValid = !validatePhone(basicInfo.phone);
     const emailValid = !validateEmail(basicInfo.email);
-
-    const firstEmptyField = findFirstEmptyField();
-    if (firstEmptyField && show) {
-      setSnackbarOpen(true);
-      setSnackbarMessage(`Please fill the ${firstEmptyField} field`);
-      setSnackbarSeverity("error");
-      return false;
-    }
 
     const newErrors = {
       staffId: !basicInfo.staffId,
@@ -362,7 +263,6 @@ export default function Addstaff1({
     }
 
     const isFormValid =
-      !firstEmptyField &&
       !newErrors.staffId &&
       !newErrors.role &&
       !newErrors.designation &&
@@ -393,10 +293,6 @@ export default function Addstaff1({
 
     return isFormValid;
   };
-
-  const [snackbarOpen, setSnackbarOpen] = useState(false);
-  const [snackbarMessage, setSnackbarMessage] = useState("");
-  const [snackbarSeverity, setSnackbarSeverity] = useState("error");
 
   // Set current date as default for date of joining
   useEffect(() => {
@@ -714,6 +610,75 @@ export default function Addstaff1({
     }
   };
 
+  // Add this near your other state declarations
+  const [genderOptions, setGenderOptions] = useState([]);
+  const [loadingGender, setLoadingGender] = useState(false);
+  const [genderError, setGenderError] = useState(null);
+
+  const fetchGenderOptions = async () => {
+    console.log("Fetching gender options...");
+    setLoadingGender(true);
+    setGenderError(null);
+
+    try {
+      // Fetch cookies dynamically
+      const getCookie = (name) => {
+        const match = document.cookie.match(new RegExp("(^| )" + name + "=([^;]+)"));
+        return match ? match[2] : null;
+      };
+
+      const token = getCookie("token");
+      const userId = getCookie("UserId");
+      const rememberToken = getCookie("remember_token");
+
+      // Handle missing cookies
+      if (!token || !userId || !rememberToken) {
+        throw new Error("Missing required cookies. Please log in again.");
+      }
+
+      // API request to fetch gender options
+      const response = await fetch("https://backend-aufx.onrender.com/api/master/gender", {
+        method: "GET", // Changed method to GET
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}` // Adding token in the Authorization header
+        },
+        withCredentials: true // Include cookies in the request
+      });
+
+      console.log("Response status:", response.status); // Log the response status
+
+      if (response.status === 401) {
+        throw new Error("Token expired. Please log in again.");
+      }
+
+      if (!response.ok) {
+        const errText = await response.text();
+        console.log("Error text:", errText); // Log the error text
+        throw new Error("Failed to fetch gender options");
+      }
+
+      const data = await response.json();
+      console.log("Gender data:", data);
+      setGenderOptions(data); // Store the gender options in state
+    } catch (error) {
+      console.error("Error fetching gender options:", error);
+      setGenderError(error.message);
+
+      // Handle token expiry
+      if (error.message === "Token expired. Please log in again.") {
+        alert("Session expired. Please log in again.");
+        window.location.href = "/login"; // Redirect to login page
+      }
+    } finally {
+      setLoadingGender(false); // Stop loading
+    }
+  };
+
+  useEffect(() => {
+    fetchGenderOptions();
+  }, []);
+
   return (
     <Box
       component={Paper}
@@ -758,7 +723,6 @@ export default function Addstaff1({
           {/* Row 1 - Staff ID, Role, Designation */}
           <Grid item xs={12} sm={4}>
             <TextField
-              inputRef={staffIdRef}
               label="Staff ID"
               fullWidth
               required
@@ -772,7 +736,6 @@ export default function Addstaff1({
           </Grid>
           <Grid item xs={12} sm={4}>
             <FormControl
-              inputRef={roleRef}
               fullWidth
               required
               sx={errors.role ? { ...errorStyle, mb: 3 } : { ...inputStyle }}
@@ -825,7 +788,6 @@ export default function Addstaff1({
           </Grid>
           <Grid item xs={12} sm={4}>
             <FormControl
-              inputRef={designationRef}
               fullWidth
               required
               sx={errors.designation ? { ...errorStyle, mb: 3 } : { ...inputStyle }}
@@ -865,7 +827,6 @@ export default function Addstaff1({
           {/* Row 2 - First Name, Last Name, Gender */}
           <Grid item xs={12} sm={4}>
             <TextField
-              inputRef={firstNameRef}
               label="First Name"
               fullWidth
               required
@@ -886,9 +847,9 @@ export default function Addstaff1({
               onChange={(e) => handleBasicInfoChange("lastName", e.target.value)}
             />
           </Grid>
+
           <Grid item xs={12} sm={4}>
             <FormControl
-              inputRef={genderRef}
               fullWidth
               required
               sx={errors.gender ? { ...errorStyle, mb: 3 } : { ...inputStyle }}
@@ -900,16 +861,35 @@ export default function Addstaff1({
                 label="Gender"
                 onChange={(e) => handleBasicInfoChange("gender", e.target.value)}
                 onBlur={() => handleFieldBlur("gender")}
+                MenuProps={{
+                  PaperProps: {
+                    sx: {
+                      maxHeight: 200,
+                      backgroundColor: isDarkMode ? theme.palette.grey[800] : undefined
+                    }
+                  }
+                }}
               >
-                <MenuItem value="Male" sx={{ fontSize: "0.875rem" }}>
-                  Male
-                </MenuItem>
-                <MenuItem value="Female" sx={{ fontSize: "0.875rem" }}>
-                  Female
-                </MenuItem>
-                <MenuItem value="Other" sx={{ fontSize: "0.875rem" }}>
-                  Other
-                </MenuItem>
+                {loadingGender ? (
+                  <MenuItem disabled sx={{ fontSize: "0.875rem" }}>
+                    Loading genders...
+                  </MenuItem>
+                ) : genderError ? (
+                  <MenuItem disabled sx={{ fontSize: "0.875rem", color: "error.main" }}>
+                    Error loading genders
+                  </MenuItem>
+                ) : (
+                  <>
+                    <MenuItem value="" sx={{ fontSize: "0.875rem" }}>
+                      Select Gender
+                    </MenuItem>
+                    {genderOptions.map((gender) => (
+                      <MenuItem key={gender.id} value={gender.name} sx={{ fontSize: "0.875rem" }}>
+                        {gender.name}
+                      </MenuItem>
+                    ))}
+                  </>
+                )}
               </Select>
               {errors.gender && (
                 <Typography
@@ -931,7 +911,6 @@ export default function Addstaff1({
           {/* Row 3 - Date of Birth, Phone, Emergency Contact */}
           <Grid item xs={12} sm={4}>
             <TextField
-              inputRef={dobRef}
               label="Date of Birth"
               type="date"
               fullWidth
@@ -985,7 +964,6 @@ export default function Addstaff1({
           </Grid>
           <Grid item xs={12} sm={4}>
             <TextField
-              inputRef={phoneRef}
               label="Phone"
               fullWidth
               required
@@ -1016,7 +994,6 @@ export default function Addstaff1({
           {/* Row 4 - Email, Marital Status */}
           <Grid item xs={12} sm={4}>
             <TextField
-              inputRef={emailRef}
               label="Email (Login Username)"
               fullWidth
               required
@@ -1035,7 +1012,6 @@ export default function Addstaff1({
           </Grid>
           <Grid item xs={12} sm={4}>
             <FormControl
-              inputRef={maritalStatusRef}
               fullWidth
               required
               sx={errors.maritalStatus ? { ...errorStyle, mb: 3 } : { ...inputStyle }}
@@ -1077,6 +1053,170 @@ export default function Addstaff1({
               )}
             </FormControl>
           </Grid>
+          <Grid item xs={12} sm={4}>
+            <FormControl
+              fullWidth
+              required
+              sx={errors.bloodGroup ? { ...errorStyle, mb: 3 } : { ...inputStyle }}
+              error={errors.bloodGroup}
+            >
+              <InputLabel>Blood Group</InputLabel>
+              <Select
+                value={basicInfo.bloodGroup}
+                label="Blood Group"
+                onChange={(e) => handleBasicInfoChange("bloodGroup", e.target.value)}
+                onBlur={() => handleFieldBlur("bloodGroup")}
+              >
+                <MenuItem value="" sx={{ fontSize: "0.875rem" }}>
+                  Select
+                </MenuItem>
+                <MenuItem value="A+" sx={{ fontSize: "0.875rem" }}>
+                  A+
+                </MenuItem>
+                <MenuItem value="A-" sx={{ fontSize: "0.875rem" }}>
+                  A-
+                </MenuItem>
+                <MenuItem value="B+" sx={{ fontSize: "0.875rem" }}>
+                  B+
+                </MenuItem>
+                <MenuItem value="B-" sx={{ fontSize: "0.875rem" }}>
+                  B-
+                </MenuItem>
+                <MenuItem value="AB+" sx={{ fontSize: "0.875rem" }}>
+                  AB+
+                </MenuItem>
+                <MenuItem value="AB-" sx={{ fontSize: "0.875rem" }}>
+                  AB-
+                </MenuItem>
+                <MenuItem value="O+" sx={{ fontSize: "0.875rem" }}>
+                  O+
+                </MenuItem>
+                <MenuItem value="O-" sx={{ fontSize: "0.875rem" }}>
+                  O-
+                </MenuItem>
+              </Select>
+              {errors.bloodGroup && (
+                <Typography
+                  variant="caption"
+                  color="error"
+                  sx={{
+                    position: "absolute",
+                    bottom: "-20px",
+                    left: "14px",
+                    fontSize: "0.75rem"
+                  }}
+                >
+                  Blood group is required
+                </Typography>
+              )}
+            </FormControl>
+          </Grid>
+
+          <Grid item xs={12} sm={4}>
+            <FormControl
+              fullWidth
+              required
+              sx={errors.category ? { ...errorStyle, mb: 3 } : { ...inputStyle, mb: 3 }}
+              error={errors.category}
+            >
+              <InputLabel>Category</InputLabel>
+              <Select
+                value={basicInfo.category}
+                label="Category"
+                onChange={(e) => handleBasicInfoChange("category", e.target.value)}
+                onBlur={() => handleFieldBlur("category")}
+              >
+                <MenuItem value="" sx={{ fontSize: "0.875rem" }}>
+                  Select
+                </MenuItem>
+                <MenuItem value="General" sx={{ fontSize: "0.875rem" }}>
+                  General
+                </MenuItem>
+                <MenuItem value="OBC" sx={{ fontSize: "0.875rem" }}>
+                  OBC
+                </MenuItem>
+                <MenuItem value="SC" sx={{ fontSize: "0.875rem" }}>
+                  SC
+                </MenuItem>
+                <MenuItem value="ST" sx={{ fontSize: "0.875rem" }}>
+                  ST
+                </MenuItem>
+                <MenuItem value="Other" sx={{ fontSize: "0.875rem" }}>
+                  Other
+                </MenuItem>
+              </Select>
+              {errors.category && (
+                <Typography
+                  variant="caption"
+                  color="error"
+                  sx={{
+                    position: "absolute",
+                    bottom: "-20px",
+                    left: "14px",
+                    fontSize: "0.75rem"
+                  }}
+                >
+                  Category is required
+                </Typography>
+              )}
+            </FormControl>
+          </Grid>
+
+          <Grid item xs={12} sm={4}>
+            <FormControl
+              fullWidth
+              required
+              sx={errors.religion ? { ...errorStyle, mb: 3 } : { ...inputStyle }}
+              error={errors.religion}
+            >
+              <InputLabel>Religion</InputLabel>
+              <Select
+                value={basicInfo.religion}
+                label="Religion"
+                onChange={(e) => handleBasicInfoChange("religion", e.target.value)}
+                onBlur={() => handleFieldBlur("religion")}
+              >
+                <MenuItem value="" sx={{ fontSize: "0.875rem" }}>
+                  Select
+                </MenuItem>
+                <MenuItem value="Hindu" sx={{ fontSize: "0.875rem" }}>
+                  Hindu
+                </MenuItem>
+                <MenuItem value="Muslim" sx={{ fontSize: "0.875rem" }}>
+                  Muslim
+                </MenuItem>
+                <MenuItem value="Christian" sx={{ fontSize: "0.875rem" }}>
+                  Christian
+                </MenuItem>
+                <MenuItem value="Sikh" sx={{ fontSize: "0.875rem" }}>
+                  Sikh
+                </MenuItem>
+                <MenuItem value="Buddhist" sx={{ fontSize: "0.875rem" }}>
+                  Buddhist
+                </MenuItem>
+                <MenuItem value="Jain" sx={{ fontSize: "0.875rem" }}>
+                  Jain
+                </MenuItem>
+                <MenuItem value="Other" sx={{ fontSize: "0.875rem" }}>
+                  Other
+                </MenuItem>
+              </Select>
+              {errors.religion && (
+                <Typography
+                  variant="caption"
+                  color="error"
+                  sx={{
+                    position: "absolute",
+                    bottom: "-20px",
+                    left: "14px",
+                    fontSize: "0.75rem"
+                  }}
+                >
+                  Religion is required
+                </Typography>
+              )}
+            </FormControl>
+          </Grid>
 
           {/* Row 5 - Father's Name, Mother's Name */}
           <Grid container spacing={2}>
@@ -1107,7 +1247,6 @@ export default function Addstaff1({
 
                 {/* Name Field */}
                 <TextField
-                  inputRef={fatherNameRef}
                   label="Father's Name"
                   fullWidth
                   required
@@ -1168,7 +1307,6 @@ export default function Addstaff1({
 
                 {/* Name Field */}
                 <TextField
-                  inputRef={motherNameRef}
                   label="Mother's Name"
                   fullWidth
                   required
@@ -1360,7 +1498,6 @@ export default function Addstaff1({
             {/* Full Address */}
             <Grid item xs={12} sm={6}>
               <TextField
-                inputRef={currentAddressRef}
                 label="Full Address"
                 fullWidth
                 multiline
@@ -1389,7 +1526,6 @@ export default function Addstaff1({
             {/* PIN Code */}
             <Grid item xs={12} sm={6}>
               <TextField
-                inputRef={currentPinCodeRef}
                 label="PIN Code"
                 fullWidth
                 required
@@ -1540,7 +1676,6 @@ export default function Addstaff1({
             {/* Full Address */}
             <Grid item xs={12} sm={6}>
               <TextField
-                inputRef={permanentAddressRef}
                 label="Full Address"
                 fullWidth
                 multiline
@@ -1572,7 +1707,6 @@ export default function Addstaff1({
             {/* PIN Code */}
             <Grid item xs={12} sm={6}>
               <TextField
-                inputRef={permanentPinCodeRef}
                 label="PIN Code"
                 fullWidth
                 required
@@ -1704,22 +1838,11 @@ export default function Addstaff1({
           Work Experience
         </Typography>
         {experiences.map((exp, index) => {
-          if (!experienceRefs.current[index]) {
-            experienceRefs.current[index] = {
-              companyRef: React.createRef(),
-              positionRef: React.createRef(),
-              fromRef: React.createRef(),
-              toRef: React.createRef(),
-              descriptionRef: React.createRef()
-            };
-          }
-
           return (
             <Box key={index} sx={{ mb: 2 }}>
               <Grid container spacing={1.5}>
                 <Grid item xs={12} sm={6}>
                   <TextField
-                    inputRef={experienceRefs.current[index].companyRef}
                     label="Company Name"
                     fullWidth
                     required
@@ -1748,7 +1871,6 @@ export default function Addstaff1({
 
                 <Grid item xs={12} sm={6}>
                   <TextField
-                    inputRef={experienceRefs.current[index].positionRef}
                     label="Position"
                     fullWidth
                     required
@@ -1775,7 +1897,6 @@ export default function Addstaff1({
 
                 <Grid item xs={12} sm={3} key={`from-${index}`}>
                   <TextField
-                    inputRef={experienceRefs.current[index].fromRef}
                     label="From Date"
                     type="date"
                     fullWidth
@@ -1829,7 +1950,6 @@ export default function Addstaff1({
 
                 <Grid item xs={12} sm={3} key={`to-${index}`}>
                   <TextField
-                    inputRef={experienceRefs.current[index].toRef}
                     label="To Date"
                     type="date"
                     fullWidth
@@ -1884,7 +2004,6 @@ export default function Addstaff1({
 
                 <Grid item xs={12} sm={6}>
                   <TextField
-                    inputRef={experienceRefs.current[index].descriptionRef}
                     label="Description"
                     fullWidth
                     required
@@ -1946,7 +2065,6 @@ export default function Addstaff1({
         <Grid container spacing={1.5}>
           <Grid item xs={12} sm={6}>
             <TextField
-              inputRef={panCardRef}
               label="PAN Card Number"
               fullWidth
               required
@@ -1960,7 +2078,6 @@ export default function Addstaff1({
           </Grid>
           <Grid item xs={12} sm={6}>
             <TextField
-              inputRef={aadhaarCardRef}
               label="Aadhaar Card Number"
               fullWidth
               required
@@ -2031,21 +2148,6 @@ export default function Addstaff1({
           </Box>
         </DialogContent>
       </Dialog>
-
-      <Snackbar
-        open={snackbarOpen}
-        autoHideDuration={6000}
-        onClose={() => setSnackbarOpen(false)}
-        anchorOrigin={{ vertical: "top", horizontal: "center" }}
-      >
-        <Alert
-          onClose={() => setSnackbarOpen(false)}
-          severity={snackbarSeverity}
-          sx={{ width: "100%" }}
-        >
-          {snackbarMessage}
-        </Alert>
-      </Snackbar>
     </Box>
   );
 }
