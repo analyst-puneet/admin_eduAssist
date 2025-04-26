@@ -32,7 +32,6 @@ const RoleGroup = ({ isMobile, isDarkMode, inputStyle }) => {
   const [editMode, setEditMode] = useState(false);
   const [currentEditId, setCurrentEditId] = useState(null);
   const [errors, setErrors] = useState({});
-
   // API endpoints
   const API_URL = "https://backend-aufx.onrender.com/api/master/role_group";
   const GET_ROLES_URL = `${API_URL}`;

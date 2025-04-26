@@ -1,4 +1,5 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect,useRef } from "react";
+import {BASE_URL} from "../../../../main";
 import {
   Box,
   Grid,
@@ -24,6 +25,7 @@ import CloseIcon from "@mui/icons-material/Close";
 import AddPhotoAlternateIcon from "@mui/icons-material/AddPhotoAlternate";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import BackButton from "app/views/material-kit/buttons/BackButton";
+import axios from "axios";
 
 export default function Addstaff1({
   formData,
@@ -475,6 +477,29 @@ export default function Addstaff1({
     }
   };
 
+  // Add this near your other state declarations
+  const [genderOptions, setGenderOptions] = useState([]);
+  const fetchedOnce = useRef(false);
+  const fetchGenderOptions = async () => {
+    try {
+      const response = await axios.get(`${BASE_URL}/api/master/gender`, {        
+        withCredentials: true 
+      });
+      const gender_data =response.data;
+      // console.log("gender_data:", gender_data);
+      setGenderOptions(gender_data); 
+    } catch (error) {
+      console.error("Error fetching gender options:", error);
+    }finally {
+      fetchedOnce.current = true;
+    }
+  };
+  useEffect(() => {
+    if(!fetchedOnce.current){
+      fetchGenderOptions();
+    }
+  }, []);
+
   return (
     <Box
       component={Paper}
@@ -642,15 +667,14 @@ export default function Addstaff1({
                 onChange={(e) => handleBasicInfoChange("gender", e.target.value)}
                 onBlur={() => handleFieldBlur("gender")}
               >
-                <MenuItem value="Male" sx={{ fontSize: "0.875rem" }}>
-                  Male
+              <MenuItem value="" disabled sx={{ fontSize: '0.875rem' }}>
+                  Select Gender
                 </MenuItem>
-                <MenuItem value="Female" sx={{ fontSize: "0.875rem" }}>
-                  Female
-                </MenuItem>
-                <MenuItem value="Other" sx={{ fontSize: "0.875rem" }}>
-                  Other
-                </MenuItem>
+                {genderOptions.map((option) => (
+                  <MenuItem key={option._id} value={option.name} sx={{ fontSize: '0.875rem' }}>
+                    {option.name}
+                  </MenuItem>
+                ))}
               </Select>
               {errors.gender && (
                 <Typography
