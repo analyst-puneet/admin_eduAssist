@@ -40,7 +40,10 @@ export const AuthProvider = ({ children }) => {
         navigate("/session/login");
       }
 
-      setError(isSessionRoute ? null : errorCode);
+      // Suppress setting error state for 401 to avoid console error message
+      if (!(errorCode === 401 && !isSessionRoute)) {
+        setError(isSessionRoute ? null : errorCode);
+      }
     } finally {
       setLoading(false);
       fetchedOnce.current = true;
