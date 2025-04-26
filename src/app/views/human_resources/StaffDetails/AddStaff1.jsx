@@ -64,7 +64,19 @@ export default function Addstaff1({
       maritalStatus: "",
       bloodGroup: "",
       category: "",
-      religion: ""
+      religion: "",
+      alternateEmail: "",
+      fatherContact: "",
+      fatherDob: "",
+      fatherEmail: "",
+      motherContact: "",
+      motherDob: "",
+      motherEmail: "",
+      guardianName: "",
+      guardianContact: "",
+      guardianDob: "",
+      guardianEmail: "",
+      guardianRelation: ""
     }
   );
 
@@ -131,6 +143,13 @@ export default function Addstaff1({
     bloodGroup: false,
     category: false,
     religion: false,
+    fatherContact: false,
+    fatherDob: false,
+    motherContact: false,
+    motherDob: false,
+    guardianName: false,
+    guardianContact: false,
+    guardianDob: false,
     experiences: experiences.map(() => ({
       company: false,
       position: false,
@@ -233,6 +252,10 @@ export default function Addstaff1({
       fatherName: !basicInfo.fatherName,
       motherName: !basicInfo.motherName,
       maritalStatus: !basicInfo.maritalStatus,
+      fatherContact: !basicInfo.fatherContact,
+      fatherDob: !basicInfo.fatherDob,
+      motherContact: !basicInfo.motherContact,
+      motherDob: !basicInfo.motherDob,
 
       // Current Address Fields
       currentFullAddress: !addressInfo.currentFullAddress,
@@ -599,7 +622,14 @@ export default function Addstaff1({
 
   // Validate field on blur
   const handleFieldBlur = (field) => {
-    if (field === "fatherName" || field === "motherName" || field === "maritalStatus") {
+    if (
+      field === "fatherContact" ||
+      field === "fatherDob" ||
+      field === "motherContact" ||
+      field === "motherDob"
+    ) {
+      setErrors((prev) => ({ ...prev, [field]: !basicInfo[field] }));
+    } else if (field === "fatherName" || field === "motherName" || field === "maritalStatus") {
       setErrors((prev) => ({ ...prev, [field]: !basicInfo[field] }));
     } else if (field === "role") {
       setErrors((prev) => ({ ...prev, role: !role }));
@@ -629,16 +659,6 @@ export default function Addstaff1({
       fetchedOnce.current = true;
     }
   };
-
-  useEffect(() => {
-    if (!fetchedOnce.current) {
-      fetchGenderOptions();
-      fetchRoleOptions();
-      fetchDesignationOptions();
-      fetchMaritalStatusOptions();
-      fetchedOnce.current = true;
-    }
-  }, []);
 
   const [roleOptions, setRoleOptions] = useState([]);
   const fetchRoleOptions = async () => {
@@ -675,6 +695,59 @@ export default function Addstaff1({
       console.error("Error fetching marital status options:", error);
     }
   };
+
+  const [bloodGroupOptions, setBloodGroupOptions] = useState([]);
+  // Blood Group
+  const fetchBloodGroupOptions = async () => {
+    try {
+      const response = await axios.get(`${BASE_URL}/api/master/blood_group`, {
+        withCredentials: true
+      });
+      setBloodGroupOptions(response.data);
+    } catch (error) {
+      console.error("Error fetching blood group options:", error);
+    }
+  };
+
+  const [religionOptions, setReligionOptions] = useState([]);
+  // Religion
+  const fetchReligionOptions = async () => {
+    try {
+      const response = await axios.get(`${BASE_URL}/api/master/religion`, {
+        withCredentials: true
+      });
+      setReligionOptions(response.data);
+    } catch (error) {
+      console.error("Error fetching religion options:", error);
+    }
+  };
+
+  const [categoryOptions, setCategoryOptions] = useState([]);
+  // Category
+  const fetchCategoryOptions = async () => {
+    try {
+      const response = await axios.get(`${BASE_URL}/api/master/category`, {
+        withCredentials: true
+      });
+      setCategoryOptions(response.data);
+    } catch (error) {
+      console.error("Error fetching category options:", error);
+    }
+  };
+
+  useEffect(() => {
+    if (!fetchedOnce.current) {
+      fetchGenderOptions();
+      fetchRoleOptions();
+      fetchDesignationOptions();
+      fetchMaritalStatusOptions();
+      fetchBloodGroupOptions(); // Add this
+      fetchReligionOptions(); // Add this
+      fetchCategoryOptions(); // Add this
+      fetchedOnce.current = true;
+    }
+  }, []);
+
   return (
     <Box
       component={Paper}
@@ -984,6 +1057,18 @@ export default function Addstaff1({
               sx={errors.email ? { ...errorStyle, mb: 3 } : { ...inputStyle }}
             />
           </Grid>
+
+          {/* Alternate Email */}
+          <Grid item xs={12} sm={4}>
+            <TextField
+              label="Alternate Email (Optional)"
+              fullWidth
+              value={basicInfo.alternateEmail}
+              onChange={(e) => handleBasicInfoChange("alternateEmail", e.target.value)}
+              sx={inputStyle}
+            />
+          </Grid>
+
           <Grid item xs={12} sm={4}>
             <FormControl
               fullWidth
@@ -1023,6 +1108,7 @@ export default function Addstaff1({
               )}
             </FormControl>
           </Grid>
+
           <Grid item xs={12} sm={4}>
             <FormControl
               fullWidth
@@ -1040,41 +1126,17 @@ export default function Addstaff1({
                 <MenuItem value="" sx={{ fontSize: "0.875rem" }}>
                   Select
                 </MenuItem>
-                <MenuItem value="A+" sx={{ fontSize: "0.875rem" }}>
-                  A+
-                </MenuItem>
-                <MenuItem value="A-" sx={{ fontSize: "0.875rem" }}>
-                  A-
-                </MenuItem>
-                <MenuItem value="B+" sx={{ fontSize: "0.875rem" }}>
-                  B+
-                </MenuItem>
-                <MenuItem value="B-" sx={{ fontSize: "0.875rem" }}>
-                  B-
-                </MenuItem>
-                <MenuItem value="AB+" sx={{ fontSize: "0.875rem" }}>
-                  AB+
-                </MenuItem>
-                <MenuItem value="AB-" sx={{ fontSize: "0.875rem" }}>
-                  AB-
-                </MenuItem>
-                <MenuItem value="O+" sx={{ fontSize: "0.875rem" }}>
-                  O+
-                </MenuItem>
-                <MenuItem value="O-" sx={{ fontSize: "0.875rem" }}>
-                  O-
-                </MenuItem>
+                {bloodGroupOptions.map((option) => (
+                  <MenuItem key={option._id} value={option.name} sx={{ fontSize: "0.875rem" }}>
+                    {option.name}
+                  </MenuItem>
+                ))}
               </Select>
               {errors.bloodGroup && (
                 <Typography
                   variant="caption"
                   color="error"
-                  sx={{
-                    position: "absolute",
-                    bottom: "-20px",
-                    left: "14px",
-                    fontSize: "0.75rem"
-                  }}
+                  sx={{ position: "absolute", bottom: "-20px", left: "14px", fontSize: "0.75rem" }}
                 >
                   Blood group is required
                 </Typography>
@@ -1099,32 +1161,17 @@ export default function Addstaff1({
                 <MenuItem value="" sx={{ fontSize: "0.875rem" }}>
                   Select
                 </MenuItem>
-                <MenuItem value="General" sx={{ fontSize: "0.875rem" }}>
-                  General
-                </MenuItem>
-                <MenuItem value="OBC" sx={{ fontSize: "0.875rem" }}>
-                  OBC
-                </MenuItem>
-                <MenuItem value="SC" sx={{ fontSize: "0.875rem" }}>
-                  SC
-                </MenuItem>
-                <MenuItem value="ST" sx={{ fontSize: "0.875rem" }}>
-                  ST
-                </MenuItem>
-                <MenuItem value="Other" sx={{ fontSize: "0.875rem" }}>
-                  Other
-                </MenuItem>
+                {categoryOptions.map((option) => (
+                  <MenuItem key={option._id} value={option.name} sx={{ fontSize: "0.875rem" }}>
+                    {option.name}
+                  </MenuItem>
+                ))}
               </Select>
               {errors.category && (
                 <Typography
                   variant="caption"
                   color="error"
-                  sx={{
-                    position: "absolute",
-                    bottom: "-20px",
-                    left: "14px",
-                    fontSize: "0.75rem"
-                  }}
+                  sx={{ position: "absolute", bottom: "-20px", left: "14px", fontSize: "0.75rem" }}
                 >
                   Category is required
                 </Typography>
@@ -1149,38 +1196,17 @@ export default function Addstaff1({
                 <MenuItem value="" sx={{ fontSize: "0.875rem" }}>
                   Select
                 </MenuItem>
-                <MenuItem value="Hindu" sx={{ fontSize: "0.875rem" }}>
-                  Hindu
-                </MenuItem>
-                <MenuItem value="Muslim" sx={{ fontSize: "0.875rem" }}>
-                  Muslim
-                </MenuItem>
-                <MenuItem value="Christian" sx={{ fontSize: "0.875rem" }}>
-                  Christian
-                </MenuItem>
-                <MenuItem value="Sikh" sx={{ fontSize: "0.875rem" }}>
-                  Sikh
-                </MenuItem>
-                <MenuItem value="Buddhist" sx={{ fontSize: "0.875rem" }}>
-                  Buddhist
-                </MenuItem>
-                <MenuItem value="Jain" sx={{ fontSize: "0.875rem" }}>
-                  Jain
-                </MenuItem>
-                <MenuItem value="Other" sx={{ fontSize: "0.875rem" }}>
-                  Other
-                </MenuItem>
+                {religionOptions.map((option) => (
+                  <MenuItem key={option._id} value={option.name} sx={{ fontSize: "0.875rem" }}>
+                    {option.name}
+                  </MenuItem>
+                ))}
               </Select>
               {errors.religion && (
                 <Typography
                   variant="caption"
                   color="error"
-                  sx={{
-                    position: "absolute",
-                    bottom: "-20px",
-                    left: "14px",
-                    fontSize: "0.75rem"
-                  }}
+                  sx={{ position: "absolute", bottom: "-20px", left: "14px", fontSize: "0.75rem" }}
                 >
                   Religion is required
                 </Typography>
@@ -1190,6 +1216,7 @@ export default function Addstaff1({
 
           {/* Row 5 - Father's Name, Mother's Name */}
           <Grid container spacing={2}>
+            {/* Father's Name */}
             {/* Father's Name */}
             <Grid item xs={12} sm={6}>
               <Box sx={{ display: "flex", alignItems: "baseline" }}>
@@ -1251,6 +1278,60 @@ export default function Addstaff1({
               </Box>
             </Grid>
 
+            {/* Father's Contact */}
+            <Grid item xs={12} sm={6}>
+              <TextField
+                label="Father's Contact Number*"
+                fullWidth
+                required
+                value={basicInfo.fatherContact}
+                onChange={(e) => handleBasicInfoChange("fatherContact", e.target.value)}
+                onBlur={() => handleFieldBlur("fatherContact")}
+                error={errors.fatherContact}
+                helperText={errors.fatherContact ? "Father's contact is required" : " "}
+                sx={errors.fatherContact ? errorStyle : inputStyle}
+                inputProps={{ maxLength: 10 }}
+              />
+            </Grid>
+
+            {/* Father's DOB */}
+            <Grid item xs={12} sm={6}>
+              <TextField
+                label="Father's Date of Birth*"
+                type="date"
+                fullWidth
+                required
+                InputLabelProps={{ shrink: true }}
+                value={basicInfo.fatherDob}
+                onChange={(e) => handleBasicInfoChange("fatherDob", e.target.value)}
+                onBlur={() => handleFieldBlur("fatherDob")}
+                error={errors.fatherDob}
+                helperText={errors.fatherDob ? "Father's DOB is required" : " "}
+                sx={{
+                  flex: 1,
+                  "& .MuiInputBase-root": {
+                    height: "40px"
+                  },
+                  "& .MuiInputLabel-root": {
+                    transform: basicInfo.fatherName
+                      ? "translate(14px, -9px) scale(0.75)"
+                      : "translate(14px, 10px) scale(1)",
+                    "&.Mui-focused": {
+                      transform: "translate(14px, -9px) scale(0.75)"
+                    }
+                  },
+                  "& .MuiInputLabel-root.Mui-focused, & .MuiInputLabel-root.MuiFormLabel-filled": {
+                    transform: "translate(14px, -9px) scale(0.75)"
+                  },
+                  "& input": {
+                    padding: "10px 14px"
+                  },
+                  marginLeft: "11.5px",
+                  ...inputStyle
+                }}
+              />
+            </Grid>
+
             {/* Mother's Name */}
             <Grid item xs={12} sm={6}>
               <Box sx={{ display: "flex", alignItems: "baseline" }}>
@@ -1309,6 +1390,152 @@ export default function Addstaff1({
                   helperText={errors.motherName ? "Mother's name is required" : " "}
                 />
               </Box>
+            </Grid>
+
+            {/* Mother's Contact */}
+            <Grid item xs={12} sm={4}>
+              <TextField
+                label="Mother's Contact Number*"
+                fullWidth
+                required
+                value={basicInfo.motherContact}
+                onChange={(e) => handleBasicInfoChange("motherContact", e.target.value)}
+                onBlur={() => handleFieldBlur("motherContact")}
+                error={errors.motherContact}
+                helperText={errors.motherContact ? "Mother's contact is required" : " "}
+                sx={{
+                  flex: 1,
+                  "& .MuiInputBase-root": {
+                    height: "40px"
+                  },
+                  "& .MuiInputLabel-root": {
+                    transform: basicInfo.fatherName
+                      ? "translate(14px, -9px) scale(0.75)"
+                      : "translate(14px, 10px) scale(1)",
+                    "&.Mui-focused": {
+                      transform: "translate(14px, -9px) scale(0.75)"
+                    }
+                  },
+                  "& .MuiInputLabel-root.Mui-focused, & .MuiInputLabel-root.MuiFormLabel-filled": {
+                    transform: "translate(14px, -9px) scale(0.75)"
+                  },
+                  "& input": {
+                    padding: "10px 14px"
+                  },
+                  marginLeft: "11.5px",
+                  ...inputStyle
+                }}
+                inputProps={{ maxLength: 10 }}
+              />
+            </Grid>
+
+            {/* Mother's DOB */}
+            <Grid item xs={12} sm={4}>
+              <TextField
+                label="Mother's Date of Birth*"
+                type="date"
+                fullWidth
+                required
+                InputLabelProps={{ shrink: true }}
+                value={basicInfo.motherDob}
+                onChange={(e) => handleBasicInfoChange("motherDob", e.target.value)}
+                onBlur={() => handleFieldBlur("motherDob")}
+                error={errors.motherDob}
+                helperText={errors.motherDob ? "Mother's DOB is required" : " "}
+                sx={errors.motherDob ? errorStyle : inputStyle}
+              />
+            </Grid>
+
+            {/* Guardian Fields */}
+            <Grid item xs={12} sm={4}>
+              <TextField
+                label="Guardian Name"
+                fullWidth
+                value={basicInfo.guardianName}
+                onChange={(e) => handleBasicInfoChange("guardianName", e.target.value)}
+                sx={inputStyle}
+              />
+            </Grid>
+            <Grid item xs={12} sm={6}>
+              <TextField
+                label="Guardian Contact Number"
+                fullWidth
+                value={basicInfo.guardianContact}
+                onChange={(e) => handleBasicInfoChange("guardianContact", e.target.value)}
+                sx={{
+                  flex: 1,
+                  "& .MuiInputBase-root": {
+                    height: "40px"
+                  },
+                  "& .MuiInputLabel-root": {
+                    transform: basicInfo.fatherName
+                      ? "translate(14px, -9px) scale(0.75)"
+                      : "translate(14px, 10px) scale(1)",
+                    "&.Mui-focused": {
+                      transform: "translate(14px, -9px) scale(0.75)"
+                    }
+                  },
+                  "& .MuiInputLabel-root.Mui-focused, & .MuiInputLabel-root.MuiFormLabel-filled": {
+                    transform: "translate(14px, -9px) scale(0.75)"
+                  },
+                  "& input": {
+                    padding: "10px 14px"
+                  },
+                  marginLeft: "11.5px",
+                  ...inputStyle
+                }}
+                inputProps={{ maxLength: 10 }}
+              />
+            </Grid>
+            <Grid item xs={12} sm={6}>
+              <TextField
+                label="Guardian Date of Birth"
+                type="date"
+                fullWidth
+                InputLabelProps={{ shrink: true }}
+                value={basicInfo.guardianDob}
+                onChange={(e) => handleBasicInfoChange("guardianDob", e.target.value)}
+                sx={inputStyle}
+              />
+            </Grid>
+            <Grid item xs={12} sm={6}>
+              <TextField
+                label="Guardian Email"
+                fullWidth
+                value={basicInfo.guardianEmail}
+                onChange={(e) => handleBasicInfoChange("guardianEmail", e.target.value)}
+                sx={{
+                  flex: 1,
+                  "& .MuiInputBase-root": {
+                    height: "40px"
+                  },
+                  "& .MuiInputLabel-root": {
+                    transform: basicInfo.fatherName
+                      ? "translate(14px, -9px) scale(0.75)"
+                      : "translate(14px, 10px) scale(1)",
+                    "&.Mui-focused": {
+                      transform: "translate(14px, -9px) scale(0.75)"
+                    }
+                  },
+                  "& .MuiInputLabel-root.Mui-focused, & .MuiInputLabel-root.MuiFormLabel-filled": {
+                    transform: "translate(14px, -9px) scale(0.75)"
+                  },
+                  "& input": {
+                    padding: "10px 14px"
+                  },
+                  marginLeft: "11.5px",
+                  ...inputStyle
+                }}
+              />
+            </Grid>
+            <Grid item xs={12} sm={6}>
+              <TextField
+                label="Guardian Relation"
+                fullWidth
+                value={basicInfo.guardianRelation}
+                onChange={(e) => handleBasicInfoChange("guardianRelation", e.target.value)}
+                sx={inputStyle}
+              />
             </Grid>
           </Grid>
 

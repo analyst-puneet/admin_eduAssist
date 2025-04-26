@@ -62,7 +62,13 @@ import {
   Note,
   Folder,
   Close,
-  Preview
+  Preview,
+  Bloodtype,
+  Category,
+  Mosque,
+  ContactEmergency,
+  ContactPhone,
+  AlternateEmail
 } from "@mui/icons-material";
 
 export default function PreviewStaffDetails({ formData, onSubmit, onBack }) {
@@ -437,6 +443,21 @@ export default function PreviewStaffDetails({ formData, onSubmit, onBack }) {
                   primary="Marital Status"
                   secondary={formData.basicInfo?.maritalStatus}
                 />
+                <InfoItem
+                  icon={<Bloodtype fontSize="small" sx={{ color: "text.secondary" }} />}
+                  primary="Blood Group"
+                  secondary={formData.basicInfo?.bloodGroup}
+                />
+                <InfoItem
+                  icon={<Category fontSize="small" sx={{ color: "text.secondary" }} />}
+                  primary="Category"
+                  secondary={formData.basicInfo?.category}
+                />
+                <InfoItem
+                  icon={<Mosque fontSize="small" sx={{ color: "text.secondary" }} />}
+                  primary="Religion"
+                  secondary={formData.basicInfo?.religion}
+                />
               </List>
             </Paper>
           </Grid>
@@ -451,6 +472,11 @@ export default function PreviewStaffDetails({ formData, onSubmit, onBack }) {
                   icon={<Email fontSize="small" sx={{ color: "text.secondary" }} />}
                   primary="Email"
                   secondary={formData.basicInfo?.email}
+                />
+                <InfoItem
+                  icon={<AlternateEmail fontSize="small" sx={{ color: "text.secondary" }} />}
+                  primary="Alternate Email"
+                  secondary={formData.basicInfo?.alternateEmail || "N/A"}
                 />
                 <InfoItem
                   icon={<Phone fontSize="small" sx={{ color: "text.secondary" }} />}
@@ -480,16 +506,95 @@ export default function PreviewStaffDetails({ formData, onSubmit, onBack }) {
                   }`}
                 />
                 <InfoItem
+                  icon={<ContactPhone fontSize="small" sx={{ color: "text.secondary" }} />}
+                  primary="Father's Contact"
+                  secondary={formData.basicInfo?.fatherContact || "N/A"}
+                />
+                <InfoItem
+                  icon={<Cake fontSize="small" sx={{ color: "text.secondary" }} />}
+                  primary="Father's DOB"
+                  secondary={formatDate(formData.basicInfo?.fatherDob)}
+                />
+                <InfoItem
                   icon={<FamilyRestroom fontSize="small" sx={{ color: "text.secondary" }} />}
                   primary="Mother's Name"
                   secondary={`${formData.basicInfo?.motherTitle || ""} ${
                     formData.basicInfo?.motherName || ""
                   }`}
                 />
+                <InfoItem
+                  icon={<ContactPhone fontSize="small" sx={{ color: "text.secondary" }} />}
+                  primary="Mother's Contact"
+                  secondary={formData.basicInfo?.motherContact || "N/A"}
+                />
+                <InfoItem
+                  icon={<Cake fontSize="small" sx={{ color: "text.secondary" }} />}
+                  primary="Mother's DOB"
+                  secondary={formatDate(formData.basicInfo?.motherDob)}
+                />
               </List>
             </Paper>
           </Grid>
         </Grid>
+
+        {/* Guardian Information */}
+        {(formData.basicInfo?.guardianName ||
+          formData.basicInfo?.guardianContact ||
+          formData.basicInfo?.guardianEmail) && (
+          <Grid container spacing={3} sx={{ mt: 1 }}>
+            <Grid item xs={12}>
+              <Paper variant="outlined" sx={{ p: 2, borderRadius: 2 }}>
+                <Typography variant="subtitle2" sx={{ mb: 1, color: "text.secondary" }}>
+                  Guardian Information
+                </Typography>
+                <Grid container spacing={2}>
+                  <Grid item xs={12} sm={4}>
+                    <InfoItem
+                      icon={<ContactEmergency fontSize="small" sx={{ color: "text.secondary" }} />}
+                      primary="Guardian Name"
+                      secondary={formData.basicInfo?.guardianName || "N/A"}
+                      sx={{ px: 0 }}
+                    />
+                  </Grid>
+                  <Grid item xs={12} sm={4}>
+                    <InfoItem
+                      icon={<ContactPhone fontSize="small" sx={{ color: "text.secondary" }} />}
+                      primary="Guardian Contact"
+                      secondary={formData.basicInfo?.guardianContact || "N/A"}
+                      sx={{ px: 0 }}
+                    />
+                  </Grid>
+                  <Grid item xs={12} sm={4}>
+                    <InfoItem
+                      icon={<Cake fontSize="small" sx={{ color: "text.secondary" }} />}
+                      primary="Guardian DOB"
+                      secondary={formatDate(formData.basicInfo?.guardianDob)}
+                      sx={{ px: 0 }}
+                    />
+                  </Grid>
+                  <Grid item xs={12} sm={6}>
+                    <InfoItem
+                      icon={<Email fontSize="small" sx={{ color: "text.secondary" }} />}
+                      primary="Guardian Email"
+                      secondary={formData.basicInfo?.guardianEmail || "N/A"}
+                      sx={{ px: 0 }}
+                    />
+                  </Grid>
+                  <Grid item xs={12} sm={6}>
+                    <InfoItem
+                      icon={
+                        <DriveFileRenameOutline fontSize="small" sx={{ color: "text.secondary" }} />
+                      }
+                      primary="Guardian Relation"
+                      secondary={formData.basicInfo?.guardianRelation || "N/A"}
+                      sx={{ px: 0 }}
+                    />
+                  </Grid>
+                </Grid>
+              </Paper>
+            </Grid>
+          </Grid>
+        )}
 
         <Grid container spacing={3} sx={{ mt: 1 }}>
           <Grid item xs={12} md={6}>
@@ -536,7 +641,7 @@ export default function PreviewStaffDetails({ formData, onSubmit, onBack }) {
               <Grid container spacing={2}>
                 <Grid item xs={12} sm={6}>
                   <InfoItem
-                    icon={<CreditCard fontSize="small" sx={{ color: "text.secondary"}} />}
+                    icon={<CreditCard fontSize="small" sx={{ color: "text.secondary" }} />}
                     primary="PAN Card"
                     secondary={formData.documents?.panCard}
                     sx={{ px: 0 }}
@@ -552,7 +657,7 @@ export default function PreviewStaffDetails({ formData, onSubmit, onBack }) {
                 </Grid>
                 <Grid item xs={12} sm={6}>
                   <InfoItem
-                    icon={<ContactMail fontSize="small" sx={{ color: "text.secondary"}}/>}
+                    icon={<ContactMail fontSize="small" sx={{ color: "text.secondary" }} />}
                     primary="Passport"
                     secondary={formData.documents?.passport}
                     sx={{ px: 0 }}
@@ -560,7 +665,9 @@ export default function PreviewStaffDetails({ formData, onSubmit, onBack }) {
                 </Grid>
                 <Grid item xs={12} sm={6}>
                   <InfoItem
-                    icon={<DriveFileRenameOutline fontSize="small" sx={{ color: "text.secondary"}}/>}
+                    icon={
+                      <DriveFileRenameOutline fontSize="small" sx={{ color: "text.secondary" }} />
+                    }
                     primary="Driving License"
                     secondary={formData.documents?.drivingLicense}
                     sx={{ px: 0 }}
@@ -933,7 +1040,7 @@ export default function PreviewStaffDetails({ formData, onSubmit, onBack }) {
               <Grid container spacing={2}>
                 <Grid item xs={12} sm={6}>
                   <InfoItem
-                    icon={<AccountBalance fontSize="small" sx={{ color: "text.secondary"}} />}
+                    icon={<AccountBalance fontSize="small" sx={{ color: "text.secondary" }} />}
                     primary="EPF Number"
                     secondary={formData.payrollInfo?.epfNo}
                     sx={{ px: 0 }}
@@ -941,7 +1048,7 @@ export default function PreviewStaffDetails({ formData, onSubmit, onBack }) {
                 </Grid>
                 <Grid item xs={12} sm={6}>
                   <InfoItem
-                    icon={<AttachMoney fontSize="small" sx={{ color: "text.secondary"}}/>}
+                    icon={<AttachMoney fontSize="small" sx={{ color: "text.secondary" }} />}
                     primary="Basic Salary"
                     secondary={
                       formData.payrollInfo?.basicSalary
@@ -953,7 +1060,7 @@ export default function PreviewStaffDetails({ formData, onSubmit, onBack }) {
                 </Grid>
                 <Grid item xs={12} sm={6}>
                   <InfoItem
-                    icon={<Work fontSize="small" sx={{ color: "text.secondary"}} />}
+                    icon={<Work fontSize="small" sx={{ color: "text.secondary" }} />}
                     primary="Contract Type"
                     secondary={formData.payrollInfo?.contractType}
                     sx={{ px: 0 }}
@@ -961,7 +1068,7 @@ export default function PreviewStaffDetails({ formData, onSubmit, onBack }) {
                 </Grid>
                 <Grid item xs={12} sm={6}>
                   <InfoItem
-                    icon={<WorkHistory fontSize="small" sx={{ color: "text.secondary"}}/>}
+                    icon={<WorkHistory fontSize="small" sx={{ color: "text.secondary" }} />}
                     primary="Work Shift"
                     secondary={formData.payrollInfo?.workShift}
                     sx={{ px: 0 }}
@@ -969,7 +1076,7 @@ export default function PreviewStaffDetails({ formData, onSubmit, onBack }) {
                 </Grid>
                 <Grid item xs={12}>
                   <InfoItem
-                    icon={<LocationCity fontSize="small" sx={{ color: "text.secondary"}} />}
+                    icon={<LocationCity fontSize="small" sx={{ color: "text.secondary" }} />}
                     primary="Work Location"
                     secondary={formData.payrollInfo?.workLocation}
                     sx={{ px: 0 }}
@@ -988,7 +1095,7 @@ export default function PreviewStaffDetails({ formData, onSubmit, onBack }) {
               <Grid container spacing={2}>
                 <Grid item xs={12} sm={6}>
                   <InfoItem
-                    icon={<Badge fontSize="small" sx={{ color: "text.secondary"}}/>}
+                    icon={<Badge fontSize="small" sx={{ color: "text.secondary" }} />}
                     primary="Account Holder"
                     secondary={formData.bankInfo?.accountHolderName}
                     sx={{ px: 0 }}
@@ -996,7 +1103,7 @@ export default function PreviewStaffDetails({ formData, onSubmit, onBack }) {
                 </Grid>
                 <Grid item xs={12} sm={6}>
                   <InfoItem
-                    icon={<CreditCard fontSize="small" sx={{ color: "text.secondary"}}/>}
+                    icon={<CreditCard fontSize="small" sx={{ color: "text.secondary" }} />}
                     primary="Account Number"
                     secondary={formData.bankInfo?.accountNumber}
                     sx={{ px: 0 }}
@@ -1004,7 +1111,7 @@ export default function PreviewStaffDetails({ formData, onSubmit, onBack }) {
                 </Grid>
                 <Grid item xs={12} sm={6}>
                   <InfoItem
-                    icon={<AccountBalance fontSize="small" sx={{ color: "text.secondary"}}/>}
+                    icon={<AccountBalance fontSize="small" sx={{ color: "text.secondary" }} />}
                     primary="Bank Name"
                     secondary={formData.bankInfo?.bankName}
                     sx={{ px: 0 }}
@@ -1012,7 +1119,7 @@ export default function PreviewStaffDetails({ formData, onSubmit, onBack }) {
                 </Grid>
                 <Grid item xs={12} sm={6}>
                   <InfoItem
-                    icon={<LibraryBooks fontSize="small" sx={{ color: "text.secondary"}}/>}
+                    icon={<LibraryBooks fontSize="small" sx={{ color: "text.secondary" }} />}
                     primary="IFSC Code"
                     secondary={formData.bankInfo?.ifscCode}
                     sx={{ px: 0 }}
@@ -1020,7 +1127,7 @@ export default function PreviewStaffDetails({ formData, onSubmit, onBack }) {
                 </Grid>
                 <Grid item xs={12} sm={6}>
                   <InfoItem
-                    icon={<PinDrop fontSize="small" sx={{ color: "text.secondary"}}/>}
+                    icon={<PinDrop fontSize="small" sx={{ color: "text.secondary" }} />}
                     primary="Branch Name"
                     secondary={formData.bankInfo?.branchName}
                     sx={{ px: 0 }}
@@ -1028,7 +1135,7 @@ export default function PreviewStaffDetails({ formData, onSubmit, onBack }) {
                 </Grid>
                 <Grid item xs={12} sm={6}>
                   <InfoItem
-                    icon={<Assignment fontSize="small" sx={{ color: "text.secondary"}}/>}
+                    icon={<Assignment fontSize="small" sx={{ color: "text.secondary" }} />}
                     primary="Account Type"
                     secondary={formData.bankInfo?.accountType}
                     sx={{ px: 0 }}

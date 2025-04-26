@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { useDropzone } from "react-dropzone";
 import { Box, Grid, Typography, Paper, Button, Modal, IconButton, useTheme } from "@mui/material";
 import {
@@ -164,6 +164,8 @@ export default function AddStaff3({
   onValidationChange,
   triggerValidation
 }) {
+  const theme = useTheme();
+  const objectUrlsRef = useRef([]);
   const [files, setFiles] = useState(
     formData.files || {
       resume: null,
@@ -197,47 +199,32 @@ export default function AddStaff3({
     return new Blob([u8arr], { type: mime });
   };
 
-  // ✅ Load files from IndexedDB only when editing existing record
+  // Load files from IndexedDB on component mount
   useEffect(() => {
     const loadFilesFromIndexedDB = async () => {
-      // Check if we're editing an existing record by checking for formData.id or other identifier
-      const isEditing = formData.id; // Assuming formData has an id when editing
-
-      if (!isEditing) {
-        // For new form, clear any existing files from IndexedDB
-        await Promise.all([
-          deleteFileFromDB("resume"),
-          deleteFileFromDB("joiningLetter"),
-          deleteFileFromDB("aadharFront"),
-          deleteFileFromDB("aadharBack"),
-          deleteFileFromDB("panCard"),
-          deleteFileFromDB("offerLetter"),
-          deleteFileFromDB("otherDocuments")
-        ]);
-        return;
-      }
-
-      // Only load files if we're editing an existing record
       try {
         const storedFiles = await getAllFilesFromDB();
         if (!storedFiles) return;
 
-        const updated = {};
+        const updatedFiles = {};
 
         for (const key of Object.keys(files)) {
-          const file = storedFiles[key];
-          if (file && file.data) {
-            const blob = await dataURLtoBlob(file.data);
-            const reconstructedFile = new File([blob], file.name, {
-              type: file.type
+          const storedFile = storedFiles[key];
+          if (storedFile && storedFile.data) {
+            const blob = await dataURLtoBlob(storedFile.data);
+            const objectUrl = URL.createObjectURL(blob);
+            objectUrlsRef.current.push(objectUrl);
+
+            const reconstructedFile = new File([blob], storedFile.name, {
+              type: storedFile.type
             });
-            updated[key] = reconstructedFile;
+            updatedFiles[key] = reconstructedFile;
           }
         }
 
         setFiles((prev) => ({
           ...prev,
-          ...updated
+          ...updatedFiles
         }));
       } catch (error) {
         console.error("Error loading files from IndexedDB:", error);
@@ -245,7 +232,13 @@ export default function AddStaff3({
     };
 
     loadFilesFromIndexedDB();
-  }, [formData.id]); // Only run when formData.id changes
+
+    return () => {
+      // Clean up object URLs
+      objectUrlsRef.current.forEach((url) => URL.revokeObjectURL(url));
+      objectUrlsRef.current = [];
+    };
+  }, []);
 
   // Validate form and notify parent
   const validateForm = (show = false) => {
@@ -267,7 +260,7 @@ export default function AddStaff3({
     return isFormValid;
   };
 
-  // 🔄 Update formData
+  // Update formData when files change
   useEffect(() => {
     setFormData((prev) => ({
       ...prev,
@@ -276,6 +269,7 @@ export default function AddStaff3({
     validateForm();
   }, [files]);
 
+  // Handle validation trigger from parent
   useEffect(() => {
     if (triggerValidation) {
       setShowErrors(true);
@@ -283,30 +277,60 @@ export default function AddStaff3({
     }
   }, [triggerValidation]);
 
-  // 📤 Upload and save to IndexedDB
-  const handleFileUpload = (field) => (acceptedFiles) => {
+  // Handle file upload and save to IndexedDB
+  const handleFileUpload = (field) => async (acceptedFiles) => {
     const file = acceptedFiles[0];
+    if (!file) return;
 
-    if (file) {
-      const reader = new FileReader();
-      reader.onload = async () => {
+    const objectUrl = URL.createObjectURL(file);
+    objectUrlsRef.current.push(objectUrl);
+
+    const reader = new FileReader();
+    reader.onload = async () => {
+      try {
+        // Save to IndexedDB
         await saveFileToDB(field, {
           name: file.name,
           type: file.type,
           data: reader.result
         });
 
+        // Update state
         setFiles((prev) => ({
           ...prev,
           [field]: file
         }));
 
+        // Clear error if exists
         if (errors[field]) {
           setErrors((prev) => ({ ...prev, [field]: false }));
         }
-      };
+      } catch (error) {
+        console.error("Error saving file to IndexedDB:", error);
+      }
+    };
+    reader.readAsDataURL(file);
+  };
 
-      reader.readAsDataURL(file);
+  // Handle file removal
+  const handleRemoveFile = async (field) => {
+    try {
+      // Delete from IndexedDB
+      await deleteFileFromDB(field);
+
+      // Update state
+      setFiles((prev) => {
+        const updated = { ...prev };
+        updated[field] = null;
+        return updated;
+      });
+
+      // Revoke object URL if exists
+      if (files[field]) {
+        URL.revokeObjectURL(URL.createObjectURL(files[field]));
+      }
+    } catch (error) {
+      console.error("Error removing file:", error);
     }
   };
 

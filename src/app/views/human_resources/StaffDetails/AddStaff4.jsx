@@ -32,6 +32,9 @@ import { saveFileToDB } from "app/utils/indexedDBUtils";
 import { getAllFilesFromDB } from "app/utils/indexedDBUtils";
 import { deleteFileFromDB } from "app/utils/indexedDBUtils";
 
+import { BASE_URL } from "../../../../main";
+import axios from "axios";
+
 export default function AddStaff4({
   formData,
   setFormData,
@@ -403,6 +406,7 @@ export default function AddStaff4({
   const handleAddEducationSection = () => {
     if (educationLevel && !sections.includes(educationLevel)) {
       setSections([...sections, educationLevel]);
+      setEducationLevel(""); // Reset dropdown after selection
     }
   };
 
@@ -432,6 +436,27 @@ export default function AddStaff4({
       setErrors((prev) => ({ ...prev, [field]: !formData[field] }));
     }
   };
+
+  const fetchedOnce = useRef(false);
+
+  const [educationTypeOptions, setEducationTypeOptions] = useState([]);
+  const fetchEducationTypeOptions = async () => {
+    try {
+      const response = await axios.get(`${BASE_URL}/api/master/education_type`, {
+        withCredentials: true
+      });
+      setEducationTypeOptions(response.data);
+    } catch (error) {
+      console.error("Error fetching education type options:", error);
+    }
+  };
+
+  useEffect(() => {
+    if (!fetchedOnce.current) {
+      fetchEducationTypeOptions();
+      fetchedOnce.current = true;
+    }
+  }, []);
 
   return (
     <Box
@@ -904,9 +929,14 @@ export default function AddStaff4({
             onChange={handleEducationLevelChange}
             sx={inputStyle}
           >
-            <MenuItem value="UG">Undergraduate (UG)</MenuItem>
-            <MenuItem value="PG">Postgraduate (PG)</MenuItem>
-            <MenuItem value="PhD">PhD</MenuItem>
+            <MenuItem value="" disabled>
+              Select Education Level
+            </MenuItem>
+            {educationTypeOptions.map((option) => (
+              <MenuItem key={option._id} value={option.name} sx={{ fontSize: "0.875rem" }}>
+                {option.name}
+              </MenuItem>
+            ))}
           </Select>
         </FormControl>
         <Button
