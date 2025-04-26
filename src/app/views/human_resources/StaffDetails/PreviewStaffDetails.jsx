@@ -71,6 +71,9 @@ import {
   AlternateEmail
 } from "@mui/icons-material";
 
+import { BASE_URL } from "../../../../main";
+import axios from "axios";
+
 export default function PreviewStaffDetails({ formData, onSubmit, onBack }) {
   const theme = useTheme();
   const isDarkMode = theme.palette.mode === "dark";
@@ -120,10 +123,92 @@ export default function PreviewStaffDetails({ formData, onSubmit, onBack }) {
       });
 
       if (result.isConfirmed) {
-        // Call the original onSubmit function if it exists
-        if (onSubmit) {
-          await onSubmit();
-        }
+        // Prepare the data for API submission
+        const submissionData = {
+          user_id: formData.basicInfo?.staffId || "",
+          first_name: formData.basicInfo?.firstName || "",
+          middle_name: null, // Set to null as per API
+          last_name: formData.basicInfo?.lastName || "",
+          full_name: `${formData.basicInfo?.firstName || ""} ${
+            formData.basicInfo?.lastName || ""
+          }`.trim(),
+          email: formData.basicInfo?.email || "",
+          alt_email: formData.basicInfo?.alternateEmail || null,
+          cantact_no_1: formData.basicInfo?.phone || "",
+          cantact_no_2: null,
+          father_name: `${formData.basicInfo?.fatherTitle || ""} ${
+            formData.basicInfo?.fatherName || ""
+          }`.trim(),
+          father_contact_no: formData.basicInfo?.fatherContact || "",
+          father_dob: formData.basicInfo?.fatherDob || "",
+          father_email: null,
+          mother_name: `${formData.basicInfo?.motherTitle || ""} ${
+            formData.basicInfo?.motherName || ""
+          }`.trim(),
+          mother_contact_no: formData.basicInfo?.motherContact || "",
+          mother_dob: formData.basicInfo?.motherDob || "",
+          mother_email: null,
+          guardian_name: formData.basicInfo?.guardianName || null,
+          guardian_contact_no: formData.basicInfo?.guardianContact || null,
+          guardian_dob: formData.basicInfo?.guardianDob || null,
+          guardian_email: formData.basicInfo?.guardianEmail || null,
+          guardian_relation: formData.basicInfo?.guardianRelation || null,
+          current_address: formData.addressInfo?.currentFullAddress || "",
+          current_city: formData.addressInfo?.currentCity || "",
+          current_state: formData.addressInfo?.currentState || "",
+          current_country: formData.addressInfo?.currentCountry || "",
+          current_pincode: formData.addressInfo?.currentPinCode || "",
+          permanent_address: formData.addressInfo?.permanentFullAddress || "",
+          permanent_city: formData.addressInfo?.permanentCity || "",
+          permanent_state: formData.addressInfo?.permanentState || "",
+          permanent_pincode: formData.addressInfo?.permanentPinCode || "",
+          permanent_country: formData.addressInfo?.permanentCountry || "",
+          gender: formData.basicInfo?.gender || "",
+          dob: formData.basicInfo?.dob || "",
+          spouse_name: null,
+          spouse_dob: null,
+          marital_status: formData.basicInfo?.maritalStatus || null,
+          no_of_children: 0,
+          blood_group: formData.basicInfo?.bloodGroup || "",
+          date_of_joining: formData.joiningDate || null,
+          date_of_resignation: null,
+          leaving_date: null,
+          employee_type: formData.role || null,
+          employee_code: formData.basicInfo?.staffId || null,
+          tax_region: null,
+          bank_name: formData.bankInfo?.bankName || null,
+          bank_acc_no: formData.bankInfo?.accountNumber || null,
+          ifsc_code: formData.bankInfo?.ifscCode || null,
+          branch_address: formData.bankInfo?.branchName || null,
+          UAN_no: null,
+          PF_no: formData.payrollInfo?.epfNo || null,
+          esic_no: null,
+          category: formData.basicInfo?.category || "",
+          religion: formData.basicInfo?.religion || "",
+          department_id: null,
+          designation_id: formData.basicInfo?.designation || null,
+          class: null,
+          section: null,
+          school_roll_no: null,
+          admission_no: null,
+          admission_date: null,
+          profile_photo_path: null,
+          house_id: null,
+          created_by: null,
+          updated_by: null,
+          deactivated: false,
+          deleted_on: null,
+          status: true,
+          createdAt: null,
+          updatedAt: null
+        };
+
+        // Make the API call
+        const response = await axios.post(
+          "https://backend-aufx.onrender.com/api/user_details/create",
+          submissionData,
+          { withCredentials: true }
+        );
 
         // Show success message
         await Swal.fire({
@@ -138,9 +223,27 @@ export default function PreviewStaffDetails({ formData, onSubmit, onBack }) {
         navigate("/human_resources/staff-details");
       }
     } catch (error) {
+      console.error("Submission error:", error);
+
+      // Enhanced error message with more details
+      let errorMessage = "Failed to submit data";
+      if (error.response) {
+        // Handle validation errors from API
+        if (error.response.data?.fields) {
+          const fieldErrors = Object.entries(error.response.data.fields)
+            .map(([field, errors]) => `${field}: ${errors.join(", ")}`)
+            .join("\n");
+          errorMessage = `Validation errors:\n${fieldErrors}`;
+        } else if (error.response.data?.message) {
+          errorMessage = error.response.data.message;
+        }
+      } else if (error.request) {
+        errorMessage = "No response received from server";
+      }
+
       await Swal.fire({
         title: "Error!",
-        text: error.message || "Failed to submit data",
+        text: errorMessage,
         icon: "error",
         confirmButtonText: "OK"
       });
