@@ -649,12 +649,6 @@ export default function Addstaff1({
     } catch (error) {
       console.error("Error fetching gender options:", error);
       setGenderError(error.message);
-
-      // Handle token expiry
-      if (error.message === "Token expired. Please log in again.") {
-        alert("Session expired. Please log in again.");
-        window.location.href = "/login"; // Redirect to login page
-      }
     } finally {
       setLoadingGender(false); // Stop loading
     }
