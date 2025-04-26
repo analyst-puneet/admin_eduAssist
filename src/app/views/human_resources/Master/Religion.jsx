@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
-import { BASE_URL } from "../../../../main";
+import { BASE_URL } from "../../../../main"; // Tumhara BASE_URL import
 import {
   Box,
   Table,
@@ -23,8 +23,8 @@ import {
 import { Edit, Delete } from "@mui/icons-material";
 import axios from "axios";
 
-const RoleGroup = ({ isMobile, isDarkMode, inputStyle }) => {
-  const [formData, setFormData] = useState({ status: "true" }); // Changed default to "true" to match your API
+const Religion = ({ isMobile, isDarkMode, inputStyle }) => {
+  const [formData, setFormData] = useState({ status: "true" });
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(5);
   const [fullData, setFullData] = useState([]);
@@ -40,10 +40,10 @@ const RoleGroup = ({ isMobile, isDarkMode, inputStyle }) => {
   const fetchedOnce = useRef(false);
 
   // API endpoints
-  const API_URL = `${BASE_URL}/api/master/role_group`;
-  const CREATE_ROLE_URL = `${API_URL}/create`;
-  const UPDATE_ROLE_URL = `${API_URL}/update`;
-  const DELETE_ROLE_URL = `${API_URL}/delete`;
+  const API_URL = `${BASE_URL}/api/master/religion`;
+  const CREATE_URL = `${API_URL}/create`;
+  const UPDATE_URL = `${API_URL}/update`;
+  const DELETE_URL = `${API_URL}/delete`;
 
   const showNotification = (message, severity = "success") => {
     setNotification({ open: true, message, severity });
@@ -53,7 +53,7 @@ const RoleGroup = ({ isMobile, isDarkMode, inputStyle }) => {
     setNotification(prev => ({ ...prev, open: false }));
   };
 
-  const fetchRoleData = async () => {
+  const fetchReligionData = async () => {
     try {
       setLoading(true);
       const response = await axios.get(API_URL, {
@@ -61,8 +61,8 @@ const RoleGroup = ({ isMobile, isDarkMode, inputStyle }) => {
       });
       setFullData(response.data);
     } catch (error) {
-      console.error("Error fetching role data:", error);
-      showNotification("Failed to fetch role data", "error");
+      console.error("Error fetching religion data:", error);
+      showNotification("Failed to fetch religion data", "error");
     } finally {
       setLoading(false);
       fetchedOnce.current = true;
@@ -71,13 +71,13 @@ const RoleGroup = ({ isMobile, isDarkMode, inputStyle }) => {
 
   useEffect(() => {
     if (!fetchedOnce.current) {
-      fetchRoleData();
+      fetchReligionData();
     }
   }, []);
 
   const validateForm = () => {
     const newErrors = {};
-    if (!formData.name) newErrors.name = "Role Name is required";
+    if (!formData.name) newErrors.name = "Religion Name is required";
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
@@ -96,48 +96,48 @@ const RoleGroup = ({ isMobile, isDarkMode, inputStyle }) => {
     setLoading(true);
     try {
       if (editMode) {
-        await axios.put(`${UPDATE_ROLE_URL}/${currentEditId}`, formData, {
+        await axios.put(`${UPDATE_URL}/${currentEditId}`, formData, {
           withCredentials: true
         });
-        showNotification("Role updated successfully!");
+        showNotification("Religion updated successfully!");
       } else {
-        await axios.post(CREATE_ROLE_URL, formData, {
+        await axios.post(CREATE_URL, formData, {
           withCredentials: true
         });
-        showNotification("Role added successfully!");
+        showNotification("Religion added successfully!");
       }
-      fetchRoleData();
+      fetchReligionData();
       resetForm();
     } catch (error) {
       showNotification(error.response?.data?.message || "An error occurred", "error");
-      console.error("Error saving role:", error);
+      console.error("Error saving religion:", error);
     } finally {
       setLoading(false);
     }
   };
 
-  const handleEdit = (role) => {
+  const handleEdit = (religion) => {
     setFormData({
-      name: role.name,
-      status: role.status.toString() // Ensure status is string for the select input
+      name: religion.name,
+      status: religion.status.toString()
     });
     setEditMode(true);
-    setCurrentEditId(role._id);
+    setCurrentEditId(religion._id);
   };
 
   const handleDelete = async (id) => {
-    if (!window.confirm("Are you sure you want to delete this role?")) return;
+    if (!window.confirm("Are you sure you want to delete this religion?")) return;
 
     setLoading(true);
     try {
-      await axios.delete(`${DELETE_ROLE_URL}/${id}`, {
+      await axios.delete(`${DELETE_URL}/${id}`, {
         withCredentials: true
       });
-      showNotification("Role deleted successfully!");
-      fetchRoleData();
+      showNotification("Religion deleted successfully!");
+      fetchReligionData();
     } catch (error) {
-      showNotification("Failed to delete role", "error");
-      console.error("Error deleting role:", error);
+      showNotification("Failed to delete religion", "error");
+      console.error("Error deleting religion:", error);
     } finally {
       setLoading(false);
     }
@@ -165,13 +165,13 @@ const RoleGroup = ({ isMobile, isDarkMode, inputStyle }) => {
     <Box>
       <Paper elevation={3} sx={{ p: 2, mb: 3 }}>
         <Typography variant="h6" gutterBottom>
-          {editMode ? "Edit Role" : "Add New Role"}
+          {editMode ? "Edit Religion" : "Add New Religion"}
         </Typography>
         <Grid container spacing={2}>
           <Grid item xs={12} sm={6}>
             <TextField
               fullWidth
-              label="Role Name"
+              label="Religion Name"
               name="name"
               value={formData.name || ""}
               onChange={handleInputChange}
@@ -200,12 +200,8 @@ const RoleGroup = ({ isMobile, isDarkMode, inputStyle }) => {
             <Button
               variant="contained"
               onClick={handleSave}
-
-              // if data are lodede then visible save Role
-              // disabled={loading}
-              // startIcon={loading ? <CircularProgress size={20} /> : null}
             >
-              {editMode ? "Update Role" : "Save Role"}
+              {editMode ? "Update Religion" : "Save"}
             </Button>
             {editMode && (
               <Button variant="outlined" onClick={resetForm} sx={{ ml: 2 }} disabled={loading}>
@@ -218,7 +214,7 @@ const RoleGroup = ({ isMobile, isDarkMode, inputStyle }) => {
 
       <Paper elevation={2} sx={{ p: 2 }}>
         <Stack direction="row" justifyContent="space-between" alignItems="center" mb={2}>
-          <Typography variant="h6">Role List</Typography>
+          <Typography variant="h6">Religion List</Typography>
           {isMobile && (
             <TablePagination
               component="div"
@@ -237,13 +233,13 @@ const RoleGroup = ({ isMobile, isDarkMode, inputStyle }) => {
             <CircularProgress />
           </Box>
         ) : fullData.length === 0 ? (
-          <Alert severity="info">No roles found. Add a new role to get started.</Alert>
+          <Alert severity="info">No religions found. Add a new religion to get started.</Alert>
         ) : (
           <Box sx={{ overflowX: "auto" }}>
             <Table size={isMobile ? "small" : "medium"}>
               <TableHead>
                 <TableRow>
-                  <TableCell>Role Name</TableCell>
+                  <TableCell>Religion Name</TableCell>
                   <TableCell>Status</TableCell>
                   <TableCell>Created At</TableCell>
                   <TableCell>Actions</TableCell>
@@ -291,8 +287,8 @@ const RoleGroup = ({ isMobile, isDarkMode, inputStyle }) => {
         onClose={closeNotification}
         anchorOrigin={{ vertical: 'top', horizontal: 'right' }}
       >
-        <Alert 
-          onClose={closeNotification} 
+        <Alert
+          onClose={closeNotification}
           severity={notification.severity}
           sx={{ width: '100%' }}
         >
@@ -303,4 +299,4 @@ const RoleGroup = ({ isMobile, isDarkMode, inputStyle }) => {
   );
 };
 
-export default RoleGroup;
+export default Religion;
