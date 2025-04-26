@@ -1217,7 +1217,6 @@ export default function Addstaff1({
           {/* Row 5 - Father's Name, Mother's Name */}
           <Grid container spacing={2}>
             {/* Father's Name */}
-            {/* Father's Name */}
             <Grid item xs={12} sm={6}>
               <Box sx={{ display: "flex", alignItems: "baseline" }}>
                 {/* Title Dropdown */}
@@ -1327,7 +1326,40 @@ export default function Addstaff1({
                     padding: "10px 14px"
                   },
                   marginLeft: "11.5px",
-                  ...inputStyle
+                  ...(errors.fatherDob ? errorStyle : inputStyle)
+                }}
+                InputProps={{
+                  inputProps: {
+                    style: {
+                      "::-webkit-calendar-picker-indicator": {
+                        display: "none",
+                        "-webkit-appearance": "none"
+                      },
+                      "::-moz-calendar-picker-indicator": {
+                        display: "none"
+                      }
+                    }
+                  },
+                  endAdornment: (
+                    <IconButton
+                      edge="end"
+                      onClick={(e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        const input = e.currentTarget
+                          .closest(".MuiTextField-root")
+                          .querySelector('input[type="date"]');
+                        input.showPicker();
+                      }}
+                      sx={{ padding: "8px", color: theme.palette.text.secondary }}
+                    >
+                      <SlCalender />
+                    </IconButton>
+                  )
+                }}
+                onClick={(e) => {
+                  const input = e.currentTarget.querySelector('input[type="date"]');
+                  input.showPicker();
                 }}
               />
             </Grid>
@@ -1442,7 +1474,40 @@ export default function Addstaff1({
                 onBlur={() => handleFieldBlur("motherDob")}
                 error={errors.motherDob}
                 helperText={errors.motherDob ? "Mother's DOB is required" : " "}
-                sx={errors.motherDob ? errorStyle : inputStyle}
+                sx={errors.motherDob ? { ...errorStyle, mb: 3 } : { ...inputStyle }}
+                InputProps={{
+                  inputProps: {
+                    style: {
+                      "::-webkit-calendar-picker-indicator": {
+                        display: "none",
+                        "-webkit-appearance": "none"
+                      },
+                      "::-moz-calendar-picker-indicator": {
+                        display: "none"
+                      }
+                    }
+                  },
+                  endAdornment: (
+                    <IconButton
+                      edge="end"
+                      onClick={(e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        const input = e.currentTarget
+                          .closest(".MuiTextField-root")
+                          .querySelector('input[type="date"]');
+                        input.showPicker();
+                      }}
+                      sx={{ padding: "8px", color: theme.palette.text.secondary }}
+                    >
+                      <SlCalender />
+                    </IconButton>
+                  )
+                }}
+                onClick={(e) => {
+                  const input = e.currentTarget.querySelector('input[type="date"]');
+                  input.showPicker();
+                }}
               />
             </Grid>
 
@@ -1495,9 +1560,46 @@ export default function Addstaff1({
                 InputLabelProps={{ shrink: true }}
                 value={basicInfo.guardianDob}
                 onChange={(e) => handleBasicInfoChange("guardianDob", e.target.value)}
-                sx={inputStyle}
+                onBlur={() => handleFieldBlur("guardianDob")}
+                error={errors.guardianDob}
+                helperText={errors.guardianDob ? "Guardian's DOB is required" : " "}
+                sx={errors.guardianDob ? { ...errorStyle, mb: 3 } : { ...inputStyle }}
+                InputProps={{
+                  inputProps: {
+                    style: {
+                      "::-webkit-calendar-picker-indicator": {
+                        display: "none",
+                        "-webkit-appearance": "none"
+                      },
+                      "::-moz-calendar-picker-indicator": {
+                        display: "none"
+                      }
+                    }
+                  },
+                  endAdornment: (
+                    <IconButton
+                      edge="end"
+                      onClick={(e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        const input = e.currentTarget
+                          .closest(".MuiTextField-root")
+                          .querySelector('input[type="date"]');
+                        input.showPicker();
+                      }}
+                      sx={{ padding: "8px", color: theme.palette.text.secondary }}
+                    >
+                      <SlCalender />
+                    </IconButton>
+                  )
+                }}
+                onClick={(e) => {
+                  const input = e.currentTarget.querySelector('input[type="date"]');
+                  input.showPicker();
+                }}
               />
             </Grid>
+
             <Grid item xs={12} sm={6}>
               <TextField
                 label="Guardian Email"

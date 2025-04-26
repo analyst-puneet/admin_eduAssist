@@ -4,7 +4,7 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useTheme } from "@mui/material";
 
-const UserCard = ({ name, id, phone, location, roles, img }) => {
+const UserCard = ({ name, id, phone, location, roles, img, department, designation }) => {
   const [isHovered, setIsHovered] = useState(false);
   const navigate = useNavigate();
   const theme = useTheme();
@@ -27,11 +27,11 @@ const UserCard = ({ name, id, phone, location, roles, img }) => {
         minHeight: "220px",
         position: "relative",
         transition: "all 0.3s ease",
-        backgroundColor: "background.paper", // Default background
+        backgroundColor: "background.paper",
         "&:hover": {
           transform: "translateY(-4px)",
           boxShadow: "0 6px 16px rgba(0,0,0,0.12)",
-          backgroundColor: "rgba(0,0,0,0.05)", // Thoda sa dark overlay
+          backgroundColor: "rgba(0,0,0,0.05)",
           "& .hover-buttons": {
             opacity: 1
           }
@@ -157,6 +157,11 @@ const UserCard = ({ name, id, phone, location, roles, img }) => {
         <Typography variant="body2" color="text.secondary" fontSize="0.75rem" noWrap>
           {phone}
         </Typography>
+        {designation && (
+          <Typography variant="body2" color="text.secondary" fontSize="0.75rem" noWrap>
+            {designation}
+          </Typography>
+        )}
       </Box>
 
       {/* Location & Roles Section */}
@@ -175,26 +180,28 @@ const UserCard = ({ name, id, phone, location, roles, img }) => {
           justifyContent="center"
           sx={{ gap: "6px" }}
         >
-          {roles.map((role, idx) => (
-            <Chip
-              key={idx}
-              label={role}
-              size="small"
-              sx={{
-                height: "24px",
-                fontSize: "0.6rem",
-                fontWeight: 500,
-                backgroundColor: idx === 0 ? theme.palette.primary.light : theme.palette.grey[200],
-                color: theme.palette.getContrastText(
-                  idx === 0 ? theme.palette.primary.light : theme.palette.grey[200]
-                ),
-                "& .MuiChip-label": {
-                  px: 1,
-                  py: 0.25
-                }
-              }}
-            />
-          ))}
+          {roles &&
+            roles.map((role, idx) => (
+              <Chip
+                key={idx}
+                label={role}
+                size="small"
+                sx={{
+                  height: "24px",
+                  fontSize: "0.6rem",
+                  fontWeight: 500,
+                  backgroundColor:
+                    idx === 0 ? theme.palette.primary.light : theme.palette.grey[200],
+                  color: theme.palette.getContrastText(
+                    idx === 0 ? theme.palette.primary.light : theme.palette.grey[200]
+                  ),
+                  "& .MuiChip-label": {
+                    px: 1,
+                    py: 0.25
+                  }
+                }}
+              />
+            ))}
         </Stack>
       </Box>
     </Card>
