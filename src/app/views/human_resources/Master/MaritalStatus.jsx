@@ -113,7 +113,7 @@ const MaritalStatus = ({ isMobile, isDarkMode, inputStyle }) => {
       };
 
       if (editMode) {
-        await axios.put(`${UPDATE_URL}/${currentEditId}`, payload, {
+        await axios.post(`${UPDATE_URL}/${currentEditId}`, payload, {
           withCredentials: true
         });
         showNotification("Marital status updated successfully!");

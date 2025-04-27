@@ -96,7 +96,7 @@ const RoleGroup = ({ isMobile, isDarkMode, inputStyle }) => {
     setLoading(true);
     try {
       if (editMode) {
-        await axios.put(`${UPDATE_ROLE_URL}/${currentEditId}`, formData, {
+        await axios.post(`${UPDATE_ROLE_URL}/${currentEditId}`, formData, {
           withCredentials: true
         });
         showNotification("Role updated successfully!");

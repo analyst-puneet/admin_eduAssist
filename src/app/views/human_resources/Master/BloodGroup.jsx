@@ -42,7 +42,6 @@ const BloodGroup = ({ isMobile, isDarkMode, inputStyle }) => {
   // Blood Group API Endpoints
   const API_URL = `${BASE_URL}/api/master/blood_group`;
   const CREATE_URL = `${API_URL}/create`;
-  const UPDATE_URL = `${API_URL}/update`;
   const DELETE_URL = `${API_URL}/delete`;
 
   const showNotification = (message, severity = "success") => {
@@ -94,7 +93,8 @@ const BloodGroup = ({ isMobile, isDarkMode, inputStyle }) => {
     setLoading(true);
     try {
       if (editMode) {
-        await axios.put(`${UPDATE_URL}/${currentEditId}`, formData, {
+        // Updated URL construction with dynamic ID
+        await axios.post(`${API_URL}/update/${currentEditId}`, formData, {
           withCredentials: true
         });
         showNotification("Blood Group updated successfully!");
@@ -195,8 +195,14 @@ const BloodGroup = ({ isMobile, isDarkMode, inputStyle }) => {
           </Grid>
 
           <Grid item xs={12}>
-            <Button variant="contained" onClick={handleSave}>
-              {editMode ? "Update Blood Group" : "Save "}
+            <Button variant="contained" onClick={handleSave} disabled={loading}>
+              {loading ? (
+                <CircularProgress size={24} color="inherit" />
+              ) : editMode ? (
+                "Update Blood Group"
+              ) : (
+                "Save"
+              )}
             </Button>
             {editMode && (
               <Button variant="outlined" onClick={resetForm} sx={{ ml: 2 }} disabled={loading}>

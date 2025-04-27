@@ -96,7 +96,7 @@ const Designation = ({ isMobile, isDarkMode, inputStyle }) => {
     setLoading(true);
     try {
       if (editMode) {
-        await axios.put(`${UPDATE_DESIGNATION_URL}/${currentEditId}`, formData, {
+        await axios.post(`${UPDATE_DESIGNATION_URL}/${currentEditId}`, formData, {
           withCredentials: true
         });
         showNotification("Designation updated successfully!");
