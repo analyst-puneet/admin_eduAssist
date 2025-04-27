@@ -96,10 +96,13 @@ export default function PreviewStaffDetails({ formData, onSubmit, onBack }) {
   const formatAddress = (addressInfo, type) => {
     if (!addressInfo) return "N/A";
 
-    const prefix = type === "current" ? "current" : "permanent";
+    const isSameAddress = formData.sameAsAddress && type === "permanent";
+    const prefix = isSameAddress ? "current" : type;
+
     const parts = [
       addressInfo[`${prefix}FullAddress`],
       addressInfo[`${prefix}City`],
+      addressInfo[`${prefix}District`],
       addressInfo[`${prefix}State`],
       addressInfo[`${prefix}Country`],
       addressInfo[`${prefix}PinCode`] ? `PIN: ${addressInfo[`${prefix}PinCode`]}` : null
@@ -178,10 +181,35 @@ export default function PreviewStaffDetails({ formData, onSubmit, onBack }) {
           current_country: toString(formData.addressInfo?.currentCountry),
           current_pincode: toString(formData.addressInfo?.currentPinCode),
           permanent_address: toString(formData.addressInfo?.permanentFullAddress),
-          permanent_city: toString(formData.addressInfo?.permanentCity) || "", // Required field
-          permanent_state: toString(formData.addressInfo?.permanentState) || "", // Required field
-          permanent_pincode: toString(formData.addressInfo?.permanentPinCode),
-          permanent_country: toString(formData.addressInfo?.permanentCountry) || "", // Required field
+          permanent_city:
+            toString(
+              formData.sameAsAddress
+                ? formData.addressInfo?.currentCity
+                : formData.addressInfo?.permanentCity
+            ) || "",
+          permanent_state:
+            toString(
+              formData.sameAsAddress
+                ? formData.addressInfo?.currentState
+                : formData.addressInfo?.permanentState
+            ) || "",
+          permanent_pincode: toString(
+            formData.sameAsAddress
+              ? formData.addressInfo?.currentPinCode
+              : formData.addressInfo?.permanentPinCode
+          ),
+          permanent_country:
+            toString(
+              formData.sameAsAddress
+                ? formData.addressInfo?.currentCountry
+                : formData.addressInfo?.permanentCountry
+            ) || "",
+          permanent_district:
+            toString(
+              formData.sameAsAddress
+                ? formData.addressInfo?.currentDistrict
+                : formData.addressInfo?.permanentDistrict
+            ) || "",
 
           // Personal Details
           gender: toString(formData.basicInfo?.gender),
