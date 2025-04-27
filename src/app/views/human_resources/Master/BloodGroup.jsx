@@ -196,7 +196,7 @@ const BloodGroup = ({ isMobile, isDarkMode, inputStyle }) => {
 
           <Grid item xs={12}>
             <Button variant="contained" onClick={handleSave}>
-              {editMode ? "Update Blood Group" : "Save Blood Group"}
+              {editMode ? "Update Blood Group" : "Save "}
             </Button>
             {editMode && (
               <Button variant="outlined" onClick={resetForm} sx={{ ml: 2 }} disabled={loading}>
