@@ -334,6 +334,28 @@ export default function AddStaff3({
     }
   };
 
+  // Add this useEffect to handle reset
+  useEffect(() => {
+    if (!formData.files) {
+      setFiles({
+        resume: null,
+        joiningLetter: null,
+        aadharFront: null,
+        aadharBack: null,
+        panCard: null,
+        offerLetter: null,
+        otherDocuments: null
+      });
+      setErrors({
+        resume: false,
+        joiningLetter: false,
+        aadharFront: false,
+        aadharBack: false,
+        panCard: false
+      });
+    }
+  }, [formData.files]);
+
   return (
     <Box>
       <Typography variant="h6" mb={2}>
