@@ -49,13 +49,12 @@ const moduleComponents = {
   "Role Group": RoleGroup
 };
 
-
 export default function Master() {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
   const isDarkMode = theme.palette.mode === "dark";
 
-  const [selectedModule, setSelectedModule] = useState("Leave Group");
+  const [selectedModule, setSelectedModule] = useState("BloodGroup");
   const [mobileOpen, setMobileOpen] = useState(false);
 
   const inputStyle = {
