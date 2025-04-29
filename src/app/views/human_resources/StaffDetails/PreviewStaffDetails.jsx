@@ -134,8 +134,8 @@ export default function PreviewStaffDetails({ formData, onSubmit, onBack }) {
           }`.trim(),
           email: formData.basicInfo?.email || "",
           alt_email: formData.basicInfo?.alternateEmail || null,
-          cantact_no_1: formData.basicInfo?.phone || "",
-          cantact_no_2: null,
+          contact_no_1: formData.basicInfo?.phone || "",
+          contact_no_2: null,
           father_name: `${formData.basicInfo?.fatherTitle || ""} ${
             formData.basicInfo?.fatherName || ""
           }`.trim(),
@@ -205,8 +205,14 @@ export default function PreviewStaffDetails({ formData, onSubmit, onBack }) {
 
         // Make the API call
         const response = await axios.post(
-          "https://backend-aufx.onrender.com/api/user_details/create",
-          submissionData,
+          `${BASE_URL}/api/user_details/create`,
+            submissionData
+          ,
+          {
+            headers: {
+            "Content-Type": "multipart/form-data",
+          },
+          },
           { withCredentials: true }
         );
 
