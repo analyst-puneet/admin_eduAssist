@@ -458,6 +458,39 @@ export default function AddStaff4({
     }
   }, []);
 
+  // Add this useEffect to handle reset
+  useEffect(() => {
+    if (!formData.educationLevel) {
+      setEducationLevel("");
+      setSections([]);
+      setFileNames({});
+      setFiles({});
+      setUgYears(3);
+      setErrors({
+        tenthBoard: false,
+        tenthPercentage: false,
+        tenthYear: false,
+        tenthMarksheet: false,
+        twelfthBoard: false,
+        twelfthPercentage: false,
+        twelfthYear: false,
+        twelfthMarksheet: false,
+        ugCollegeName: false,
+        ugCourse: false,
+        ugPercentage: false,
+        pgCollegeName: false,
+        pgCourse: false,
+        pgPercentage: false,
+        pgMarksheet1: false,
+        pgMarksheet2: false,
+        phdInstitute: false,
+        phdSubject: false,
+        phdThesis: false,
+        phdCertificate: false
+      });
+    }
+  }, [formData.educationLevel]);
+
   return (
     <Box
       component={Paper}

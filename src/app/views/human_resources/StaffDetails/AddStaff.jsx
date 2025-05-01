@@ -111,6 +111,65 @@ export default function StepperForm() {
     showSuccess("Form has been reset");
   };
 
+
+  const handleBackFromPreview = (shouldReset = false) => {
+    if (shouldReset) {
+      // Reset all form data
+      setActiveStep(0);
+      setFormData({
+        basicInfo: null,
+        addressInfo: null,
+        experiences: [],
+        documents: null,
+        payrollInfo: null,
+        leaveAllocation: null,
+        bankInfo: null,
+        educationLevel: "",
+        sections: [],
+        fileNames: {},
+        files: {},
+        ugYears: 3,
+        selectedImage: null,
+        role: "",
+        joiningDate: "",
+        sameAsAddress: false
+      });
+
+      // Clear IndexedDB
+      clearIndexedDB();
+    }
+    setActiveStep(activeStep - 1);
+  };
+
+  const clearIndexedDB = async () => {
+    try {
+      const fileKeys = [
+        "staff-photo",
+        "resume",
+        "joiningLetter",
+        "aadharFront",
+        "aadharBack",
+        "panCard",
+        "offerLetter",
+        "otherDocuments",
+        "tenthMarksheet",
+        "tenthCertificate",
+        "twelfthMarksheet",
+        "twelfthCertificate",
+        ...Array.from({ length: 10 }, (_, i) => `ugYear${i + 1}`),
+        "pgMarksheet1",
+        "pgMarksheet2",
+        "phdCertificate"
+      ];
+
+      for (const key of fileKeys) {
+        await deleteFileFromDB(key);
+      }
+    } catch (error) {
+      console.error("Error clearing IndexedDB:", error);
+    }
+  };
+
   const handleSubmit = () => {
     // Here you would typically send the formData to your API
     console.log("Form submitted:", formData);

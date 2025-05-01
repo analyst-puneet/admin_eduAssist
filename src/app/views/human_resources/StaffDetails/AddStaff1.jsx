@@ -748,6 +748,107 @@ export default function Addstaff1({
     }
   }, []);
 
+  useEffect(() => {
+    if (!formData.basicInfo) {
+      setSelectedImage(null);
+      setRole("");
+      // setJoiningDate("");
+      setSameAsAddress(false);
+      setBasicInfo({
+        staffId: "",
+        designation: "",
+        firstName: "",
+        lastName: "",
+        gender: "",
+        dob: "",
+        phone: "",
+        emergencyContact: "",
+        email: "",
+        fatherName: "",
+        fatherTitle: "Shri",
+        motherName: "",
+        motherTitle: "Shrimati",
+        maritalStatus: "",
+        bloodGroup: "",
+        category: "",
+        religion: "",
+        alternateEmail: "",
+        fatherContact: "",
+        fatherDob: "",
+        fatherEmail: "",
+        motherContact: "",
+        motherDob: "",
+        motherEmail: "",
+        guardianName: "",
+        guardianContact: "",
+        guardianDob: "",
+        guardianEmail: "",
+        guardianRelation: ""
+      });
+      setAddressInfo({
+        currentFullAddress: "",
+        currentPinCode: "",
+        currentCountry: "",
+        currentState: "",
+        currentDistrict: "",
+        currentCity: "",
+        permanentFullAddress: "",
+        permanentPinCode: "",
+        permanentCountry: "",
+        permanentState: "",
+        permanentDistrict: "",
+        permanentCity: ""
+      });
+      setExperiences([{ company: "", position: "", from: "", to: "", description: "" }]);
+      setDocuments({
+        panCard: "",
+        aadhaarCard: "",
+        passport: "",
+        drivingLicense: ""
+      });
+      setErrors({
+        staffId: false,
+        role: false,
+        designation: false,
+        firstName: false,
+        gender: false,
+        dob: false,
+        phone: false,
+        emergencyContact: false,
+        email: false,
+        country: false,
+        state: false,
+        district: false,
+        city: false,
+        pinCode: false,
+        currentAddress: false,
+        permanentAddress: false,
+        panCard: false,
+        aadhaarCard: false,
+        fatherName: false,
+        motherName: false,
+        maritalStatus: false,
+        bloodGroup: false,
+        category: false,
+        religion: false,
+        fatherContact: false,
+        fatherDob: false,
+        motherContact: false,
+        motherDob: false,
+        guardianName: false,
+        guardianContact: false,
+        guardianDob: false,
+        experiences: experiences.map(() => ({
+          company: false,
+          position: false,
+          from: false,
+          to: false,
+          description: false
+        }))
+      });
+    }
+  }, [formData.basicInfo]);
+
   return (
     <Box
       component={Paper}

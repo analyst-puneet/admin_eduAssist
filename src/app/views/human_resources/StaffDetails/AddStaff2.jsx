@@ -198,6 +198,50 @@ export default function AddStaff2({
     }
   };
 
+  // Add this useEffect to handle reset
+  useEffect(() => {
+    if (!formData.payrollInfo) {
+      setPayrollInfo({
+        epfNo: "",
+        basicSalary: "",
+        contractType: "",
+        workShift: "",
+        workLocation: ""
+      });
+      setLeaveAllocation({
+        medicalLeave: "",
+        casualLeave: "",
+        maternityLeave: "",
+        sickLeave: ""
+      });
+      setBankInfo({
+        accountHolderName: "",
+        accountNumber: "",
+        bankName: "",
+        ifscCode: "",
+        branchName: "",
+        accountType: ""
+      });
+      setErrors({
+        epfNo: false,
+        basicSalary: false,
+        contractType: false,
+        workShift: false,
+        workLocation: false,
+        accountHolderName: false,
+        accountNumber: false,
+        bankName: false,
+        ifscCode: false,
+        accountType: false,
+        medicalLeave: false,
+        casualLeave: false,
+        maternityLeave: false,
+        sickLeave: false,
+        branchName: false
+      });
+    }
+  }, [formData.payrollInfo]);
+
   return (
     <Box
       component={Paper}

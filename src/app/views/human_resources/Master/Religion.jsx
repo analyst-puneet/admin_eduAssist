@@ -96,7 +96,7 @@ const Religion = ({ isMobile, isDarkMode, inputStyle }) => {
     setLoading(true);
     try {
       if (editMode) {
-        await axios.put(`${UPDATE_URL}/${currentEditId}`, formData, {
+        await axios.post(`${UPDATE_URL}/${currentEditId}`, formData, {
           withCredentials: true
         });
         showNotification("Religion updated successfully!");
