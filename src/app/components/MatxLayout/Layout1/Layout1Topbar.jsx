@@ -95,7 +95,7 @@ const Layout1Topbar = () => {
   };
   const logout = async (req,res) => {
     try {
-      const response= await axios.post(`${BASE_URL}/api/auth/logout`, {
+      const response= await axios.post(`${BASE_URL}/api/auth/logout`, {},{
            withCredentials: true 
           });
           console.log(response.status);
