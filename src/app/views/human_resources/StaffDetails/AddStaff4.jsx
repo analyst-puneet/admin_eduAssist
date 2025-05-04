@@ -90,8 +90,9 @@ export default function AddStaff4({
         fileNamesMap[key] = fileData.name;
       }
 
-      setFiles(reconstructedFiles);
-      setFileNames(fileNamesMap);
+      // Preserve existing files while adding new ones
+      setFiles((prev) => ({ ...prev, ...reconstructedFiles }));
+      setFileNames((prev) => ({ ...prev, ...fileNamesMap }));
     };
 
     initializeFiles();
@@ -182,10 +183,10 @@ export default function AddStaff4({
       pgMarksheet2: sections.includes("PG") && !fileNames.pgMarksheet2,
 
       // PhD Section validation
-      phdInstitute: sections.includes("PhD") && !formData.phdInstitute,
-      phdSubject: sections.includes("PhD") && !formData.phdSubject,
-      phdThesis: sections.includes("PhD") && !formData.phdThesis,
-      phdCertificate: sections.includes("PhD") && !fileNames.phdCertificate
+      phdInstitute: sections.includes("PHD") && !formData.phdInstitute,
+      phdSubject: sections.includes("PHD") && !formData.phdSubject,
+      phdThesis: sections.includes("PHD") && !formData.phdThesis,
+      phdCertificate: sections.includes("PHD") && !fileNames.phdCertificate
     };
 
     if (show) setErrors(newErrors);
@@ -205,8 +206,8 @@ export default function AddStaff4({
       ...prev,
       educationLevel,
       sections,
-      fileNames,
-      files,
+      fileNames: { ...prev.fileNames, ...fileNames },
+      files: { ...prev.files, ...files },
       ugYears
     }));
     validateForm();
@@ -404,9 +405,9 @@ export default function AddStaff4({
   };
 
   const handleAddEducationSection = () => {
-    if (educationLevel && !sections.includes(educationLevel)) {
-      setSections([...sections, educationLevel]);
-      setEducationLevel(""); // Reset dropdown after selection
+    if (formData.educationLevel && !sections.includes(formData.educationLevel)) {
+      const newSections = [...sections, formData.educationLevel];
+      setSections(newSections);
     }
   };
 
@@ -462,9 +463,8 @@ export default function AddStaff4({
   useEffect(() => {
     if (!formData.educationLevel) {
       setEducationLevel("");
-      setSections([]);
-      setFileNames({});
-      setFiles({});
+      // setFileNames({});
+      // setFiles({});
       setUgYears(3);
       setErrors({
         tenthBoard: false,
@@ -886,11 +886,11 @@ export default function AddStaff4({
       )}
 
       {/* PhD Section */}
-      {sections.includes("PhD") && (
+      {sections.includes("PHD") && (
         <Box mb={3}>
           <Typography variant="subtitle1" sx={{ fontWeight: 500, mb: 1.5 }}>
             PhD (Doctorate)
-            <IconButton sx={{ float: "right" }} onClick={() => handleRemoveSection("PhD")}>
+            <IconButton sx={{ float: "right" }} onClick={() => handleRemoveSection("PHD")}>
               <DeleteIcon />
             </IconButton>
           </Typography>
@@ -957,9 +957,9 @@ export default function AddStaff4({
           <InputLabel id="education-level-label">Select Level</InputLabel>
           <Select
             labelId="education-level-label"
-            value={educationLevel}
+            value={formData.educationLevel || ""}
             label="Select Level"
-            onChange={handleEducationLevelChange}
+            onChange={(e) => handleBasicFieldChange("educationLevel", e.target.value)}
             sx={inputStyle}
           >
             <MenuItem value="" disabled>
@@ -975,7 +975,7 @@ export default function AddStaff4({
         <Button
           variant="contained"
           onClick={handleAddEducationSection}
-          disabled={!educationLevel || sections.includes(educationLevel)}
+          disabled={!formData.educationLevel || sections.includes(formData.educationLevel)}
         >
           Add
         </Button>

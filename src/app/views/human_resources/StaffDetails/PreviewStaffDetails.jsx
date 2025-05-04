@@ -113,7 +113,7 @@ export default function PreviewStaffDetails({ formData, onSubmit, onBack }) {
 
   const handleSubmit = async () => {
     try {
-      // Show confirmation dialog first
+      // Confirmation dialog
       const result = await Swal.fire({
         title: "Are you sure?",
         text: "You're about to submit the staff details",
@@ -126,165 +126,281 @@ export default function PreviewStaffDetails({ formData, onSubmit, onBack }) {
       });
 
       if (result.isConfirmed) {
-        // Strict type conversion functions
-        const toString = (value) => (value !== undefined && value !== null ? String(value) : "");
-        const toDateString = (value) => {
-          if (!value) return null;
-          try {
-            return new Date(value).toISOString();
-          } catch {
-            return null;
-          }
-        };
-        const toNumber = (value) => (value !== undefined && value !== null ? Number(value) : null);
-        const toBoolean = (value) =>
-          value !== undefined && value !== null ? Boolean(value) : false;
-
-        // Prepare the submission data with strict type checking
+        // Prepare data - HAR FIELD KO ALAG SE HANDLE KARENGE
         const submissionData = {
-          // String fields (required)
-          user_id: toString(formData.basicInfo?.staffId),
-          first_name: toString(formData.basicInfo?.firstName),
-          middle_name: null, // Explicit null as per API
-          last_name: toString(formData.basicInfo?.lastName),
-          full_name: `${toString(formData.basicInfo?.firstName)} ${toString(
-            formData.basicInfo?.lastName
-          )}`.trim(),
-          email: toString(formData.basicInfo?.email),
-          alt_email: toString(formData.basicInfo?.alternateEmail) || null,
-          cantact_no_1: toString(formData.basicInfo?.phone),
-          cantact_no_2: toString(formData.basicInfo?.emergencyContact) || null,
+          // 1. BASIC INFO
+          user_id: formData.basicInfo?.staffId || "",
+          first_name: formData.basicInfo?.firstName || "",
+          middle_name: formData.basicInfo?.middleName || null,
+          last_name: formData.basicInfo?.lastName || "",
+          full_name: `${formData.basicInfo?.firstName || ""} ${
+            formData.basicInfo?.lastName || ""
+          }`.trim(),
+          email: formData.basicInfo?.email || "",
+          alt_email: formData.basicInfo?.alternateEmail || null,
+          contact_no_1: formData.basicInfo?.phone || "",
+          contact_no_2: formData.basicInfo?.emergencyContact || null,
 
-          // Family Info
-          father_name: `${toString(formData.basicInfo?.fatherTitle)} ${toString(
-            formData.basicInfo?.fatherName
-          )}`.trim(),
-          father_contact_no: toString(formData.basicInfo?.fatherContact) || null,
-          father_dob: toDateString(formData.basicInfo?.fatherDob),
-          father_email: null, // Explicit null
-          mother_name: `${toString(formData.basicInfo?.motherTitle)} ${toString(
-            formData.basicInfo?.motherName
-          )}`.trim(),
-          mother_contact_no: toString(formData.basicInfo?.motherContact) || null,
-          mother_dob: toDateString(formData.basicInfo?.motherDob),
-          mother_email: null, // Explicit null
-          guardian_name: toString(formData.basicInfo?.guardianName) || null,
-          guardian_contact_no: toString(formData.basicInfo?.guardianContact) || null,
-          guardian_dob: toDateString(formData.basicInfo?.guardianDob),
-          guardian_email: toString(formData.basicInfo?.guardianEmail) || null,
-          guardian_relation: toString(formData.basicInfo?.guardianRelation) || null,
+          // 2. FAMILY INFO
+          father_name: `${formData.basicInfo?.fatherTitle || ""} ${
+            formData.basicInfo?.fatherName || ""
+          }`.trim(),
+          father_contact_no: formData.basicInfo?.fatherContact || null,
+          father_dob: formData.basicInfo?.fatherDob || null,
+          father_email: formData.basicInfo?.fatherEmail || null,
+          mother_name: `${formData.basicInfo?.motherTitle || ""} ${
+            formData.basicInfo?.motherName || ""
+          }`.trim(),
+          mother_contact_no: formData.basicInfo?.motherContact || null,
+          mother_dob: formData.basicInfo?.motherDob || null,
+          mother_email: formData.basicInfo?.motherEmail || null,
+          guardian_name: formData.basicInfo?.guardianName || null,
+          guardian_contact_no: formData.basicInfo?.guardianContact || null,
+          guardian_dob: formData.basicInfo?.guardianDob || null,
+          guardian_email: formData.basicInfo?.guardianEmail || null,
+          guardian_relation: formData.basicInfo?.guardianRelation || null,
 
-          // Address Info (required fields)
-          current_address: toString(formData.addressInfo?.currentFullAddress),
-          current_city: toString(formData.addressInfo?.currentCity),
-          current_state: toString(formData.addressInfo?.currentState),
-          current_country: toString(formData.addressInfo?.currentCountry),
-          current_pincode: toString(formData.addressInfo?.currentPinCode),
-          permanent_address: toString(formData.addressInfo?.permanentFullAddress),
-          permanent_city:
-            toString(
-              formData.sameAsAddress
-                ? formData.addressInfo?.currentCity
-                : formData.addressInfo?.permanentCity
-            ) || "",
-          permanent_state:
-            toString(
-              formData.sameAsAddress
-                ? formData.addressInfo?.currentState
-                : formData.addressInfo?.permanentState
-            ) || "",
-          permanent_pincode: toString(
-            formData.sameAsAddress
-              ? formData.addressInfo?.currentPinCode
-              : formData.addressInfo?.permanentPinCode
-          ),
-          permanent_country:
-            toString(
-              formData.sameAsAddress
-                ? formData.addressInfo?.currentCountry
-                : formData.addressInfo?.permanentCountry
-            ) || "",
-          permanent_district:
-            toString(
-              formData.sameAsAddress
-                ? formData.addressInfo?.currentDistrict
-                : formData.addressInfo?.permanentDistrict
-            ) || "",
+          // 3. ADDRESS INFO
+          current_address: formData.addressInfo?.currentFullAddress || "",
+          current_city: formData.addressInfo?.currentCity || "",
+          current_state: formData.addressInfo?.currentState || "",
+          current_country: formData.addressInfo?.currentCountry || "",
+          current_pincode: formData.addressInfo?.currentPinCode || "",
+          permanent_address: formData.sameAsAddress
+            ? formData.addressInfo?.currentFullAddress
+            : formData.addressInfo?.permanentFullAddress || "",
+          permanent_city: formData.sameAsAddress
+            ? formData.addressInfo?.currentCity
+            : formData.addressInfo?.permanentCity || "",
+          permanent_state: formData.sameAsAddress
+            ? formData.addressInfo?.currentState
+            : formData.addressInfo?.permanentState || "",
+          permanent_pincode: formData.sameAsAddress
+            ? formData.addressInfo?.currentPinCode
+            : formData.addressInfo?.permanentPinCode || "",
+          permanent_country: formData.sameAsAddress
+            ? formData.addressInfo?.currentCountry
+            : formData.addressInfo?.permanentCountry || "",
 
-          // Personal Details
-          gender: toString(formData.basicInfo?.gender),
-          dob: toDateString(formData.basicInfo?.dob),
-          blood_group: toString(formData.basicInfo?.bloodGroup) || null,
-          marital_status: toString(formData.basicInfo?.maritalStatus) || null,
-          category: toString(formData.basicInfo?.category),
-          religion: toString(formData.basicInfo?.religion),
+          // 4. PERSONAL DETAILS
+          gender: formData.basicInfo?.gender || "",
+          dob: formData.basicInfo?.dob || "",
+          blood_group: formData.basicInfo?.bloodGroup || null,
+          marital_status: formData.basicInfo?.maritalStatus || null,
+          spouse_name: formData.basicInfo?.spouseName || null,
+          spouse_dob: formData.basicInfo?.spouseDob || null,
+          no_of_children: formData.basicInfo?.noOfChildren || null,
+          category: formData.basicInfo?.category || "",
+          religion: formData.basicInfo?.religion || "",
 
-          // Employment Details
-          date_of_joining: toDateString(formData.joiningDate),
-          employee_type: toString(formData.role) || null,
-          employee_code: toString(formData.basicInfo?.staffId) || null,
-          designation_id: toString(formData.basicInfo?.designation) || null,
+          // 5. EMPLOYMENT DETAILS
+          date_of_joining: formData.joiningDate || "",
+          employee_type: formData.role || null,
+          employee_code: formData.basicInfo?.staffId || null,
+          designation_id: formData.basicInfo?.designationId || null,
+          date_of_resignation: formData.basicInfo?.resignationDate || null,
+          leaving_date: formData.basicInfo?.leavingDate || null,
+          department_id: formData.basicInfo?.departmentId || null,
 
-          // Bank Details
-          bank_name: toString(formData.bankInfo?.bankName) || null,
-          bank_acc_no: toString(formData.bankInfo?.accountNumber) || null,
-          ifsc_code: toString(formData.bankInfo?.ifscCode) || null,
-          branch_address: toString(formData.bankInfo?.branchName) || null,
-          PF_no: toString(formData.payrollInfo?.epfNo) || null,
+          // 6. BANK DETAILS
+          bank_name: formData.bankInfo?.bankName || null,
+          bank_acc_no: formData.bankInfo?.accountNumber || null,
+          ifsc_code: formData.bankInfo?.ifscCode || null,
+          branch_address: formData.bankInfo?.branchName || null,
 
-          // Profile Photo
+          // 7. PAYROLL INFORMATION
+          UAN_no: formData.payrollInfo?.uanNo || null,
+          PF_no: formData.payrollInfo?.epfNo || null,
+          esic_no: formData.payrollInfo?.esicNo || null,
+          tax_region: formData.payrollInfo?.taxRegion || null,
+
+          // 8. EDUCATION DETAILS
+          eduDetails: [
+            // 10th details - compulsory
+            {
+              qualification: "10th",
+              board: formData.tenthBoard,
+              percentage: formData.tenthPercentage,
+              year: formData.tenthYear,
+              marksheet: formData.fileNames?.tenthMarksheet || null,
+              ...(formData.fileNames?.tenthCertificate && {
+                certificate: formData.fileNames.tenthCertificate
+              })
+            },
+            // 12th details - compulsory
+            {
+              qualification: "12th",
+              board: formData.twelfthBoard,
+              percentage: formData.twelfthPercentage,
+              year: formData.twelfthYear,
+              marksheet: formData.fileNames?.twelfthMarksheet || null,
+              ...(formData.fileNames?.twelfthCertificate && {
+                certificate: formData.fileNames.twelfthCertificate
+              })
+            },
+            // UG details - only if added by user
+            ...(formData.sections?.includes("UG")
+              ? [
+                  {
+                    qualification: "UG",
+                    institution: formData.ugCollegeName,
+                    course: formData.ugCourse,
+                    percentage: formData.ugPercentage,
+                    duration: formData.ugYears,
+                    marksheets: [
+                      // 3 compulsory marksheets
+                      {
+                        year: 1,
+                        filename: formData.fileNames?.ugYear1 || null
+                      },
+                      {
+                        year: 2,
+                        filename: formData.fileNames?.ugYear2 || null
+                      },
+                      {
+                        year: 3,
+                        filename: formData.fileNames?.ugYear3 || null
+                      },
+                      // dynamically added extra marksheets (optional)
+                      ...(formData.extraUgMarksheets?.map((fileObj, index) => ({
+                        year: 4 + index,
+                        filename: fileObj.filename || null
+                      })) || [])
+                    ]
+                  }
+                ]
+              : []),
+            // PG details - only if added by user
+            ...(formData.sections?.includes("PG")
+              ? [
+                  {
+                    qualification: "PG",
+                    institution: formData.pgCollegeName,
+                    course: formData.pgCourse,
+                    percentage: formData.pgPercentage,
+                    marksheets: [
+                      { year: 1, filename: formData.fileNames?.pgMarksheet1 || null },
+                      { year: 2, filename: formData.fileNames?.pgMarksheet2 || null }
+                    ]
+                  }
+                ]
+              : []),
+            // PhD details - only if added by user
+            ...(formData.sections?.includes("PhD")
+              ? [
+                  {
+                    qualification: "PhD",
+                    institution: formData.phdInstitute,
+                    subject: formData.phdSubject,
+                    thesis: formData.phdThesis,
+                    certificate: formData.fileNames?.phdCertificate || null
+                  }
+                ]
+              : [])
+          ],
+
+          // 9. DOCUMENTS DETAILS
+          documents: [
+            {
+              document1: "Aadhar",
+              aadharNo: formData.documents?.aadhaarCard || null,
+              files: [
+                {
+                  name: "Aadhar Front",
+                  filename: formData.files?.aadharFront || null
+                },
+                {
+                  name: "Aadhar Back",
+                  filename: formData.files?.aadharBack || null
+                }
+              ]
+            },
+            {
+              document2: "PAN Card",
+              panNo: formData.documents?.panCard || null,
+              files: [
+                {
+                  name: "PAN Front",
+                  filename: formData.files?.panCard || null
+                }
+              ]
+            },
+            ...(formData.documents?.drivingLicense
+              ? [
+                  {
+                    document3: "Driving License",
+                    drivingLicenseNo: formData.documents.drivingLicense
+                  }
+                ]
+              : []),
+
+            ...(formData.documents?.passport
+              ? [
+                  {
+                    document4: "Passport",
+                    passportNo: formData.documents.passport
+                  }
+                ]
+              : []),
+            {
+              document5: "Resume",
+              resume: formData.files?.resume || null
+            },
+            {
+              document6: "Joining Letter",
+              joiningLetter: formData.files?.joiningLetter || null
+            },
+            ...(formData.files?.offerLetter
+              ? [
+                  {
+                    document7: "Offer Letter",
+                    offerLetter: formData.files.offerLetter
+                  }
+                ]
+              : []),
+            ...(formData.files?.otherDocuments
+              ? [
+                  {
+                    document8: "Other Documents",
+                    otherDocuments: formData.files.otherDocuments
+                  }
+                ]
+              : [])
+          ],
+
+          // 10. SYSTEM FIELDS
           profile_photo_path: formData.selectedImage || null,
-
-          // Default values with proper types
-          spouse_name: null,
-          spouse_dob: null,
-          no_of_children: null,
-          date_of_resignation: null,
-          leaving_date: null,
-          tax_region: null,
-          UAN_no: null,
-          esic_no: null,
-          department_id: null,
-          class: null,
-          section: null,
-          school_roll_no: null,
-          admission_no: null,
-          admission_date: null,
-          house_id: null,
-          created_by: null,
-          updated_by: null,
-          deactivated: false, // Boolean
-          deleted_on: null,
-          status: "true", // API expects string "true"/"false"
-          createdAt: null,
-          updatedAt: null
+          house_id: null, // Form mein nahi hai
+          created_by: null, // Form mein nahi hai
+          updated_by: null, // Form mein nahi hai
+          deactivated: false, // Hardcoded
+          deleted_on: null, // Form mein nahi hai
+          status: "Active", // Hardcoded
+          createdAt: null, // Form mein nahi hai
+          updatedAt: null // Form mein nahi hai
         };
 
-        // Validate required fields
-        const requiredFields = ["permanent_city", "permanent_state", "permanent_country"];
+        // Debug log
+        console.log("Final Submission Data:", submissionData);
 
-        const missingFields = requiredFields.filter((field) => !submissionData[field]);
+        console.log("Education Details to be submitted:", submissionData.eduDetails);
 
-        if (missingFields.length > 0) {
-          throw new Error(`Missing required fields: ${missingFields.join(", ")}`);
-        }
+        console.log("Documents to be submitted:", submissionData.documents);
 
-        // Debug: Log the final payload
-        console.log("Final Submission Data:", JSON.stringify(submissionData, null, 2));
-
-        // Make the API call
+        // API Call
         const response = await axios.post(
           "https://backend-aufx.onrender.com/api/user_details/create",
           submissionData,
           {
             withCredentials: true,
-            headers: {
-              "Content-Type": "application/json"
-            }
+            headers: { "Content-Type": "application/json" }
           }
         );
 
-        // Show success message
+        // Response mein bhi check karo
+        console.log("API Response:", response.data);
+
+        // Success message
         await Swal.fire({
           title: "Success!",
           text: "Staff details submitted successfully",
@@ -293,24 +409,15 @@ export default function PreviewStaffDetails({ formData, onSubmit, onBack }) {
           confirmButtonColor: theme.palette.primary.main
         });
 
-        // Redirect after confirmation
+        // Redirect
         navigate("/human_resources/staff-details");
       }
     } catch (error) {
       console.error("Submission error:", error);
       let errorMessage = "Failed to submit data";
 
-      if (error.response) {
-        if (error.response.data?.fields) {
-          const fieldErrors = Object.entries(error.response.data.fields)
-            .map(([field, errors]) => `${field}: ${errors.join(", ")}`)
-            .join("\n");
-          errorMessage = `Validation errors:\n${fieldErrors}`;
-        } else if (error.response.data?.message) {
-          errorMessage = error.response.data.message;
-        }
-      } else if (error.message) {
-        errorMessage = error.message;
+      if (error.response?.data?.message) {
+        errorMessage = error.response.data.message;
       }
 
       await Swal.fire({
