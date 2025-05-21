@@ -126,7 +126,7 @@ export default function Addstaff1({
     gender: false,
     dob: false,
     phone: false,
-    emergencyContact: false,
+    // emergencyContact: false,
     email: false,
     country: false,
     state: false,
@@ -248,7 +248,7 @@ export default function Addstaff1({
       dob: !basicInfo.dob,
       phone: !phoneValid,
       email: !emailValid,
-      emergencyContact: !basicInfo.emergencyContact,
+      // emergencyContact: !basicInfo.emergencyContact,
       fatherName: !basicInfo.fatherName,
       motherName: !basicInfo.motherName,
       maritalStatus: !basicInfo.maritalStatus,
@@ -1381,7 +1381,7 @@ export default function Addstaff1({
             {/* Father's Contact */}
             <Grid item xs={12} sm={6}>
               <TextField
-                label="Father's Contact Number*"
+                label="Father's Contact Number"
                 fullWidth
                 required
                 value={basicInfo.fatherContact}
@@ -1397,7 +1397,7 @@ export default function Addstaff1({
             {/* Father's DOB */}
             <Grid item xs={12} sm={6}>
               <TextField
-                label="Father's Date of Birth*"
+                label="Father's Date of Birth"
                 type="date"
                 fullWidth
                 required
@@ -1528,7 +1528,7 @@ export default function Addstaff1({
             {/* Mother's Contact */}
             <Grid item xs={12} sm={4}>
               <TextField
-                label="Mother's Contact Number*"
+                label="Mother's Contact Number"
                 fullWidth
                 required
                 value={basicInfo.motherContact}

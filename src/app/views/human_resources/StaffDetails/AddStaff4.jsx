@@ -31,6 +31,7 @@ import {
 import { saveFileToDB } from "app/utils/indexedDBUtils";
 import { getAllFilesFromDB } from "app/utils/indexedDBUtils";
 import { deleteFileFromDB } from "app/utils/indexedDBUtils";
+import { clearAllFilesFromDB } from "app/utils/indexedDBUtils";
 
 import { BASE_URL } from "../../../../main";
 import axios from "axios";
@@ -51,48 +52,59 @@ export default function AddStaff4({
   const [ugYears, setUgYears] = useState(formData.ugYears || 3);
   const [previewFile, setPreviewFile] = useState(null);
   const [openPreview, setOpenPreview] = useState(false);
+  const [isFreshForm, setIsFreshForm] = useState(true);
+  const [initialLoad, setInitialLoad] = useState(true);
 
   const objectUrlsRef = useRef([]);
 
   // Initialize form data and recreate object URLs when component mounts
   useEffect(() => {
     const initializeFiles = async () => {
-      // Fresh start detection: if formData.files is empty
-      const isNewForm =
+      // Check if this is a completely fresh form (no existing data)
+      const isFreshForm =
+        !formData.educationLevel &&
         (!formData.files || Object.keys(formData.files).length === 0) &&
         (!formData.fileNames || Object.keys(formData.fileNames).length === 0);
 
-      if (isNewForm) {
-        // Don't preload files for new form
+      // On initial load, check if we have any saved sections
+      if (initialLoad) {
+        setInitialLoad(false);
+
+        // If we have sections, load their files
+        if (sections.length > 0) {
+          const storedFiles = await getAllFilesFromDB();
+          if (!storedFiles || Object.keys(storedFiles).length === 0) return;
+
+          const reconstructedFiles = {};
+          const fileNamesMap = {};
+
+          for (const [key, fileData] of Object.entries(storedFiles)) {
+            if (!fileData.data) continue;
+
+            const blob = await dataURLtoBlob(fileData.data);
+            const objectUrl = URL.createObjectURL(blob);
+            objectUrlsRef.current.push(objectUrl);
+
+            reconstructedFiles[key] = {
+              name: fileData.name,
+              type: fileData.type,
+              data: fileData.data,
+              preview: objectUrl
+            };
+            fileNamesMap[key] = fileData.name;
+          }
+
+          setFiles((prev) => ({ ...prev, ...reconstructedFiles }));
+          setFileNames((prev) => ({ ...prev, ...fileNamesMap }));
+        }
         return;
       }
 
-      // Else: resume session → load saved files
-      const storedFiles = await getAllFilesFromDB();
-      if (!storedFiles || Object.keys(storedFiles).length === 0) return;
-
-      const reconstructedFiles = {};
-      const fileNamesMap = {};
-
-      for (const [key, fileData] of Object.entries(storedFiles)) {
-        if (!fileData.data) continue;
-
-        const blob = await dataURLtoBlob(fileData.data);
-        const objectUrl = URL.createObjectURL(blob);
-        objectUrlsRef.current.push(objectUrl);
-
-        reconstructedFiles[key] = {
-          name: fileData.name,
-          type: fileData.type,
-          data: fileData.data,
-          preview: objectUrl
-        };
-        fileNamesMap[key] = fileData.name;
+      // For fresh forms, clear everything
+      if (isFreshForm) {
+        await clearAllFilesFromDB();
+        return;
       }
-
-      // Preserve existing files while adding new ones
-      setFiles((prev) => ({ ...prev, ...reconstructedFiles }));
-      setFileNames((prev) => ({ ...prev, ...fileNamesMap }));
     };
 
     initializeFiles();
@@ -101,7 +113,7 @@ export default function AddStaff4({
       objectUrlsRef.current.forEach((url) => URL.revokeObjectURL(url));
       objectUrlsRef.current = [];
     };
-  }, []);
+  }, [sections]); // Only depend on sections
 
   // Validation states
   const [errors, setErrors] = useState({
@@ -400,14 +412,44 @@ export default function AddStaff4({
     </Box>
   );
 
+  // Modify your reset function to preserve sections
+  const resetForm = async () => {
+    // Only clear files when explicitly resetting (like after submission)
+    await clearAllFilesFromDB();
+
+    // Reset all state except sections
+    setFileNames({});
+    setFiles({});
+    setUgYears(3);
+    setEducationLevel("");
+
+    // Reset form data for education fields
+    setFormData((prev) => ({
+      ...prev,
+      educationLevel: "",
+      fileNames: {},
+      files: {},
+      ugYears: 3,
+      // Reset all education-related fields
+      tenthBoard: "",
+      tenthPercentage: ""
+      // ... (reset all other education fields)
+    }));
+  };
+
   const handleEducationLevelChange = (event) => {
     setEducationLevel(event.target.value);
   };
 
+  // Modified handleAddEducationSection
   const handleAddEducationSection = () => {
     if (formData.educationLevel && !sections.includes(formData.educationLevel)) {
       const newSections = [...sections, formData.educationLevel];
       setSections(newSections);
+
+      // Reset education level selection after adding
+      setEducationLevel("");
+      setFormData((prev) => ({ ...prev, educationLevel: "" }));
     }
   };
 
