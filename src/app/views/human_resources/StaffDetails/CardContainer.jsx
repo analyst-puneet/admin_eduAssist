@@ -11,21 +11,16 @@ const CardContainer = () => {
   useEffect(() => {
     const fetchUsers = async () => {
       try {
-        const response = await axios.get("http://localhost:3000/users");
+        const response = await axios.get("https://backend-aufx.onrender.com/api/user_details");
         console.log("Full API response:", response); // Debugging log
 
-        // Handle different possible response structures
+        // Handle the API response structure
         let usersData = [];
 
         if (Array.isArray(response.data)) {
-          // Case 1: Response is directly an array
           usersData = response.data;
-        } else if (response.data?.users && Array.isArray(response.data.users)) {
-          // Case 2: Response has users property containing array
-          usersData = response.data.users;
-        } else if (response.data?.data?.users && Array.isArray(response.data.data.users)) {
-          // Case 3: Nested response structure
-          usersData = response.data.data.users;
+        } else if (response.data?.data && Array.isArray(response.data.data)) {
+          usersData = response.data.data;
         } else {
           throw new Error("API response doesn't contain valid users data");
         }
@@ -88,16 +83,16 @@ const CardContainer = () => {
     <Box mt={2}>
       <Grid container spacing={2}>
         {users.map((user) => (
-          <Grid item xs={12} sm={6} md={4} lg={3} key={user.empId}>
+          <Grid item xs={12} sm={6} md={4} lg={3} key={user._id}>
             <UserCard
-              name={user.name}
-              id={user.empId}
-              phone={user.contact}
-              location={user.location}
-              roles={user.roles}
-              img={user.img}
-              department={user.department}
-              designation={user.designation}
+              name={user.full_name}
+              id={user.user_id}
+              phone={user.cantact_no_1}
+              location={`${user.current_city}, ${user.current_state}`}
+              roles={[user.designation_id || user.employee_type]}
+              img={user.profile_photo_path}
+              department={user.department_id}
+              designation={user.designation_id}
             />
           </Grid>
         ))}

@@ -1,5 +1,6 @@
-import React, { useState, useEffect,useRef } from "react";
-import {BASE_URL} from "../../../../main";
+import React, { useState, useEffect, useRef } from "react";
+import { BASE_URL } from "../../../../main";
+import axios from "axios";
 import {
   Box,
   Grid,
@@ -18,14 +19,15 @@ import {
   Checkbox,
   FormControlLabel,
   Divider,
-  CircularProgress
+  Alert
 } from "@mui/material";
 import { useNavigate } from "react-router-dom";
 import CloseIcon from "@mui/icons-material/Close";
 import AddPhotoAlternateIcon from "@mui/icons-material/AddPhotoAlternate";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import BackButton from "app/views/material-kit/buttons/BackButton";
-import axios from "axios";
+import { SlCalender } from "react-icons/sl";
+import { saveFileToDB, getAllFilesFromDB } from "app/utils/indexedDBUtils";
 
 export default function Addstaff1({
   formData,
@@ -38,16 +40,12 @@ export default function Addstaff1({
   const isDarkMode = theme.palette.mode === "dark";
 
   // Initialize state from formData
-  const [selectedImage, setSelectedImage] = useState(
-    formData.selectedImage
-      ? typeof formData.selectedImage === "string"
-        ? formData.selectedImage
-        : URL.createObjectURL(formData.selectedImage)
-      : null
-  );
+  const [selectedImage, setSelectedImage] = useState(null);
+  const objectUrlsRef = useRef([]);
   const [role, setRole] = useState(formData.role || "");
   const [joiningDate, setJoiningDate] = useState(formData.joiningDate || "");
   const [sameAsAddress, setSameAsAddress] = useState(formData.sameAsAddress || false);
+
   const [basicInfo, setBasicInfo] = useState(
     formData.basicInfo || {
       staffId: "",
@@ -60,12 +58,28 @@ export default function Addstaff1({
       emergencyContact: "",
       email: "",
       fatherName: "",
-      fatherTitle: "Shri", // Default title for father
+      fatherTitle: "Shri",
       motherName: "",
-      motherTitle: "Shrimati", // Default title for mother
-      maritalStatus: ""
+      motherTitle: "Shrimati",
+      maritalStatus: "",
+      bloodGroup: "",
+      category: "",
+      religion: "",
+      alternateEmail: "",
+      fatherContact: "",
+      fatherDob: "",
+      fatherEmail: "",
+      motherContact: "",
+      motherDob: "",
+      motherEmail: "",
+      guardianName: "",
+      guardianContact: "",
+      guardianDob: "",
+      guardianEmail: "",
+      guardianRelation: ""
     }
   );
+
   const [addressInfo, setAddressInfo] = useState(
     formData.addressInfo || {
       currentFullAddress: "",
@@ -94,6 +108,8 @@ export default function Addstaff1({
     }
   );
 
+  const [formInteracted, setFormInteracted] = useState(false);
+
   // States for API data
   const [countries, setCountries] = useState([]);
   const [states, setStates] = useState([]);
@@ -110,7 +126,7 @@ export default function Addstaff1({
     gender: false,
     dob: false,
     phone: false,
-    emergencyContact: false,
+    // emergencyContact: false,
     email: false,
     country: false,
     state: false,
@@ -124,6 +140,16 @@ export default function Addstaff1({
     fatherName: false,
     motherName: false,
     maritalStatus: false,
+    bloodGroup: false,
+    category: false,
+    religion: false,
+    fatherContact: false,
+    fatherDob: false,
+    motherContact: false,
+    motherDob: false,
+    guardianName: false,
+    guardianContact: false,
+    guardianDob: false,
     experiences: experiences.map(() => ({
       company: false,
       position: false,
@@ -134,6 +160,25 @@ export default function Addstaff1({
   });
 
   const [showErrors, setShowErrors] = useState(false);
+
+  const [validationMessages, setValidationMessages] = useState({
+    phone: "",
+    email: ""
+  });
+
+  const validatePhone = (phone) => {
+    if (!phone) return "Phone number is required";
+    if (phone.length !== 10) return "Phone number must be 10 digits";
+    if (!/^\d+$/.test(phone)) return "Phone number must contain only digits";
+    return "";
+  };
+
+  // Update email validation
+  const validateEmail = (email) => {
+    if (!email) return "Email is required";
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return "Invalid email format";
+    return "";
+  };
 
   // Initialize experiences errors array
   useEffect(() => {
@@ -147,6 +192,23 @@ export default function Addstaff1({
       }))
     }));
   }, [experiences.length]);
+
+  useEffect(() => {
+    const handleInteraction = () => {
+      setFormInteracted(true);
+      // Remove the event listener after first interaction
+      window.removeEventListener("click", handleInteraction);
+      window.removeEventListener("keydown", handleInteraction);
+    };
+
+    window.addEventListener("click", handleInteraction);
+    window.addEventListener("keydown", handleInteraction);
+
+    return () => {
+      window.removeEventListener("click", handleInteraction);
+      window.removeEventListener("keydown", handleInteraction);
+    };
+  }, []);
 
   // Update formData whenever any field changes
   useEffect(() => {
@@ -174,6 +236,9 @@ export default function Addstaff1({
 
   // Validate all required fields
   const validateForm = (show = false) => {
+    const phoneValid = !validatePhone(basicInfo.phone);
+    const emailValid = !validateEmail(basicInfo.email);
+
     const newErrors = {
       staffId: !basicInfo.staffId,
       role: !role,
@@ -181,12 +246,16 @@ export default function Addstaff1({
       firstName: !basicInfo.firstName,
       gender: !basicInfo.gender,
       dob: !basicInfo.dob,
-      phone: !basicInfo.phone,
-      emergencyContact: !basicInfo.emergencyContact,
-      email: !basicInfo.email,
+      phone: !phoneValid,
+      email: !emailValid,
+      // emergencyContact: !basicInfo.emergencyContact,
       fatherName: !basicInfo.fatherName,
       motherName: !basicInfo.motherName,
       maritalStatus: !basicInfo.maritalStatus,
+      fatherContact: !basicInfo.fatherContact,
+      fatherDob: !basicInfo.fatherDob,
+      motherContact: !basicInfo.motherContact,
+      motherDob: !basicInfo.motherDob,
 
       // Current Address Fields
       currentFullAddress: !addressInfo.currentFullAddress,
@@ -210,7 +279,13 @@ export default function Addstaff1({
       }))
     };
 
-    if (show) setErrors(newErrors); // show errors only when asked
+    if (show) {
+      setErrors(newErrors);
+      setValidationMessages({
+        phone: validatePhone(basicInfo.phone),
+        email: validateEmail(basicInfo.email)
+      });
+    }
 
     const isFormValid =
       !newErrors.staffId &&
@@ -233,7 +308,9 @@ export default function Addstaff1({
       !newErrors.aadhaarCard &&
       newErrors.experiences.every(
         (exp) => !exp.company && !exp.position && !exp.from && !exp.to && !exp.description
-      );
+      ) &&
+      phoneValid &&
+      emailValid;
 
     if (onValidationChange) {
       onValidationChange(isFormValid);
@@ -296,10 +373,10 @@ export default function Addstaff1({
   const errorStyle = {
     ...inputStyle,
     "& .MuiOutlinedInput-notchedOutline": {
-      borderColor: theme.palette.error.light // हल्का लाल बॉर्डर
+      borderColor: theme.palette.error.light
     },
     "& .MuiFormHelperText-root": {
-      color: theme.palette.error.light, // हल्का लाल टेक्स्ट
+      color: theme.palette.error.light,
       position: "absolute",
       bottom: "-20px",
       left: 0,
@@ -318,16 +395,84 @@ export default function Addstaff1({
     }
   };
 
-  const handleImageChange = (e) => {
+  useEffect(() => {
+    const loadImageFromIndexedDB = async () => {
+      // Fresh start detection: if formData doesn't have selectedImage
+      const isNewForm = !formData.selectedImage;
+
+      if (isNewForm) {
+        // Don't preload image for new form
+        return;
+      }
+
+      try {
+        const files = await getAllFilesFromDB();
+        const file = files["staff-photo"];
+
+        if (file) {
+          const imageUrl = URL.createObjectURL(file);
+          setSelectedImage(imageUrl);
+
+          // setFormData to keep selectedImage always in sync
+          setFormData((prev) => ({
+            ...prev,
+            selectedImage: {
+              key: "staff-photo",
+              name: file.name
+            }
+          }));
+        }
+      } catch (err) {
+        console.error("Failed to load image from IndexedDB:", err);
+      }
+    };
+
+    loadImageFromIndexedDB();
+
+    return () => {
+      // Cleanup object URLs when component unmounts
+      objectUrlsRef.current.forEach((url) => URL.revokeObjectURL(url));
+      objectUrlsRef.current = [];
+    };
+  }, []);
+
+  const handleImageChange = async (e) => {
     const file = e.target.files[0];
     if (file && file.type.startsWith("image/")) {
+      if (selectedImage) {
+        URL.revokeObjectURL(selectedImage);
+        objectUrlsRef.current = objectUrlsRef.current.filter((url) => url !== selectedImage);
+      }
       const imageUrl = URL.createObjectURL(file);
       setSelectedImage(imageUrl);
-      // Also store the file object if needed for submission
+
+      await saveFileToDB("staff-photo", file);
+
       setFormData((prev) => ({
         ...prev,
-        selectedImage: file // Store the actual file object
+        selectedImage: {
+          key: "staff-photo",
+          name: file.name
+        }
       }));
+    }
+  };
+
+  const handleRemoveImage = async () => {
+    if (selectedImage) {
+      URL.revokeObjectURL(selectedImage);
+      objectUrlsRef.current = objectUrlsRef.current.filter((url) => url !== selectedImage);
+      setSelectedImage(null);
+
+      try {
+        await deleteFileFromDB("staff-photo");
+        setFormData((prev) => ({
+          ...prev,
+          selectedImage: null
+        }));
+      } catch (err) {
+        console.error("Failed to delete image from IndexedDB:", err);
+      }
     }
   };
 
@@ -404,6 +549,19 @@ export default function Addstaff1({
     if (value && errors[field]) {
       setErrors((prev) => ({ ...prev, [field]: false }));
     }
+
+    // Validate phone and email
+    if (field === "phone") {
+      const message = validatePhone(value);
+      setValidationMessages((prev) => ({ ...prev, phone: message }));
+      setErrors((prev) => ({ ...prev, phone: !!message }));
+    }
+
+    if (field === "email") {
+      const message = validateEmail(value);
+      setValidationMessages((prev) => ({ ...prev, email: message }));
+      setErrors((prev) => ({ ...prev, email: !!message }));
+    }
   };
 
   const handleExperienceChange = (index, field, value) => {
@@ -464,7 +622,14 @@ export default function Addstaff1({
 
   // Validate field on blur
   const handleFieldBlur = (field) => {
-    if (field === "fatherName" || field === "motherName" || field === "maritalStatus") {
+    if (
+      field === "fatherContact" ||
+      field === "fatherDob" ||
+      field === "motherContact" ||
+      field === "motherDob"
+    ) {
+      setErrors((prev) => ({ ...prev, [field]: !basicInfo[field] }));
+    } else if (field === "fatherName" || field === "motherName" || field === "maritalStatus") {
       setErrors((prev) => ({ ...prev, [field]: !basicInfo[field] }));
     } else if (field === "role") {
       setErrors((prev) => ({ ...prev, role: !role }));
@@ -482,23 +647,207 @@ export default function Addstaff1({
   const fetchedOnce = useRef(false);
   const fetchGenderOptions = async () => {
     try {
-      const response = await axios.get(`${BASE_URL}/api/master/gender`, {        
-        withCredentials: true 
+      const response = await axios.get(`${BASE_URL}/api/master/gender`, {
+        withCredentials: true
       });
-      const gender_data =response.data;
+      const gender_data = response.data;
       // console.log("gender_data:", gender_data);
-      setGenderOptions(gender_data); 
+      setGenderOptions(gender_data);
     } catch (error) {
       console.error("Error fetching gender options:", error);
-    }finally {
+    } finally {
       fetchedOnce.current = true;
     }
   };
+
+  const [roleOptions, setRoleOptions] = useState([]);
+  const fetchRoleOptions = async () => {
+    try {
+      const response = await axios.get(`${BASE_URL}/api/master/role_group`, {
+        withCredentials: true
+      });
+      setRoleOptions(response.data);
+    } catch (error) {
+      console.error("Error fetching role options:", error);
+    }
+  };
+
+  const [designationOptions, setDesignationOptions] = useState([]);
+  const fetchDesignationOptions = async () => {
+    try {
+      const response = await axios.get(`${BASE_URL}/api/master/designation_mast`, {
+        withCredentials: true
+      });
+      setDesignationOptions(response.data);
+    } catch (error) {
+      console.error("Error fetching designation options:", error);
+    }
+  };
+
+  const [maritalStatusOptions, setMaritalStatusOptions] = useState([]);
+  const fetchMaritalStatusOptions = async () => {
+    try {
+      const response = await axios.get(`${BASE_URL}/api/master/marital_status`, {
+        withCredentials: true
+      });
+      setMaritalStatusOptions(response.data);
+    } catch (error) {
+      console.error("Error fetching marital status options:", error);
+    }
+  };
+
+  const [bloodGroupOptions, setBloodGroupOptions] = useState([]);
+  // Blood Group
+  const fetchBloodGroupOptions = async () => {
+    try {
+      const response = await axios.get(`${BASE_URL}/api/master/blood_group`, {
+        withCredentials: true
+      });
+      setBloodGroupOptions(response.data);
+    } catch (error) {
+      console.error("Error fetching blood group options:", error);
+    }
+  };
+
+  const [religionOptions, setReligionOptions] = useState([]);
+  // Religion
+  const fetchReligionOptions = async () => {
+    try {
+      const response = await axios.get(`${BASE_URL}/api/master/religion`, {
+        withCredentials: true
+      });
+      setReligionOptions(response.data);
+    } catch (error) {
+      console.error("Error fetching religion options:", error);
+    }
+  };
+
+  const [categoryOptions, setCategoryOptions] = useState([]);
+  // Category
+  const fetchCategoryOptions = async () => {
+    try {
+      const response = await axios.get(`${BASE_URL}/api/master/category`, {
+        withCredentials: true
+      });
+      setCategoryOptions(response.data);
+    } catch (error) {
+      console.error("Error fetching category options:", error);
+    }
+  };
+
   useEffect(() => {
-    if(!fetchedOnce.current){
+    if (!fetchedOnce.current) {
       fetchGenderOptions();
+      fetchRoleOptions();
+      fetchDesignationOptions();
+      fetchMaritalStatusOptions();
+      fetchBloodGroupOptions(); // Add this
+      fetchReligionOptions(); // Add this
+      fetchCategoryOptions(); // Add this
+      fetchedOnce.current = true;
     }
   }, []);
+
+  useEffect(() => {
+    if (!formData.basicInfo) {
+      setSelectedImage(null);
+      setRole("");
+      // setJoiningDate("");
+      setSameAsAddress(false);
+      setBasicInfo({
+        staffId: "",
+        designation: "",
+        firstName: "",
+        lastName: "",
+        gender: "",
+        dob: "",
+        phone: "",
+        emergencyContact: "",
+        email: "",
+        fatherName: "",
+        fatherTitle: "Shri",
+        motherName: "",
+        motherTitle: "Shrimati",
+        maritalStatus: "",
+        bloodGroup: "",
+        category: "",
+        religion: "",
+        alternateEmail: "",
+        fatherContact: "",
+        fatherDob: "",
+        fatherEmail: "",
+        motherContact: "",
+        motherDob: "",
+        motherEmail: "",
+        guardianName: "",
+        guardianContact: "",
+        guardianDob: "",
+        guardianEmail: "",
+        guardianRelation: ""
+      });
+      setAddressInfo({
+        currentFullAddress: "",
+        currentPinCode: "",
+        currentCountry: "",
+        currentState: "",
+        currentDistrict: "",
+        currentCity: "",
+        permanentFullAddress: "",
+        permanentPinCode: "",
+        permanentCountry: "",
+        permanentState: "",
+        permanentDistrict: "",
+        permanentCity: ""
+      });
+      setExperiences([{ company: "", position: "", from: "", to: "", description: "" }]);
+      setDocuments({
+        panCard: "",
+        aadhaarCard: "",
+        passport: "",
+        drivingLicense: ""
+      });
+      setErrors({
+        staffId: false,
+        role: false,
+        designation: false,
+        firstName: false,
+        gender: false,
+        dob: false,
+        phone: false,
+        emergencyContact: false,
+        email: false,
+        country: false,
+        state: false,
+        district: false,
+        city: false,
+        pinCode: false,
+        currentAddress: false,
+        permanentAddress: false,
+        panCard: false,
+        aadhaarCard: false,
+        fatherName: false,
+        motherName: false,
+        maritalStatus: false,
+        bloodGroup: false,
+        category: false,
+        religion: false,
+        fatherContact: false,
+        fatherDob: false,
+        motherContact: false,
+        motherDob: false,
+        guardianName: false,
+        guardianContact: false,
+        guardianDob: false,
+        experiences: experiences.map(() => ({
+          company: false,
+          position: false,
+          from: false,
+          to: false,
+          description: false
+        }))
+      });
+    }
+  }, [formData.basicInfo]);
 
   return (
     <Box
@@ -522,7 +871,22 @@ export default function Addstaff1({
           >
             Basic Information
           </Typography>
-          <BackButton onClick={handleBackClick} />
+          <Button
+            variant="outlined"
+            size="small"
+            sx={{
+              textTransform: "none",
+              fontSize: "0.875rem",
+              backgroundColor: theme.palette.primary.main,
+              color: "white",
+              "&:hover": {
+                backgroundColor: theme.palette.primary.dark
+              }
+            }}
+            onClick={() => navigate("/human_resources/staff-details/import-staff")}
+          >
+            Import Staff
+          </Button>
         </Box>
 
         <Grid container spacing={1.5}>
@@ -566,15 +930,11 @@ export default function Addstaff1({
                 <MenuItem value="" sx={{ fontSize: "0.875rem" }}>
                   Select
                 </MenuItem>
-                <MenuItem value="admin" sx={{ fontSize: "0.875rem" }}>
-                  Admin
-                </MenuItem>
-                <MenuItem value="faculty" sx={{ fontSize: "0.875rem" }}>
-                  Faculty
-                </MenuItem>
-                <MenuItem value="librarian" sx={{ fontSize: "0.875rem" }}>
-                  Librarian
-                </MenuItem>
+                {roleOptions.map((option) => (
+                  <MenuItem key={option._id} value={option.name} sx={{ fontSize: "0.875rem" }}>
+                    {option.name}
+                  </MenuItem>
+                ))}
               </Select>
               {errors.role && (
                 <Typography
@@ -606,12 +966,14 @@ export default function Addstaff1({
                 onChange={(e) => handleBasicInfoChange("designation", e.target.value)}
                 onBlur={() => handleFieldBlur("designation")}
               >
-                <MenuItem value="Professor" sx={{ fontSize: "0.875rem" }}>
-                  Professor
+                <MenuItem value="" sx={{ fontSize: "0.875rem" }}>
+                  Select
                 </MenuItem>
-                <MenuItem value="Lecturer" sx={{ fontSize: "0.875rem" }}>
-                  Lecturer
-                </MenuItem>
+                {designationOptions.map((option) => (
+                  <MenuItem key={option._id} value={option.name} sx={{ fontSize: "0.875rem" }}>
+                    {option.name}
+                  </MenuItem>
+                ))}
               </Select>
               {errors.designation && (
                 <Typography
@@ -653,6 +1015,7 @@ export default function Addstaff1({
               onChange={(e) => handleBasicInfoChange("lastName", e.target.value)}
             />
           </Grid>
+
           <Grid item xs={12} sm={4}>
             <FormControl
               fullWidth
@@ -667,11 +1030,11 @@ export default function Addstaff1({
                 onChange={(e) => handleBasicInfoChange("gender", e.target.value)}
                 onBlur={() => handleFieldBlur("gender")}
               >
-              <MenuItem value="" disabled sx={{ fontSize: '0.875rem' }}>
+                <MenuItem value="" disabled sx={{ fontSize: "0.875rem" }}>
                   Select Gender
                 </MenuItem>
                 {genderOptions.map((option) => (
-                  <MenuItem key={option._id} value={option.name} sx={{ fontSize: '0.875rem' }}>
+                  <MenuItem key={option._id} value={option.name} sx={{ fontSize: "0.875rem" }}>
                     {option.name}
                   </MenuItem>
                 ))}
@@ -699,14 +1062,52 @@ export default function Addstaff1({
               label="Date of Birth"
               type="date"
               fullWidth
-              InputLabelProps={{ shrink: true }}
               required
-              sx={errors.dob ? { ...errorStyle, mb: 3 } : { ...inputStyle }}
+              InputLabelProps={{ shrink: true }}
               value={basicInfo.dob}
               onChange={(e) => handleBasicInfoChange("dob", e.target.value)}
               onBlur={() => handleFieldBlur("dob")}
               error={errors.dob}
               helperText={errors.dob ? "Date of birth is required" : " "}
+              sx={errors.dob ? { ...errorStyle, mb: 3 } : { ...inputStyle }}
+              InputProps={{
+                // This removes the default browser calendar icon
+                inputProps: {
+                  style: {
+                    // Hide the default calendar dropdown arrow in Chrome/Safari
+                    "::-webkit-calendar-picker-indicator": {
+                      display: "none",
+                      "-webkit-appearance": "none"
+                    },
+                    // Hide in Firefox
+                    "::-moz-calendar-picker-indicator": {
+                      display: "none"
+                    }
+                  }
+                },
+                endAdornment: (
+                  <IconButton
+                    edge="end"
+                    onClick={(e) => {
+                      e.preventDefault();
+                      e.stopPropagation();
+                      // Programmatically open the date picker
+                      const input = e.currentTarget
+                        .closest(".MuiTextField-root")
+                        .querySelector('input[type="date"]');
+                      input.showPicker();
+                    }}
+                    sx={{ padding: "8px", color: theme.palette.text.secondary }}
+                  >
+                    <SlCalender />
+                  </IconButton>
+                )
+              }}
+              onClick={(e) => {
+                // Open date picker when clicking anywhere in the field
+                const input = e.currentTarget.querySelector('input[type="date"]');
+                input.showPicker();
+              }}
             />
           </Grid>
           <Grid item xs={12} sm={4}>
@@ -714,25 +1115,27 @@ export default function Addstaff1({
               label="Phone"
               fullWidth
               required
-              sx={errors.phone ? { ...errorStyle, mb: 3 } : { ...inputStyle }}
               value={basicInfo.phone}
               onChange={(e) => handleBasicInfoChange("phone", e.target.value)}
-              onBlur={() => handleFieldBlur("phone")}
+              onBlur={() => {
+                handleFieldBlur("phone");
+                const message = validatePhone(basicInfo.phone);
+                setValidationMessages((prev) => ({ ...prev, phone: message }));
+                setErrors((prev) => ({ ...prev, phone: !!message }));
+              }}
               error={errors.phone}
-              helperText={errors.phone ? "Phone number is required" : " "}
+              helperText={validationMessages.phone || " "}
+              inputProps={{ maxLength: 10 }}
+              sx={errors.phone ? { ...errorStyle, mb: 3 } : { ...inputStyle }}
             />
           </Grid>
           <Grid item xs={12} sm={4}>
             <TextField
               label="Emergency Contact"
               fullWidth
-              required
-              sx={errors.emergencyContact ? { ...errorStyle, mb: 3 } : { ...inputStyle }}
+              sx={{ ...inputStyle }}
               value={basicInfo.emergencyContact}
               onChange={(e) => handleBasicInfoChange("emergencyContact", e.target.value)}
-              onBlur={() => handleFieldBlur("emergencyContact")}
-              error={errors.emergencyContact}
-              helperText={errors.emergencyContact ? "Emergency contact is required" : " "}
             />
           </Grid>
 
@@ -742,14 +1145,31 @@ export default function Addstaff1({
               label="Email (Login Username)"
               fullWidth
               required
-              sx={errors.email ? { ...errorStyle, mb: 3 } : { ...inputStyle }}
               value={basicInfo.email}
               onChange={(e) => handleBasicInfoChange("email", e.target.value)}
-              onBlur={() => handleFieldBlur("email")}
+              onBlur={() => {
+                handleFieldBlur("email");
+                const message = validateEmail(basicInfo.email);
+                setValidationMessages((prev) => ({ ...prev, email: message }));
+                setErrors((prev) => ({ ...prev, email: !!message }));
+              }}
               error={errors.email}
-              helperText={errors.email ? "Email is required" : " "}
+              helperText={validationMessages.email || " "}
+              sx={errors.email ? { ...errorStyle, mb: 3 } : { ...inputStyle }}
             />
           </Grid>
+
+          {/* Alternate Email */}
+          <Grid item xs={12} sm={4}>
+            <TextField
+              label="Alternate Email (Optional)"
+              fullWidth
+              value={basicInfo.alternateEmail}
+              onChange={(e) => handleBasicInfoChange("alternateEmail", e.target.value)}
+              sx={inputStyle}
+            />
+          </Grid>
+
           <Grid item xs={12} sm={4}>
             <FormControl
               fullWidth
@@ -767,15 +1187,11 @@ export default function Addstaff1({
                 <MenuItem value="" sx={{ fontSize: "0.875rem" }}>
                   Select
                 </MenuItem>
-                <MenuItem value="Single" sx={{ fontSize: "0.875rem" }}>
-                  Single
-                </MenuItem>
-                <MenuItem value="Married" sx={{ fontSize: "0.875rem" }}>
-                  Married
-                </MenuItem>
-                <MenuItem value="Other" sx={{ fontSize: "0.875rem" }}>
-                  Other
-                </MenuItem>
+                {maritalStatusOptions.map((option) => (
+                  <MenuItem key={option._id} value={option.name} sx={{ fontSize: "0.875rem" }}>
+                    {option.name}
+                  </MenuItem>
+                ))}
               </Select>
               {errors.maritalStatus && (
                 <Typography
@@ -789,6 +1205,111 @@ export default function Addstaff1({
                   }}
                 >
                   Marital status is required
+                </Typography>
+              )}
+            </FormControl>
+          </Grid>
+
+          <Grid item xs={12} sm={4}>
+            <FormControl
+              fullWidth
+              required
+              sx={errors.bloodGroup ? { ...errorStyle, mb: 3 } : { ...inputStyle }}
+              error={errors.bloodGroup}
+            >
+              <InputLabel>Blood Group</InputLabel>
+              <Select
+                value={basicInfo.bloodGroup}
+                label="Blood Group"
+                onChange={(e) => handleBasicInfoChange("bloodGroup", e.target.value)}
+                onBlur={() => handleFieldBlur("bloodGroup")}
+              >
+                <MenuItem value="" sx={{ fontSize: "0.875rem" }}>
+                  Select
+                </MenuItem>
+                {bloodGroupOptions.map((option) => (
+                  <MenuItem key={option._id} value={option.name} sx={{ fontSize: "0.875rem" }}>
+                    {option.name}
+                  </MenuItem>
+                ))}
+              </Select>
+              {errors.bloodGroup && (
+                <Typography
+                  variant="caption"
+                  color="error"
+                  sx={{ position: "absolute", bottom: "-20px", left: "14px", fontSize: "0.75rem" }}
+                >
+                  Blood group is required
+                </Typography>
+              )}
+            </FormControl>
+          </Grid>
+
+          <Grid item xs={12} sm={4}>
+            <FormControl
+              fullWidth
+              required
+              sx={errors.category ? { ...errorStyle, mb: 3 } : { ...inputStyle, mb: 3 }}
+              error={errors.category}
+            >
+              <InputLabel>Category</InputLabel>
+              <Select
+                value={basicInfo.category}
+                label="Category"
+                onChange={(e) => handleBasicInfoChange("category", e.target.value)}
+                onBlur={() => handleFieldBlur("category")}
+              >
+                <MenuItem value="" sx={{ fontSize: "0.875rem" }}>
+                  Select
+                </MenuItem>
+                {categoryOptions.map((option) => (
+                  <MenuItem key={option._id} value={option.name} sx={{ fontSize: "0.875rem" }}>
+                    {option.name}
+                  </MenuItem>
+                ))}
+              </Select>
+              {errors.category && (
+                <Typography
+                  variant="caption"
+                  color="error"
+                  sx={{ position: "absolute", bottom: "-20px", left: "14px", fontSize: "0.75rem" }}
+                >
+                  Category is required
+                </Typography>
+              )}
+            </FormControl>
+          </Grid>
+
+          <Grid item xs={12} sm={4}>
+            <FormControl
+              fullWidth
+              required
+              sx={errors.religion ? { ...errorStyle, mb: 3 } : { ...inputStyle }}
+              error={errors.religion}
+            >
+              <InputLabel>Religion</InputLabel>
+              <Select
+                value={basicInfo.religion}
+                label="Religion"
+                onChange={(e) => handleBasicInfoChange("religion", e.target.value)}
+                onBlur={() => handleFieldBlur("religion")}
+              >
+                <MenuItem value="" sx={{ fontSize: "0.875rem" }}>
+                  Select
+                </MenuItem>
+                {religionOptions.map((option) => (
+                  <MenuItem key={option._id} value={option.name} sx={{ fontSize: "0.875rem" }}>
+                    {option.name}
+                  </MenuItem>
+                ))}
+              </Select>
+              {errors.religion && (
+                <Typography
+                  variant="caption"
+                  color="error"
+                  sx={{ position: "absolute", bottom: "-20px", left: "14px", fontSize: "0.75rem" }}
+                >
+                  Religion is required
                 </Typography>
               )}
             </FormControl>
@@ -812,7 +1333,8 @@ export default function Addstaff1({
                         paddingTop: "8px",
                         paddingBottom: "8px"
                       },
-                      marginLeft: "11.5px"
+                      marginLeft: "11.5px",
+                      ...inputStyle
                     }}
                   >
                     <MenuItem value="Shri">Shri</MenuItem>
@@ -832,14 +1354,21 @@ export default function Addstaff1({
                       height: "40px"
                     },
                     "& .MuiInputLabel-root": {
-                      transform: "translate(14px, 10px) scale(1)",
+                      transform: basicInfo.fatherName
+                        ? "translate(14px, -9px) scale(0.75)"
+                        : "translate(14px, 10px) scale(1)",
                       "&.Mui-focused": {
                         transform: "translate(14px, -9px) scale(0.75)"
                       }
                     },
+                    "& .MuiInputLabel-root.Mui-focused, & .MuiInputLabel-root.MuiFormLabel-filled":
+                      {
+                        transform: "translate(14px, -9px) scale(0.75)"
+                      },
                     "& input": {
                       padding: "10px 14px"
-                    }
+                    },
+                    ...inputStyle
                   }}
                   value={basicInfo.fatherName}
                   onChange={(e) => handleBasicInfoChange("fatherName", e.target.value)}
@@ -847,6 +1376,93 @@ export default function Addstaff1({
                   helperText={errors.fatherName ? "Father's name is required" : " "}
                 />
               </Box>
+            </Grid>
+
+            {/* Father's Contact */}
+            <Grid item xs={12} sm={6}>
+              <TextField
+                label="Father's Contact Number"
+                fullWidth
+                required
+                value={basicInfo.fatherContact}
+                onChange={(e) => handleBasicInfoChange("fatherContact", e.target.value)}
+                onBlur={() => handleFieldBlur("fatherContact")}
+                error={errors.fatherContact}
+                helperText={errors.fatherContact ? "Father's contact is required" : " "}
+                sx={errors.fatherContact ? errorStyle : inputStyle}
+                inputProps={{ maxLength: 10 }}
+              />
+            </Grid>
+
+            {/* Father's DOB */}
+            <Grid item xs={12} sm={6}>
+              <TextField
+                label="Father's Date of Birth"
+                type="date"
+                fullWidth
+                required
+                InputLabelProps={{ shrink: true }}
+                value={basicInfo.fatherDob}
+                onChange={(e) => handleBasicInfoChange("fatherDob", e.target.value)}
+                onBlur={() => handleFieldBlur("fatherDob")}
+                error={errors.fatherDob}
+                helperText={errors.fatherDob ? "Father's DOB is required" : " "}
+                sx={{
+                  flex: 1,
+                  "& .MuiInputBase-root": {
+                    height: "40px"
+                  },
+                  "& .MuiInputLabel-root": {
+                    transform: basicInfo.fatherName
+                      ? "translate(14px, -9px) scale(0.75)"
+                      : "translate(14px, 10px) scale(1)",
+                    "&.Mui-focused": {
+                      transform: "translate(14px, -9px) scale(0.75)"
+                    }
+                  },
+                  "& .MuiInputLabel-root.Mui-focused, & .MuiInputLabel-root.MuiFormLabel-filled": {
+                    transform: "translate(14px, -9px) scale(0.75)"
+                  },
+                  "& input": {
+                    padding: "10px 14px"
+                  },
+                  marginLeft: "11.5px",
+                  ...(errors.fatherDob ? errorStyle : inputStyle)
+                }}
+                InputProps={{
+                  inputProps: {
+                    style: {
+                      "::-webkit-calendar-picker-indicator": {
+                        display: "none",
+                        "-webkit-appearance": "none"
+                      },
+                      "::-moz-calendar-picker-indicator": {
+                        display: "none"
+                      }
+                    }
+                  },
+                  endAdornment: (
+                    <IconButton
+                      edge="end"
+                      onClick={(e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        const input = e.currentTarget
+                          .closest(".MuiTextField-root")
+                          .querySelector('input[type="date"]');
+                        input.showPicker();
+                      }}
+                      sx={{ padding: "8px", color: theme.palette.text.secondary }}
+                    >
+                      <SlCalender />
+                    </IconButton>
+                  )
+                }}
+                onClick={(e) => {
+                  const input = e.currentTarget.querySelector('input[type="date"]');
+                  input.showPicker();
+                }}
+              />
             </Grid>
 
             {/* Mother's Name */}
@@ -864,7 +1480,8 @@ export default function Addstaff1({
                         alignItems: "center",
                         paddingTop: "8px",
                         paddingBottom: "8px"
-                      }
+                      },
+                      ...inputStyle
                     }}
                   >
                     <MenuItem value="Shrimati">Shrimati</MenuItem>
@@ -884,14 +1501,21 @@ export default function Addstaff1({
                       height: "40px"
                     },
                     "& .MuiInputLabel-root": {
-                      transform: "translate(14px, 10px) scale(1)",
+                      transform: basicInfo.motherName
+                        ? "translate(14px, -9px) scale(0.75)"
+                        : "translate(14px, 10px) scale(1)",
                       "&.Mui-focused": {
                         transform: "translate(14px, -9px) scale(0.75)"
                       }
                     },
+                    "& .MuiInputLabel-root.Mui-focused, & .MuiInputLabel-root.MuiFormLabel-filled":
+                      {
+                        transform: "translate(14px, -9px) scale(0.75)"
+                      },
                     "& input": {
                       padding: "10px 14px"
-                    }
+                    },
+                    ...inputStyle
                   }}
                   value={basicInfo.motherName}
                   onChange={(e) => handleBasicInfoChange("motherName", e.target.value)}
@@ -899,6 +1523,222 @@ export default function Addstaff1({
                   helperText={errors.motherName ? "Mother's name is required" : " "}
                 />
               </Box>
+            </Grid>
+
+            {/* Mother's Contact */}
+            <Grid item xs={12} sm={4}>
+              <TextField
+                label="Mother's Contact Number"
+                fullWidth
+                required
+                value={basicInfo.motherContact}
+                onChange={(e) => handleBasicInfoChange("motherContact", e.target.value)}
+                onBlur={() => handleFieldBlur("motherContact")}
+                error={errors.motherContact}
+                helperText={errors.motherContact ? "Mother's contact is required" : " "}
+                sx={{
+                  flex: 1,
+                  "& .MuiInputBase-root": {
+                    height: "40px"
+                  },
+                  "& .MuiInputLabel-root": {
+                    transform: basicInfo.fatherName
+                      ? "translate(14px, -9px) scale(0.75)"
+                      : "translate(14px, 10px) scale(1)",
+                    "&.Mui-focused": {
+                      transform: "translate(14px, -9px) scale(0.75)"
+                    }
+                  },
+                  "& .MuiInputLabel-root.Mui-focused, & .MuiInputLabel-root.MuiFormLabel-filled": {
+                    transform: "translate(14px, -9px) scale(0.75)"
+                  },
+                  "& input": {
+                    padding: "10px 14px"
+                  },
+                  marginLeft: "11.5px",
+                  ...inputStyle
+                }}
+                inputProps={{ maxLength: 10 }}
+              />
+            </Grid>
+
+            {/* Mother's DOB */}
+            <Grid item xs={12} sm={4}>
+              <TextField
+                label="Mother's Date of Birth*"
+                type="date"
+                fullWidth
+                required
+                InputLabelProps={{ shrink: true }}
+                value={basicInfo.motherDob}
+                onChange={(e) => handleBasicInfoChange("motherDob", e.target.value)}
+                onBlur={() => handleFieldBlur("motherDob")}
+                error={errors.motherDob}
+                helperText={errors.motherDob ? "Mother's DOB is required" : " "}
+                sx={errors.motherDob ? { ...errorStyle, mb: 3 } : { ...inputStyle }}
+                InputProps={{
+                  inputProps: {
+                    style: {
+                      "::-webkit-calendar-picker-indicator": {
+                        display: "none",
+                        "-webkit-appearance": "none"
+                      },
+                      "::-moz-calendar-picker-indicator": {
+                        display: "none"
+                      }
+                    }
+                  },
+                  endAdornment: (
+                    <IconButton
+                      edge="end"
+                      onClick={(e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        const input = e.currentTarget
+                          .closest(".MuiTextField-root")
+                          .querySelector('input[type="date"]');
+                        input.showPicker();
+                      }}
+                      sx={{ padding: "8px", color: theme.palette.text.secondary }}
+                    >
+                      <SlCalender />
+                    </IconButton>
+                  )
+                }}
+                onClick={(e) => {
+                  const input = e.currentTarget.querySelector('input[type="date"]');
+                  input.showPicker();
+                }}
+              />
+            </Grid>
+
+            {/* Guardian Fields */}
+            <Grid item xs={12} sm={4}>
+              <TextField
+                label="Guardian Name"
+                fullWidth
+                value={basicInfo.guardianName}
+                onChange={(e) => handleBasicInfoChange("guardianName", e.target.value)}
+                sx={inputStyle}
+              />
+            </Grid>
+            <Grid item xs={12} sm={6}>
+              <TextField
+                label="Guardian Contact Number"
+                fullWidth
+                value={basicInfo.guardianContact}
+                onChange={(e) => handleBasicInfoChange("guardianContact", e.target.value)}
+                sx={{
+                  flex: 1,
+                  "& .MuiInputBase-root": {
+                    height: "40px"
+                  },
+                  "& .MuiInputLabel-root": {
+                    transform: basicInfo.fatherName
+                      ? "translate(14px, -9px) scale(0.75)"
+                      : "translate(14px, 10px) scale(1)",
+                    "&.Mui-focused": {
+                      transform: "translate(14px, -9px) scale(0.75)"
+                    }
+                  },
+                  "& .MuiInputLabel-root.Mui-focused, & .MuiInputLabel-root.MuiFormLabel-filled": {
+                    transform: "translate(14px, -9px) scale(0.75)"
+                  },
+                  "& input": {
+                    padding: "10px 14px"
+                  },
+                  marginLeft: "11.5px",
+                  ...inputStyle
+                }}
+                inputProps={{ maxLength: 10 }}
+              />
+            </Grid>
+            <Grid item xs={12} sm={6}>
+              <TextField
+                label="Guardian Date of Birth"
+                type="date"
+                fullWidth
+                InputLabelProps={{ shrink: true }}
+                value={basicInfo.guardianDob}
+                onChange={(e) => handleBasicInfoChange("guardianDob", e.target.value)}
+                onBlur={() => handleFieldBlur("guardianDob")}
+                error={errors.guardianDob}
+                helperText={errors.guardianDob ? "Guardian's DOB is required" : " "}
+                sx={errors.guardianDob ? { ...errorStyle, mb: 3 } : { ...inputStyle }}
+                InputProps={{
+                  inputProps: {
+                    style: {
+                      "::-webkit-calendar-picker-indicator": {
+                        display: "none",
+                        "-webkit-appearance": "none"
+                      },
+                      "::-moz-calendar-picker-indicator": {
+                        display: "none"
+                      }
+                    }
+                  },
+                  endAdornment: (
+                    <IconButton
+                      edge="end"
+                      onClick={(e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        const input = e.currentTarget
+                          .closest(".MuiTextField-root")
+                          .querySelector('input[type="date"]');
+                        input.showPicker();
+                      }}
+                      sx={{ padding: "8px", color: theme.palette.text.secondary }}
+                    >
+                      <SlCalender />
+                    </IconButton>
+                  )
+                }}
+                onClick={(e) => {
+                  const input = e.currentTarget.querySelector('input[type="date"]');
+                  input.showPicker();
+                }}
+              />
+            </Grid>
+
+            <Grid item xs={12} sm={6}>
+              <TextField
+                label="Guardian Email"
+                fullWidth
+                value={basicInfo.guardianEmail}
+                onChange={(e) => handleBasicInfoChange("guardianEmail", e.target.value)}
+                sx={{
+                  flex: 1,
+                  "& .MuiInputBase-root": {
+                    height: "40px"
+                  },
+                  "& .MuiInputLabel-root": {
+                    transform: basicInfo.fatherName
+                      ? "translate(14px, -9px) scale(0.75)"
+                      : "translate(14px, 10px) scale(1)",
+                    "&.Mui-focused": {
+                      transform: "translate(14px, -9px) scale(0.75)"
+                    }
+                  },
+                  "& .MuiInputLabel-root.Mui-focused, & .MuiInputLabel-root.MuiFormLabel-filled": {
+                    transform: "translate(14px, -9px) scale(0.75)"
+                  },
+                  "& input": {
+                    padding: "10px 14px"
+                  },
+                  marginLeft: "11.5px",
+                  ...inputStyle
+                }}
+              />
+            </Grid>
+            <Grid item xs={12} sm={6}>
+              <TextField
+                label="Guardian Relation"
+                fullWidth
+                value={basicInfo.guardianRelation}
+                onChange={(e) => handleBasicInfoChange("guardianRelation", e.target.value)}
+                sx={inputStyle}
+              />
             </Grid>
           </Grid>
 
@@ -912,20 +1752,53 @@ export default function Addstaff1({
                 InputLabelProps={{ shrink: true }}
                 value={joiningDate}
                 onChange={(e) => setJoiningDate(e.target.value)}
+                sx={{
+                  ml: { sm: 1.5 },
+                  "& .MuiInputLabel-root": {
+                    transform: "translate(14px, -9px) scale(0.75)"
+                  },
+                  ...inputStyle
+                }}
                 InputProps={{
+                  inputProps: {
+                    style: {
+                      "::-webkit-calendar-picker-indicator": {
+                        display: "none",
+                        "-webkit-appearance": "none"
+                      },
+                      "::-moz-calendar-picker-indicator": {
+                        display: "none"
+                      }
+                    }
+                  },
+                  endAdornment: (
+                    <IconButton
+                      edge="end"
+                      onClick={(e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        const input = e.currentTarget
+                          .closest(".MuiTextField-root")
+                          .querySelector('input[type="date"]');
+                        input.showPicker();
+                      }}
+                      sx={{ padding: "8px", color: theme.palette.text.secondary }}
+                    >
+                      <SlCalender />
+                    </IconButton>
+                  ),
                   sx: {
                     height: 40,
                     fontSize: "0.875rem"
                   }
                 }}
-                sx={{
-                  ml: { sm: 1.5 },
-                  "& .MuiInputLabel-root": {
-                    transform: "translate(14px, -9px) scale(0.75)"
-                  }
+                onClick={(e) => {
+                  const input = e.currentTarget.querySelector('input[type="date"]');
+                  input.showPicker();
                 }}
               />
             </Grid>
+
             <Grid item xs={12} sm={6}>
               <Box sx={{ display: "flex", alignItems: "center", gap: 2, height: "100%" }}>
                 <Box
@@ -1028,7 +1901,8 @@ export default function Addstaff1({
                 label="Full Address"
                 fullWidth
                 multiline
-                rows={3}
+                minRows={3}
+                maxRows={6}
                 required
                 value={addressInfo.currentFullAddress}
                 onChange={(e) => handleAddressChange("currentFullAddress", e.target.value)}
@@ -1038,8 +1912,12 @@ export default function Addstaff1({
                 sx={{
                   ...(errors.currentFullAddress ? { ...errorStyle, mb: 3 } : { ...inputStyle }),
                   "& .MuiInputBase-root": {
-                    height: "auto",
-                    minHeight: "100px"
+                    minHeight: "100px",
+                    alignItems: "flex-start" // Align text to top
+                  },
+                  "& textarea": {
+                    resize: "vertical" // Allow vertical resizing
+                    // minHeight: "10px"
                   }
                 }}
               />
@@ -1110,24 +1988,18 @@ export default function Addstaff1({
             </Grid>
 
             {/* Auto-filled fields */}
+            {/* City/Town */}
             <Grid item xs={12} sm={3}>
               <TextField
-                label="Country"
+                label="City/Town"
                 fullWidth
-                value={addressInfo.currentCountry || ""}
+                value={addressInfo.currentCity || ""}
                 InputProps={{ readOnly: true }}
                 sx={{ ...inputStyle }}
               />
             </Grid>
-            <Grid item xs={12} sm={3}>
-              <TextField
-                label="State"
-                fullWidth
-                value={addressInfo.currentState || ""}
-                InputProps={{ readOnly: true }}
-                sx={{ ...inputStyle }}
-              />
-            </Grid>
+
+            {/* District */}
             <Grid item xs={12} sm={3}>
               <TextField
                 label="District"
@@ -1137,11 +2009,24 @@ export default function Addstaff1({
                 sx={{ ...inputStyle }}
               />
             </Grid>
+
+            {/* State */}
             <Grid item xs={12} sm={3}>
               <TextField
-                label="City/Town"
+                label="State"
                 fullWidth
-                value={addressInfo.currentCity || ""}
+                value={addressInfo.currentState || ""}
+                InputProps={{ readOnly: true }}
+                sx={{ ...inputStyle }}
+              />
+            </Grid>
+
+            {/* Counttry */}
+            <Grid item xs={12} sm={3}>
+              <TextField
+                label="Country"
+                fullWidth
+                value={addressInfo.currentCountry || ""}
                 InputProps={{ readOnly: true }}
                 sx={{ ...inputStyle }}
               />
@@ -1194,7 +2079,8 @@ export default function Addstaff1({
                 label="Full Address"
                 fullWidth
                 multiline
-                rows={3}
+                minRows={3}
+                maxRows={6}
                 required
                 value={
                   sameAsAddress ? addressInfo.currentFullAddress : addressInfo.permanentFullAddress
@@ -1206,8 +2092,12 @@ export default function Addstaff1({
                 sx={{
                   ...(errors.permanentFullAddress ? { ...errorStyle, mb: 3 } : { ...inputStyle }),
                   "& .MuiInputBase-root": {
-                    height: "auto",
-                    minHeight: "100px"
+                    minHeight: "100px",
+                    alignItems: "flex-start"
+                  },
+                  "& textarea": {
+                    resize: "vertical"
+                    // minHeight: "100px"
                   }
                 }}
                 disabled={sameAsAddress}
@@ -1284,26 +2174,18 @@ export default function Addstaff1({
             </Grid>
 
             {/* Auto-filled fields */}
+            {/* City/State */}
             <Grid item xs={12} sm={3}>
               <TextField
-                label="Country"
+                label="City/Town"
                 fullWidth
-                value={
-                  sameAsAddress ? addressInfo.currentCountry : addressInfo.permanentCountry || ""
-                }
+                value={sameAsAddress ? addressInfo.currentCity : addressInfo.permanentCity || ""}
                 InputProps={{ readOnly: true }}
                 sx={{ ...inputStyle }}
               />
             </Grid>
-            <Grid item xs={12} sm={3}>
-              <TextField
-                label="State"
-                fullWidth
-                value={sameAsAddress ? addressInfo.currentState : addressInfo.permanentState || ""}
-                InputProps={{ readOnly: true }}
-                sx={{ ...inputStyle }}
-              />
-            </Grid>
+
+            {/* District */}
             <Grid item xs={12} sm={3}>
               <TextField
                 label="District"
@@ -1315,11 +2197,26 @@ export default function Addstaff1({
                 sx={{ ...inputStyle }}
               />
             </Grid>
+
+            {/* State */}
             <Grid item xs={12} sm={3}>
               <TextField
-                label="City/Town"
+                label="State"
                 fullWidth
-                value={sameAsAddress ? addressInfo.currentCity : addressInfo.permanentCity || ""}
+                value={sameAsAddress ? addressInfo.currentState : addressInfo.permanentState || ""}
+                InputProps={{ readOnly: true }}
+                sx={{ ...inputStyle }}
+              />
+            </Grid>
+
+            {/* Country */}
+            <Grid item xs={12} sm={3}>
+              <TextField
+                label="Country"
+                fullWidth
+                value={
+                  sameAsAddress ? addressInfo.currentCountry : addressInfo.permanentCountry || ""
+                }
                 InputProps={{ readOnly: true }}
                 sx={{ ...inputStyle }}
               />
@@ -1340,147 +2237,214 @@ export default function Addstaff1({
         >
           Work Experience
         </Typography>
-        {experiences.map((exp, index) => (
-          <Box key={index} sx={{ mb: 2 }}>
-            <Grid container spacing={1.5}>
-              <Grid item xs={12} sm={6}>
-                <TextField
-                  label="Company Name"
-                  fullWidth
-                  required
-                  value={exp.company}
-                  onChange={(e) => handleExperienceChange(index, "company", e.target.value)}
-                  onBlur={() => {
-                    if (!exp.company) {
-                      setErrors((prev) => {
-                        const newExperiences = [...prev.experiences];
-                        newExperiences[index] = { ...newExperiences[index], company: true };
-                        return { ...prev, experiences: newExperiences };
-                      });
+        {experiences.map((exp, index) => {
+          return (
+            <Box key={index} sx={{ mb: 2 }}>
+              <Grid container spacing={1.5}>
+                <Grid item xs={12} sm={6}>
+                  <TextField
+                    label="Company Name"
+                    fullWidth
+                    required
+                    value={exp.company}
+                    onChange={(e) => handleExperienceChange(index, "company", e.target.value)}
+                    onBlur={() => {
+                      if (!exp.company) {
+                        setErrors((prev) => {
+                          const newExperiences = [...prev.experiences];
+                          newExperiences[index] = { ...newExperiences[index], company: true };
+                          return { ...prev, experiences: newExperiences };
+                        });
+                      }
+                    }}
+                    sx={
+                      errors.experiences[index]?.company
+                        ? { ...errorStyle, mb: 3 }
+                        : { ...inputStyle }
                     }
-                  }}
-                  sx={
-                    errors.experiences[index]?.company
-                      ? { ...errorStyle, mb: 3 }
-                      : { ...inputStyle }
-                  }
-                  error={errors.experiences[index]?.company}
-                  helperText={errors.experiences[index]?.company ? "Company name is required" : " "}
-                />
-              </Grid>
-              <Grid item xs={12} sm={6}>
-                <TextField
-                  label="Position"
-                  fullWidth
-                  required
-                  value={exp.position}
-                  onChange={(e) => handleExperienceChange(index, "position", e.target.value)}
-                  onBlur={() => {
-                    if (!exp.position) {
-                      setErrors((prev) => {
-                        const newExperiences = [...prev.experiences];
-                        newExperiences[index] = { ...newExperiences[index], position: true };
-                        return { ...prev, experiences: newExperiences };
-                      });
+                    error={errors.experiences[index]?.company}
+                    helperText={
+                      errors.experiences[index]?.company ? "Company name is required" : " "
                     }
-                  }}
-                  sx={
-                    errors.experiences[index]?.position
-                      ? { ...errorStyle, mb: 3 }
-                      : { ...inputStyle }
-                  }
-                  error={errors.experiences[index]?.position}
-                  helperText={errors.experiences[index]?.position ? "Position is required" : " "}
-                />
-              </Grid>
-              <Grid item xs={12} sm={3}>
-                <TextField
-                  label="From Date"
-                  type="date"
-                  fullWidth
-                  InputLabelProps={{ shrink: true }}
-                  value={exp.from}
-                  onChange={(e) => handleExperienceChange(index, "from", e.target.value)}
-                  onBlur={() => {
-                    if (!exp.from) {
-                      setErrors((prev) => {
-                        const newExperiences = [...prev.experiences];
-                        newExperiences[index] = { ...newExperiences[index], from: true };
-                        return { ...prev, experiences: newExperiences };
-                      });
+                  />
+                </Grid>
+
+                <Grid item xs={12} sm={6}>
+                  <TextField
+                    label="Position"
+                    fullWidth
+                    required
+                    value={exp.position}
+                    onChange={(e) => handleExperienceChange(index, "position", e.target.value)}
+                    onBlur={() => {
+                      if (!exp.position) {
+                        setErrors((prev) => {
+                          const newExperiences = [...prev.experiences];
+                          newExperiences[index] = { ...newExperiences[index], position: true };
+                          return { ...prev, experiences: newExperiences };
+                        });
+                      }
+                    }}
+                    sx={
+                      errors.experiences[index]?.position
+                        ? { ...errorStyle, mb: 3 }
+                        : { ...inputStyle }
                     }
-                  }}
-                  sx={
-                    errors.experiences[index]?.from ? { ...errorStyle, mb: 3 } : { ...inputStyle }
-                  }
-                  error={errors.experiences[index]?.from}
-                  helperText={errors.experiences[index]?.from ? "From date is required" : " "}
-                />
-              </Grid>
-              <Grid item xs={12} sm={3}>
-                <TextField
-                  label="To Date"
-                  type="date"
-                  fullWidth
-                  InputLabelProps={{ shrink: true }}
-                  value={exp.to}
-                  onChange={(e) => handleExperienceChange(index, "to", e.target.value)}
-                  onBlur={() => {
-                    if (!exp.to) {
-                      setErrors((prev) => {
-                        const newExperiences = [...prev.experiences];
-                        newExperiences[index] = { ...newExperiences[index], to: true };
-                        return { ...prev, experiences: newExperiences };
-                      });
+                    error={errors.experiences[index]?.position}
+                    helperText={errors.experiences[index]?.position ? "Position is required" : " "}
+                  />
+                </Grid>
+
+                <Grid item xs={12} sm={3} key={`from-${index}`}>
+                  <TextField
+                    label="From Date"
+                    type="date"
+                    fullWidth
+                    InputLabelProps={{ shrink: true }}
+                    value={exp.from}
+                    onChange={(e) => handleExperienceChange(index, "from", e.target.value)}
+                    sx={
+                      errors.experiences[index]?.from ? { ...errorStyle, mb: 3 } : { ...inputStyle }
                     }
-                  }}
-                  sx={errors.experiences[index]?.to ? { ...errorStyle, mb: 3 } : { ...inputStyle }}
-                  error={errors.experiences[index]?.to}
-                  helperText={errors.experiences[index]?.to ? "To date is required" : " "}
-                />
-              </Grid>
-              <Grid item xs={12} sm={6}>
-                <TextField
-                  label="Description"
-                  fullWidth
-                  required
-                  value={exp.description}
-                  onChange={(e) => handleExperienceChange(index, "description", e.target.value)}
-                  onBlur={() => {
-                    if (!exp.description) {
-                      setErrors((prev) => {
-                        const newExperiences = [...prev.experiences];
-                        newExperiences[index] = { ...newExperiences[index], description: true };
-                        return { ...prev, experiences: newExperiences };
-                      });
+                    InputProps={{
+                      inputProps: {
+                        style: {
+                          // For Chrome/Safari
+                          "::-webkit-calendar-picker-indicator": {
+                            display: "none",
+                            "-webkit-appearance": "none"
+                          },
+                          // For Firefox
+                          "::-moz-calendar-picker-indicator": {
+                            display: "none"
+                          },
+                          // For Edge
+                          "::-ms-clear": {
+                            display: "none"
+                          }
+                        }
+                      },
+                      endAdornment: (
+                        <IconButton
+                          edge="end"
+                          onClick={(e) => {
+                            e.preventDefault();
+                            e.stopPropagation();
+                            const input = e.currentTarget
+                              .closest(".MuiTextField-root")
+                              .querySelector('input[type="date"]');
+                            input.showPicker();
+                          }}
+                          sx={{ padding: "8px", color: theme.palette.text.secondary }}
+                        >
+                          <SlCalender />
+                        </IconButton>
+                      )
+                    }}
+                    onClick={(e) => {
+                      const input = e.currentTarget.querySelector('input[type="date"]');
+                      input.showPicker();
+                    }}
+                  />
+                </Grid>
+
+                <Grid item xs={12} sm={3} key={`to-${index}`}>
+                  <TextField
+                    label="To Date"
+                    type="date"
+                    fullWidth
+                    InputLabelProps={{ shrink: true }}
+                    value={exp.to}
+                    onChange={(e) => handleExperienceChange(index, "to", e.target.value)}
+                    sx={
+                      errors.experiences[index]?.to ? { ...errorStyle, mb: 3 } : { ...inputStyle }
                     }
-                  }}
-                  sx={
-                    errors.experiences[index]?.description
-                      ? { ...errorStyle, mb: 3 }
-                      : { ...inputStyle }
-                  }
-                  error={errors.experiences[index]?.description}
-                  helperText={
-                    errors.experiences[index]?.description ? "Description is required" : " "
-                  }
-                />
+                    InputProps={{
+                      // This completely removes the default calendar icon
+                      inputProps: {
+                        style: {
+                          // For Chrome/Safari
+                          "::-webkit-calendar-picker-indicator": {
+                            display: "none",
+                            "-webkit-appearance": "none"
+                          },
+                          // For Firefox
+                          "::-moz-calendar-picker-indicator": {
+                            display: "none"
+                          },
+                          // For Edge
+                          "::-ms-clear": {
+                            display: "none"
+                          }
+                        }
+                      },
+                      endAdornment: (
+                        <IconButton
+                          edge="end"
+                          onClick={(e) => {
+                            e.preventDefault();
+                            e.stopPropagation();
+                            const input = e.currentTarget
+                              .closest(".MuiTextField-root")
+                              .querySelector('input[type="date"]');
+                            input.showPicker();
+                          }}
+                          sx={{ padding: "8px", color: theme.palette.text.secondary }}
+                        >
+                          <SlCalender />
+                        </IconButton>
+                      )
+                    }}
+                    onClick={(e) => {
+                      const input = e.currentTarget.querySelector('input[type="date"]');
+                      input.showPicker();
+                    }}
+                  />
+                </Grid>
+
+                <Grid item xs={12} sm={6}>
+                  <TextField
+                    label="Description"
+                    fullWidth
+                    required
+                    value={exp.description}
+                    onChange={(e) => handleExperienceChange(index, "description", e.target.value)}
+                    onBlur={() => {
+                      if (!exp.description) {
+                        setErrors((prev) => {
+                          const newExperiences = [...prev.experiences];
+                          newExperiences[index] = { ...newExperiences[index], description: true };
+                          return { ...prev, experiences: newExperiences };
+                        });
+                      }
+                    }}
+                    sx={
+                      errors.experiences[index]?.description
+                        ? { ...errorStyle, mb: 3 }
+                        : { ...inputStyle }
+                    }
+                    error={errors.experiences[index]?.description}
+                    helperText={
+                      errors.experiences[index]?.description ? "Description is required" : " "
+                    }
+                  />
+                </Grid>
               </Grid>
-            </Grid>
-            <Box sx={{ display: "flex", justifyContent: "flex-end", mt: 1 }}>
-              <Button
-                variant="outlined"
-                color="error"
-                size="small"
-                onClick={() => removeExperience(index)}
-                disabled={experiences.length <= 1}
-              >
-                Remove
-              </Button>
+              <Box sx={{ display: "flex", justifyContent: "flex-end", mt: 1 }}>
+                <Button
+                  variant="outlined"
+                  color="error"
+                  size="small"
+                  onClick={() => removeExperience(index)}
+                  disabled={experiences.length <= 1}
+                >
+                  Remove
+                </Button>
+              </Box>
+              {index < experiences.length - 1 && <Divider sx={{ my: 2 }} />}
             </Box>
-            {index < experiences.length - 1 && <Divider sx={{ my: 2 }} />}
-          </Box>
-        ))}
+          );
+        })}
         <Button variant="outlined" onClick={addExperience}>
           Add Another Experience
         </Button>

@@ -27,6 +27,7 @@ import {
   FileDownload as ExcelIcon
 } from "@mui/icons-material";
 import axios from "axios";
+import { BASE_URL } from "../../../../main";
 
 const ListView = () => {
   const [users, setUsers] = useState([]);
@@ -36,20 +37,47 @@ const ListView = () => {
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(5);
 
+  const API_URL = `${BASE_URL}/api/user_details`;
+
   useEffect(() => {
     const fetchUsers = async () => {
       try {
-        const response = await axios.get("http://localhost:3000/users");
-        const usersData = Array.isArray(response.data)
-          ? response.data
-          : response.data?.users || response.data?.data?.users || [];
+        const response = await axios.get(API_URL);
+        console.log("Full API response:", response);
 
-        if (usersData.length === 0) {
-          throw new Error("No users found in API response");
+        let usersData = [];
+
+        if (Array.isArray(response.data)) {
+          usersData = response.data;
+        } else if (response.data?.data && Array.isArray(response.data.data)) {
+          usersData = response.data.data;
+        } else {
+          throw new Error("API response doesn't contain valid users data");
         }
 
-        setUsers(usersData);
+        console.log("Processed users data:", usersData);
+
+        // Map API data to table format according to API response fields
+        const mappedUsers = usersData.map((user) => ({
+          userId: user.user_id || "",
+          empId: user.employee_code || "",
+          name: user.full_name || [user.first_name, user.middle_name, user.last_name].filter(Boolean).join(" "),
+          roles: [user.designation_id || user.employee_type || ""],
+          department: user.department_id || "",
+          designation: user.designation_id || "",
+          contact: user.cantact_no_1 || "",
+          gender: user.gender || "",
+          bloodGroup: user.blood_group || "",
+          status: user.status === "true" ? "Active" : "Inactive"
+        }));
+
+        setUsers(mappedUsers);
       } catch (err) {
+        console.error("API Error Details:", {
+          error: err,
+          response: err.response?.data,
+          status: err.response?.status
+        });
         setError(err.message || "Failed to fetch users");
       } finally {
         setLoading(false);
@@ -148,42 +176,30 @@ const ListView = () => {
           <Table sx={{ minWidth: 650 }} aria-label="users table">
             <TableHead sx={{ backgroundColor: "#f5f5f5" }}>
               <TableRow>
-                <TableCell>
-                  <strong>Staff ID</strong>
-                </TableCell>
-                <TableCell>
-                  <strong>Name</strong>
-                </TableCell>
-                <TableCell>
-                  <strong>Role</strong>
-                </TableCell>
-                <TableCell>
-                  <strong>Department</strong>
-                </TableCell>
-                <TableCell>
-                  <strong>Designation</strong>
-                </TableCell>
-                <TableCell>
-                  <strong>Mobile</strong>
-                </TableCell>
-                <TableCell>
-                  <strong>PAN Number</strong>
-                </TableCell>
-                <TableCell align="center">
-                  <strong>Actions</strong>
-                </TableCell>
+                <TableCell><strong>User ID</strong></TableCell>
+                <TableCell><strong>Employee Code</strong></TableCell>
+                <TableCell><strong>Name</strong></TableCell>
+                <TableCell><strong>Designation</strong></TableCell>
+                <TableCell><strong>Department</strong></TableCell>
+                <TableCell><strong>Contact</strong></TableCell>
+                <TableCell><strong>Gender</strong></TableCell>
+                <TableCell><strong>Blood Group</strong></TableCell>
+                <TableCell><strong>Status</strong></TableCell>
+                <TableCell align="center"><strong>Actions</strong></TableCell>
               </TableRow>
             </TableHead>
             <TableBody>
               {paginatedRows.map((user) => (
-                <TableRow key={user.empId} hover>
+                <TableRow key={user.userId} hover>
+                  <TableCell>{user.userId}</TableCell>
                   <TableCell>{user.empId}</TableCell>
                   <TableCell>{user.name}</TableCell>
                   <TableCell>{user.roles.join(", ")}</TableCell>
                   <TableCell>{user.department}</TableCell>
-                  <TableCell>{user.designation}</TableCell>
                   <TableCell>{user.contact}</TableCell>
-                  <TableCell>{user.PanNumber}</TableCell>
+                  <TableCell>{user.gender}</TableCell>
+                  <TableCell>{user.bloodGroup}</TableCell>
+                  <TableCell>{user.status}</TableCell>
                   <TableCell align="center">
                     <Stack direction="row" spacing={1} justifyContent="center">
                       <IconButton color="primary" title="View">

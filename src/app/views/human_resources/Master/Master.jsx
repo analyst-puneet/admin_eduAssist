@@ -8,28 +8,45 @@ import {
   Typography,
   Drawer,
   useMediaQuery,
-  useTheme,
+  useTheme
 } from "@mui/material";
 import {
   Home as HomeIcon,
   ChevronRight as ChevronRightIcon,
-  Menu as MenuIcon,
+  Menu as MenuIcon
 } from "@mui/icons-material";
 import { Link } from "react-router-dom";
 import LeaveGroup from "./LeaveGroup";
 import ComplaintType from "./ComplaintType";
-import Source from "./Source";
-import Reference from "./Reference";
-import RoleGroup from "./RoleGroup";
 
-const modules = ["Leave Group","Role Group", "Complaint Type", "Source", "Reference"];
+import RoleGroup from "./RoleGroup";
+import Designation from "./Designation";
+import MaritalStatus from "./MaritalStatus";
+import BloodGroup from "./BloodGroup";
+import Category from "./Category";
+import Religion from "./Religion";
+import EducationType from "./EducationType";
+
+const modules = [
+  "BloodGroup",
+  "Category",
+  "Designation",
+  "EducationType",
+  "Leave Group",
+  "MaritalStatus",
+  "Religion",
+  "Role Group"
+];
 
 const moduleComponents = {
+  BloodGroup: BloodGroup,
+  Category: Category,
+  Designation: Designation,
+  EducationType: EducationType,
   "Leave Group": LeaveGroup,
-  "Role Group":RoleGroup,
-  "Complaint Type": ComplaintType,
-  "Source": Source,
-  "Reference": Reference,
+  MaritalStatus: MaritalStatus,
+  Religion: Religion,
+  "Role Group": RoleGroup
 };
 
 export default function Master() {
@@ -37,7 +54,7 @@ export default function Master() {
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
   const isDarkMode = theme.palette.mode === "dark";
 
-  const [selectedModule, setSelectedModule] = useState("Leave Group");
+  const [selectedModule, setSelectedModule] = useState("BloodGroup");
   const [mobileOpen, setMobileOpen] = useState(false);
 
   const inputStyle = {
@@ -138,10 +155,10 @@ export default function Master() {
         )}
 
         <Box flex={1} sx={{ overflowX: "auto" }}>
-          <SelectedModuleComponent 
-            isMobile={isMobile} 
-            isDarkMode={isDarkMode} 
-            inputStyle={inputStyle} 
+          <SelectedModuleComponent
+            isMobile={isMobile}
+            isDarkMode={isDarkMode}
+            inputStyle={inputStyle}
           />
         </Box>
       </Box>

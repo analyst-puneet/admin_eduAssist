@@ -22,20 +22,65 @@ const StaffProfile = () => {
           throw new Error("No employee ID provided in URL");
         }
 
-        const response = await axios.get(`http://localhost:3000/users`);
-        const usersData = Array.isArray(response.data) ? response.data : response.data?.users || [];
+        // Using the real API endpoint
+        const response = await axios.get(`https://backend-aufx.onrender.com/api/user_details`);
 
-        if (!Array.isArray(usersData)) {
+        // Handle different possible response structures
+        let usersData = [];
+        if (Array.isArray(response.data)) {
+          usersData = response.data;
+        } else if (response.data?.data && Array.isArray(response.data.data)) {
+          usersData = response.data.data;
+        } else {
           throw new Error("Invalid API response format");
         }
 
-        const foundUser = usersData.find((user) => user.empId === empId);
+        // Find user by employee_code (since empId in URL is employee_code)
+        const foundUser = usersData.find((user) => user.employee_code === empId);
+
         if (!foundUser) {
           throw new Error(`User with ID ${empId} not found`);
         }
 
-        setUserData(foundUser);
+        // Map API data to expected format
+        const mappedUserData = {
+          empId: foundUser.employee_code,
+          userId: foundUser.user_id,
+          name:
+            foundUser.full_name ||
+            `${foundUser.first_name} ${foundUser.middle_name || ""} ${
+              foundUser.last_name || ""
+            }`.trim(),
+          contact: foundUser.cantact_no_1,
+          altContact: foundUser.cantact_no_2,
+          email: foundUser.email,
+          altEmail: foundUser.alt_email,
+          gender: foundUser.gender,
+          dob: foundUser.dob,
+          bloodGroup: foundUser.blood_group,
+          designation: foundUser.designation_id,
+          department: foundUser.department_id,
+          employeeType: foundUser.employee_type,
+          dateOfJoining: foundUser.date_of_joining,
+          status: foundUser.status === "true" ? "Active" : "Inactive",
+          currentAddress: `${foundUser.current_address}, ${foundUser.current_city}, ${foundUser.current_state}, ${foundUser.current_country} - ${foundUser.current_pincode}`,
+          permanentAddress: `${foundUser.permanent_address}, ${foundUser.permanent_city}, ${foundUser.permanent_state}, ${foundUser.permanent_country} - ${foundUser.permanent_pincode}`,
+          maritalStatus: foundUser.marital_status,
+          spouseName: foundUser.spouse_name,
+          noOfChildren: foundUser.no_of_children,
+          fatherName: foundUser.father_name,
+          motherName: foundUser.mother_name,
+          guardianName: foundUser.guardian_name,
+          bankName: foundUser.bank_name,
+          bankAccNo: foundUser.bank_acc_no,
+          ifscCode: foundUser.ifsc_code,
+          profilePhoto: foundUser.profile_photo_path
+          // Add more fields as needed
+        };
+
+        setUserData(mappedUserData);
       } catch (err) {
+        console.error("Error fetching user data:", err);
         setError(err.message || "Failed to fetch user data");
       } finally {
         setLoading(false);
@@ -49,7 +94,6 @@ const StaffProfile = () => {
     navigate("/human_resources/staff-details");
   };
 
-  // Back button styling
   const backButtonStyle = {
     borderRadius: "8px",
     padding: "8px 16px",
@@ -81,12 +125,7 @@ const StaffProfile = () => {
         <Alert severity="error" sx={{ mb: 2 }}>
           {error}
         </Alert>
-        <Button
-          variant="contained"
-          onClick={handleBack}
-          // startIcon={<ArrowBackIcon />}
-          sx={backButtonStyle}
-        >
+        <Button variant="contained" onClick={handleBack} sx={backButtonStyle}>
           Back to Users
         </Button>
       </Box>

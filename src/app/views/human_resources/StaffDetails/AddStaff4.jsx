@@ -31,6 +31,10 @@ import {
 import { saveFileToDB } from "app/utils/indexedDBUtils";
 import { getAllFilesFromDB } from "app/utils/indexedDBUtils";
 import { deleteFileFromDB } from "app/utils/indexedDBUtils";
+import { clearAllFilesFromDB } from "app/utils/indexedDBUtils";
+
+import { BASE_URL } from "../../../../main";
+import axios from "axios";
 
 export default function AddStaff4({
   formData,
@@ -48,47 +52,59 @@ export default function AddStaff4({
   const [ugYears, setUgYears] = useState(formData.ugYears || 3);
   const [previewFile, setPreviewFile] = useState(null);
   const [openPreview, setOpenPreview] = useState(false);
+  const [isFreshForm, setIsFreshForm] = useState(true);
+  const [initialLoad, setInitialLoad] = useState(true);
 
   const objectUrlsRef = useRef([]);
 
   // Initialize form data and recreate object URLs when component mounts
   useEffect(() => {
     const initializeFiles = async () => {
-      // Fresh start detection: if formData.files is empty
-      const isNewForm =
+      // Check if this is a completely fresh form (no existing data)
+      const isFreshForm =
+        !formData.educationLevel &&
         (!formData.files || Object.keys(formData.files).length === 0) &&
         (!formData.fileNames || Object.keys(formData.fileNames).length === 0);
 
-      if (isNewForm) {
-        // Don't preload files for new form
+      // On initial load, check if we have any saved sections
+      if (initialLoad) {
+        setInitialLoad(false);
+
+        // If we have sections, load their files
+        if (sections.length > 0) {
+          const storedFiles = await getAllFilesFromDB();
+          if (!storedFiles || Object.keys(storedFiles).length === 0) return;
+
+          const reconstructedFiles = {};
+          const fileNamesMap = {};
+
+          for (const [key, fileData] of Object.entries(storedFiles)) {
+            if (!fileData.data) continue;
+
+            const blob = await dataURLtoBlob(fileData.data);
+            const objectUrl = URL.createObjectURL(blob);
+            objectUrlsRef.current.push(objectUrl);
+
+            reconstructedFiles[key] = {
+              name: fileData.name,
+              type: fileData.type,
+              data: fileData.data,
+              preview: objectUrl
+            };
+            fileNamesMap[key] = fileData.name;
+          }
+
+          setFiles((prev) => ({ ...prev, ...reconstructedFiles }));
+          setFileNames((prev) => ({ ...prev, ...fileNamesMap }));
+        }
         return;
       }
 
-      // Else: resume session → load saved files
-      const storedFiles = await getAllFilesFromDB();
-      if (!storedFiles || Object.keys(storedFiles).length === 0) return;
-
-      const reconstructedFiles = {};
-      const fileNamesMap = {};
-
-      for (const [key, fileData] of Object.entries(storedFiles)) {
-        if (!fileData.data) continue;
-
-        const blob = await dataURLtoBlob(fileData.data);
-        const objectUrl = URL.createObjectURL(blob);
-        objectUrlsRef.current.push(objectUrl);
-
-        reconstructedFiles[key] = {
-          name: fileData.name,
-          type: fileData.type,
-          data: fileData.data,
-          preview: objectUrl
-        };
-        fileNamesMap[key] = fileData.name;
+      // For fresh forms, clear everything
+      if (isFreshForm) {
+        await clearAllFilesFromDB();
+        return;
       }
-
-      setFiles(reconstructedFiles);
-      setFileNames(fileNamesMap);
     };
 
     initializeFiles();
@@ -97,7 +113,7 @@ export default function AddStaff4({
       objectUrlsRef.current.forEach((url) => URL.revokeObjectURL(url));
       objectUrlsRef.current = [];
     };
-  }, []);
+  }, [sections]); // Only depend on sections
 
   // Validation states
   const [errors, setErrors] = useState({
@@ -179,10 +195,10 @@ export default function AddStaff4({
       pgMarksheet2: sections.includes("PG") && !fileNames.pgMarksheet2,
 
       // PhD Section validation
-      phdInstitute: sections.includes("PhD") && !formData.phdInstitute,
-      phdSubject: sections.includes("PhD") && !formData.phdSubject,
-      phdThesis: sections.includes("PhD") && !formData.phdThesis,
-      phdCertificate: sections.includes("PhD") && !fileNames.phdCertificate
+      phdInstitute: sections.includes("PHD") && !formData.phdInstitute,
+      phdSubject: sections.includes("PHD") && !formData.phdSubject,
+      phdThesis: sections.includes("PHD") && !formData.phdThesis,
+      phdCertificate: sections.includes("PHD") && !fileNames.phdCertificate
     };
 
     if (show) setErrors(newErrors);
@@ -202,8 +218,8 @@ export default function AddStaff4({
       ...prev,
       educationLevel,
       sections,
-      fileNames,
-      files,
+      fileNames: { ...prev.fileNames, ...fileNames },
+      files: { ...prev.files, ...files },
       ugYears
     }));
     validateForm();
@@ -396,13 +412,44 @@ export default function AddStaff4({
     </Box>
   );
 
+  // Modify your reset function to preserve sections
+  const resetForm = async () => {
+    // Only clear files when explicitly resetting (like after submission)
+    await clearAllFilesFromDB();
+
+    // Reset all state except sections
+    setFileNames({});
+    setFiles({});
+    setUgYears(3);
+    setEducationLevel("");
+
+    // Reset form data for education fields
+    setFormData((prev) => ({
+      ...prev,
+      educationLevel: "",
+      fileNames: {},
+      files: {},
+      ugYears: 3,
+      // Reset all education-related fields
+      tenthBoard: "",
+      tenthPercentage: ""
+      // ... (reset all other education fields)
+    }));
+  };
+
   const handleEducationLevelChange = (event) => {
     setEducationLevel(event.target.value);
   };
 
+  // Modified handleAddEducationSection
   const handleAddEducationSection = () => {
-    if (educationLevel && !sections.includes(educationLevel)) {
-      setSections([...sections, educationLevel]);
+    if (formData.educationLevel && !sections.includes(formData.educationLevel)) {
+      const newSections = [...sections, formData.educationLevel];
+      setSections(newSections);
+
+      // Reset education level selection after adding
+      setEducationLevel("");
+      setFormData((prev) => ({ ...prev, educationLevel: "" }));
     }
   };
 
@@ -432,6 +479,59 @@ export default function AddStaff4({
       setErrors((prev) => ({ ...prev, [field]: !formData[field] }));
     }
   };
+
+  const fetchedOnce = useRef(false);
+
+  const [educationTypeOptions, setEducationTypeOptions] = useState([]);
+  const fetchEducationTypeOptions = async () => {
+    try {
+      const response = await axios.get(`${BASE_URL}/api/master/education_type`, {
+        withCredentials: true
+      });
+      setEducationTypeOptions(response.data);
+    } catch (error) {
+      console.error("Error fetching education type options:", error);
+    }
+  };
+
+  useEffect(() => {
+    if (!fetchedOnce.current) {
+      fetchEducationTypeOptions();
+      fetchedOnce.current = true;
+    }
+  }, []);
+
+  // Add this useEffect to handle reset
+  useEffect(() => {
+    if (!formData.educationLevel) {
+      setEducationLevel("");
+      // setFileNames({});
+      // setFiles({});
+      setUgYears(3);
+      setErrors({
+        tenthBoard: false,
+        tenthPercentage: false,
+        tenthYear: false,
+        tenthMarksheet: false,
+        twelfthBoard: false,
+        twelfthPercentage: false,
+        twelfthYear: false,
+        twelfthMarksheet: false,
+        ugCollegeName: false,
+        ugCourse: false,
+        ugPercentage: false,
+        pgCollegeName: false,
+        pgCourse: false,
+        pgPercentage: false,
+        pgMarksheet1: false,
+        pgMarksheet2: false,
+        phdInstitute: false,
+        phdSubject: false,
+        phdThesis: false,
+        phdCertificate: false
+      });
+    }
+  }, [formData.educationLevel]);
 
   return (
     <Box
@@ -828,11 +928,11 @@ export default function AddStaff4({
       )}
 
       {/* PhD Section */}
-      {sections.includes("PhD") && (
+      {sections.includes("PHD") && (
         <Box mb={3}>
           <Typography variant="subtitle1" sx={{ fontWeight: 500, mb: 1.5 }}>
             PhD (Doctorate)
-            <IconButton sx={{ float: "right" }} onClick={() => handleRemoveSection("PhD")}>
+            <IconButton sx={{ float: "right" }} onClick={() => handleRemoveSection("PHD")}>
               <DeleteIcon />
             </IconButton>
           </Typography>
@@ -899,20 +999,25 @@ export default function AddStaff4({
           <InputLabel id="education-level-label">Select Level</InputLabel>
           <Select
             labelId="education-level-label"
-            value={educationLevel}
+            value={formData.educationLevel || ""}
             label="Select Level"
-            onChange={handleEducationLevelChange}
+            onChange={(e) => handleBasicFieldChange("educationLevel", e.target.value)}
             sx={inputStyle}
           >
-            <MenuItem value="UG">Undergraduate (UG)</MenuItem>
-            <MenuItem value="PG">Postgraduate (PG)</MenuItem>
-            <MenuItem value="PhD">PhD</MenuItem>
+            <MenuItem value="" disabled>
+              Select Education Level
+            </MenuItem>
+            {educationTypeOptions.map((option) => (
+              <MenuItem key={option._id} value={option.name} sx={{ fontSize: "0.875rem" }}>
+                {option.name}
+              </MenuItem>
+            ))}
           </Select>
         </FormControl>
         <Button
           variant="contained"
           onClick={handleAddEducationSection}
-          disabled={!educationLevel || sections.includes(educationLevel)}
+          disabled={!formData.educationLevel || sections.includes(formData.educationLevel)}
         >
           Add
         </Button>
