@@ -126,6 +126,7 @@ export default function PreviewStaffDetails({ formData, onSubmit, onBack }) {
       });
 
       if (result.isConfirmed) {
+<<<<<<< HEAD
         // Prepare data - HAR FIELD KO ALAG SE HANDLE KARENGE
         const submissionData = {
           // 1. BASIC INFO
@@ -140,6 +141,36 @@ export default function PreviewStaffDetails({ formData, onSubmit, onBack }) {
           alt_email: formData.basicInfo?.alternateEmail || null,
           contact_no_1: formData.basicInfo?.phone || "",
           contact_no_2: formData.basicInfo?.emergencyContact || null,
+=======
+        // Strict type conversion functions
+        const toString = (value) => (value !== undefined && value !== null ? String(value) : "");
+        const toDateString = (value) => {
+          if (!value) return null;
+          try {
+            return new Date(value).toISOString();
+          } catch {
+            return null;
+          }
+        };
+        const toNumber = (value) => (value !== undefined && value !== null ? Number(value) : null);
+        const toBoolean = (value) =>
+          value !== undefined && value !== null ? Boolean(value) : false;
+        let submissionData=new FormData();
+        // Prepare the submission data with strict type checking
+         submissionData = {
+          // String fields (required)
+          user_id: toString(formData.basicInfo?.staffId),
+          first_name: toString(formData.basicInfo?.firstName),
+          middle_name: null, // Explicit null as per API
+          last_name: toString(formData.basicInfo?.lastName),
+          full_name: `${toString(formData.basicInfo?.firstName)} ${toString(
+            formData.basicInfo?.lastName
+          )}`.trim(),
+          email: toString(formData.basicInfo?.email),
+          alt_email: toString(formData.basicInfo?.alternateEmail) || null,
+          cantact_no_1: toString(formData.basicInfo?.phone),
+          cantact_no_2: toString(formData.basicInfo?.emergencyContact) || null,
+>>>>>>> 6aa17dd80fe2ccef48199b1739a284fa0addda7c
 
           // 2. FAMILY INFO
           father_name: `${formData.basicInfo?.fatherTitle || ""} ${
@@ -202,11 +233,23 @@ export default function PreviewStaffDetails({ formData, onSubmit, onBack }) {
           leaving_date: formData.basicInfo?.leavingDate || null,
           department_id: formData.basicInfo?.departmentId || null,
 
+<<<<<<< HEAD
           // 6. BANK DETAILS
           bank_name: formData.bankInfo?.bankName || null,
           bank_acc_no: formData.bankInfo?.accountNumber || null,
           ifsc_code: formData.bankInfo?.ifscCode || null,
           branch_address: formData.bankInfo?.branchName || null,
+=======
+          // Bank Details
+          bank_name: toString(formData.bankInfo?.bankName) || null,
+          bank_acc_no: toString(formData.bankInfo?.accountNumber) || null,
+          ifsc_code: toString(formData.bankInfo?.ifscCode) || null,
+          branch_address: toString(formData.bankInfo?.branchName) || null,
+          PF_no: toString(formData.payrollInfo?.epfNo) || null,
+          tenthBoard: toString(formData.tenthBoard) || null,
+          tenthPercentage: toString(formData.tenthPercentage) || null,
+          PF_no: toString(formData.tenthPercentage) || null,
+>>>>>>> 6aa17dd80fe2ccef48199b1739a284fa0addda7c
 
           // 7. PAYROLL INFORMATION
           UAN_no: formData.payrollInfo?.uanNo || null,
@@ -370,6 +413,7 @@ export default function PreviewStaffDetails({ formData, onSubmit, onBack }) {
 
           // 10. SYSTEM FIELDS
           profile_photo_path: formData.selectedImage || null,
+<<<<<<< HEAD
           house_id: null, // Form mein nahi hai
           created_by: null, // Form mein nahi hai
           updated_by: null, // Form mein nahi hai
@@ -378,6 +422,39 @@ export default function PreviewStaffDetails({ formData, onSubmit, onBack }) {
           status: "Active", // Hardcoded
           createdAt: null, // Form mein nahi hai
           updatedAt: null // Form mein nahi hai
+=======
+          aadharBack: formData.files.aadharBack || null,
+          aadharFront: formData.files.aadharFront || null,
+          joiningLetter: formData.files.joiningLetter || null,
+          panCard: formData.files.panCard || null,
+          resume: formData.files.resume || null,
+          tenthMarksheet: formData.files.tenthMarksheet || null,
+          twelfthMarksheet: formData.files.twelfthMarksheet || null,
+          
+          // Default values with proper types
+          spouse_name: null,
+          spouse_dob: null,
+          no_of_children: null,
+          date_of_resignation: null,
+          leaving_date: null,
+          tax_region: null,
+          UAN_no: null,
+          esic_no: null,
+          department_id: null,
+          class: null,
+          section: null,
+          school_roll_no: null,
+          admission_no: null,
+          admission_date: null,
+          house_id: null,
+          created_by: null,
+          updated_by: null,
+          deactivated: false, // Boolean
+          deleted_on: null,
+          status: "true", // API expects string "true"/"false"
+          createdAt: null,
+          updatedAt: null
+>>>>>>> 6aa17dd80fe2ccef48199b1739a284fa0addda7c
         };
 
         // Debug log
@@ -385,16 +462,32 @@ export default function PreviewStaffDetails({ formData, onSubmit, onBack }) {
 
         console.log("Education Details to be submitted:", submissionData.eduDetails);
 
+<<<<<<< HEAD
         console.log("Documents to be submitted:", submissionData.documents);
 
         // API Call
+=======
+        if (missingFields.length > 0) {
+          throw new Error(`Missing required fields: ${missingFields.join(", ")}`);
+        }
+        console.log("formData.files are", formData.files);
+>>>>>>> 6aa17dd80fe2ccef48199b1739a284fa0addda7c
         const response = await axios.post(
-          "https://backend-aufx.onrender.com/api/user_details/create",
-          submissionData,
+          `${BASE_URL}/api/user_details/create`,
+            submissionData
+          ,
           {
+<<<<<<< HEAD
             withCredentials: true,
             headers: { "Content-Type": "application/json" }
           }
+=======
+            headers: {
+            "Content-Type": "multipart/form-data",
+            
+          },
+          },
+>>>>>>> 6aa17dd80fe2ccef48199b1739a284fa0addda7c
         );
 
         // Response mein bhi check karo

@@ -19,10 +19,11 @@ export const AuthProvider = ({ children }) => {
 
   const fetchUser = async () => {
     try {
+      // console.log(BASE_URL);
       const response = await axios.get(`${BASE_URL}/api/auth/validate`, {
         withCredentials: true,
       });
-
+      
       if (response.status === 200) {
         setUserId(response.data.userId);
         setError(null);

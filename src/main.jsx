@@ -7,6 +7,7 @@ import "perfect-scrollbar/css/perfect-scrollbar.css";
 // export const BASE_URL = "https://backend-aufx.onrender.com";
 export const BASE_URL = "http://localhost:5173";
 // const BASE_URL = "https://backend-aufx.onrender.com";
+// export const BASE_URL = "http://localhost:5000";
 // if (window.location.host == "localhost:5173") {
 // }
 const root = createRoot(document.getElementById("root"));
