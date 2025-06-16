@@ -11,7 +11,10 @@ const CardContainer = () => {
   useEffect(() => {
     const fetchUsers = async () => {
       try {
-        const response = await axios.get("https://backend-aufx.onrender.com/api/user_details");
+        const response = await axios.get("http://localhost:5000/api/user_details", {
+          withCredentials: true
+        });
+
         console.log("Full API response:", response); // Debugging log
 
         // Handle the API response structure

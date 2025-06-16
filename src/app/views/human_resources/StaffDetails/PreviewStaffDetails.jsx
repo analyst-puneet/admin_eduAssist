@@ -215,158 +215,158 @@ export default function PreviewStaffDetails({ formData, onSubmit, onBack }) {
           tax_region: formData.payrollInfo?.taxRegion || null,
 
           // 8. EDUCATION DETAILS
-          // eduDetails: [
-          //   // 10th details - compulsory
-          //   {
-          //     qualification: "10th",
-          //     board: formData.tenthBoard,
-          //     percentage: formData.tenthPercentage,
-          //     year: formData.tenthYear,
-          //     marksheet: formData.fileNames?.tenthMarksheet || null,
-          //     ...(formData.fileNames?.tenthCertificate && {
-          //       certificate: formData.fileNames.tenthCertificate
-          //     })
-          //   },
-          //   // 12th details - compulsory
-          //   {
-          //     qualification: "12th",
-          //     board: formData.twelfthBoard,
-          //     percentage: formData.twelfthPercentage,
-          //     year: formData.twelfthYear,
-          //     marksheet: formData.fileNames?.twelfthMarksheet || null,
-          //     ...(formData.fileNames?.twelfthCertificate && {
-          //       certificate: formData.fileNames.twelfthCertificate
-          //     })
-          //   },
-          //   // UG details - only if added by user
-          //   ...(formData.sections?.includes("UG")
-          //     ? [
-          //         {
-          //           qualification: "UG",
-          //           institution: formData.ugCollegeName,
-          //           course: formData.ugCourse,
-          //           percentage: formData.ugPercentage,
-          //           duration: formData.ugYears,
-          //           marksheets: [
-          //             // 3 compulsory marksheets
-          //             {
-          //               year: 1,
-          //               filename: formData.fileNames?.ugYear1 || null
-          //             },
-          //             {
-          //               year: 2,
-          //               filename: formData.fileNames?.ugYear2 || null
-          //             },
-          //             {
-          //               year: 3,
-          //               filename: formData.fileNames?.ugYear3 || null
-          //             },
-          //             // dynamically added extra marksheets (optional)
-          //             ...(formData.extraUgMarksheets?.map((fileObj, index) => ({
-          //               year: 4 + index,
-          //               filename: fileObj.filename || null
-          //             })) || [])
-          //           ]
-          //         }
-          //       ]
-          //     : []),
-          //   // PG details - only if added by user
-          //   ...(formData.sections?.includes("PG")
-          //     ? [
-          //         {
-          //           qualification: "PG",
-          //           institution: formData.pgCollegeName,
-          //           course: formData.pgCourse,
-          //           percentage: formData.pgPercentage,
-          //           marksheets: [
-          //             { year: 1, filename: formData.fileNames?.pgMarksheet1 || null },
-          //             { year: 2, filename: formData.fileNames?.pgMarksheet2 || null }
-          //           ]
-          //         }
-          //       ]
-          //     : []),
-          //   // PhD details - only if added by user
-          //   ...(formData.sections?.includes("PhD")
-          //     ? [
-          //         {
-          //           qualification: "PhD",
-          //           institution: formData.phdInstitute,
-          //           subject: formData.phdSubject,
-          //           thesis: formData.phdThesis,
-          //           certificate: formData.fileNames?.phdCertificate || null
-          //         }
-          //       ]
-          //     : [])
-          // ],
+          eduDetails: [
+            // 10th details - compulsory
+            {
+              qualification: "10th",
+              board: formData.tenthBoard,
+              percentage: formData.tenthPercentage,
+              year: formData.tenthYear,
+              marksheet: formData.fileNames?.tenthMarksheet || null,
+              ...(formData.fileNames?.tenthCertificate && {
+                certificate: formData.fileNames.tenthCertificate
+              })
+            },
+            // 12th details - compulsory
+            {
+              qualification: "12th",
+              board: formData.twelfthBoard,
+              percentage: formData.twelfthPercentage,
+              year: formData.twelfthYear,
+              marksheet: formData.fileNames?.twelfthMarksheet || null,
+              ...(formData.fileNames?.twelfthCertificate && {
+                certificate: formData.fileNames.twelfthCertificate
+              })
+            },
+            // UG details - only if added by user
+            ...(formData.sections?.includes("UG")
+              ? [
+                  {
+                    qualification: "UG",
+                    institution: formData.ugCollegeName,
+                    course: formData.ugCourse,
+                    percentage: formData.ugPercentage,
+                    duration: formData.ugYears,
+                    marksheets: [
+                      // 3 compulsory marksheets
+                      {
+                        year: 1,
+                        filename: formData.fileNames?.ugYear1 || null
+                      },
+                      {
+                        year: 2,
+                        filename: formData.fileNames?.ugYear2 || null
+                      },
+                      {
+                        year: 3,
+                        filename: formData.fileNames?.ugYear3 || null
+                      },
+                      // dynamically added extra marksheets (optional)
+                      ...(formData.extraUgMarksheets?.map((fileObj, index) => ({
+                        year: 4 + index,
+                        filename: fileObj.filename || null
+                      })) || [])
+                    ]
+                  }
+                ]
+              : []),
+            // PG details - only if added by user
+            ...(formData.sections?.includes("PG")
+              ? [
+                  {
+                    qualification: "PG",
+                    institution: formData.pgCollegeName,
+                    course: formData.pgCourse,
+                    percentage: formData.pgPercentage,
+                    marksheets: [
+                      { year: 1, filename: formData.fileNames?.pgMarksheet1 || null },
+                      { year: 2, filename: formData.fileNames?.pgMarksheet2 || null }
+                    ]
+                  }
+                ]
+              : []),
+            // PhD details - only if added by user
+            ...(formData.sections?.includes("PhD")
+              ? [
+                  {
+                    qualification: "PhD",
+                    institution: formData.phdInstitute,
+                    subject: formData.phdSubject,
+                    thesis: formData.phdThesis,
+                    certificate: formData.fileNames?.phdCertificate || null
+                  }
+                ]
+              : [])
+          ],
 
           // 9. DOCUMENTS DETAILS
-          // documents: [
-          //   {
-          //     document1: "Aadhar",
-          //     aadharNo: formData.documents?.aadhaarCard || null,
-          //     files: [
-          //       {
-          //         name: "Aadhar Front",
-          //         filename: formData.files?.aadharFront || null
-          //       },
-          //       {
-          //         name: "Aadhar Back",
-          //         filename: formData.files?.aadharBack || null
-          //       }
-          //     ]
-          //   },
-          //   {
-          //     document2: "PAN Card",
-          //     panNo: formData.documents?.panCard || null,
-          //     files: [
-          //       {
-          //         name: "PAN Front",
-          //         filename: formData.files?.panCard || null
-          //       }
-          //     ]
-          //   },
-          //   ...(formData.documents?.drivingLicense
-          //     ? [
-          //         {
-          //           document3: "Driving License",
-          //           drivingLicenseNo: formData.documents.drivingLicense
-          //         }
-          //       ]
-          //     : []),
+          documents: [
+            {
+              document1: "Aadhar",
+              aadharNo: formData.documents?.aadhaarCard || null,
+              files: [
+                {
+                  name: "Aadhar Front",
+                  filename: formData.files?.aadharFront || null
+                },
+                {
+                  name: "Aadhar Back",
+                  filename: formData.files?.aadharBack || null
+                }
+              ]
+            },
+            {
+              document2: "PAN Card",
+              panNo: formData.documents?.panCard || null,
+              files: [
+                {
+                  name: "PAN Front",
+                  filename: formData.files?.panCard || null
+                }
+              ]
+            },
+            ...(formData.documents?.drivingLicense
+              ? [
+                  {
+                    document3: "Driving License",
+                    drivingLicenseNo: formData.documents.drivingLicense
+                  }
+                ]
+              : []),
 
-          //   ...(formData.documents?.passport
-          //     ? [
-          //         {
-          //           document4: "Passport",
-          //           passportNo: formData.documents.passport
-          //         }
-          //       ]
-          //     : []),
-          //   {
-          //     document5: "Resume",
-          //     resume: formData.files?.resume || null
-          //   },
-          //   {
-          //     document6: "Joining Letter",
-          //     joiningLetter: formData.files?.joiningLetter || null
-          //   },
-          //   ...(formData.files?.offerLetter
-          //     ? [
-          //         {
-          //           document7: "Offer Letter",
-          //           offerLetter: formData.files.offerLetter
-          //         }
-          //       ]
-          //     : []),
-          //   ...(formData.files?.otherDocuments
-          //     ? [
-          //         {
-          //           document8: "Other Documents",
-          //           otherDocuments: formData.files.otherDocuments
-          //         }
-          //       ]
-          //     : [])
-          // ],
+            ...(formData.documents?.passport
+              ? [
+                  {
+                    document4: "Passport",
+                    passportNo: formData.documents.passport
+                  }
+                ]
+              : []),
+            {
+              document5: "Resume",
+              resume: formData.files?.resume || null
+            },
+            {
+              document6: "Joining Letter",
+              joiningLetter: formData.files?.joiningLetter || null
+            },
+            ...(formData.files?.offerLetter
+              ? [
+                  {
+                    document7: "Offer Letter",
+                    offerLetter: formData.files.offerLetter
+                  }
+                ]
+              : []),
+            ...(formData.files?.otherDocuments
+              ? [
+                  {
+                    document8: "Other Documents",
+                    otherDocuments: formData.files.otherDocuments
+                  }
+                ]
+              : [])
+          ],
 
           // 10. SYSTEM FIELDS
           profile_photo_path: formData.selectedImage || null,
@@ -389,7 +389,7 @@ export default function PreviewStaffDetails({ formData, onSubmit, onBack }) {
 
         // API Call
         const response = await axios.post(
-          "https://backend-aufx.onrender.com/api/user_details/create",
+          "http://localhost:5000/api/user_details/create",
           submissionData,
           {
             withCredentials: true,
