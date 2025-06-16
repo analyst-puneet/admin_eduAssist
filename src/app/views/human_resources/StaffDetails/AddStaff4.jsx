@@ -54,6 +54,7 @@ export default function AddStaff4({
   const [openPreview, setOpenPreview] = useState(false);
   const [isFreshForm, setIsFreshForm] = useState(true);
   const [initialLoad, setInitialLoad] = useState(true);
+  const [uploadErrors, setUploadErrors] = useState({});
 
   const objectUrlsRef = useRef([]);
 
@@ -174,6 +175,8 @@ export default function AddStaff4({
 
   // Validate form and notify parent
   const validateForm = (show = false) => {
+    const hasFileSizeErrors = Object.keys(uploadErrors).length > 0;
+
     const newErrors = {
       tenthBoard: !formData.tenthBoard,
       tenthPercentage: !formData.tenthPercentage,
@@ -256,6 +259,22 @@ export default function AddStaff4({
   const handleFileChange = (fieldName, e) => {
     const file = e.target.files[0];
     if (!file) return;
+
+    // Check file size (1MB = 1 * 1024 * 1024 bytes)
+    if (file.size > 1 * 1024 * 1024) {
+      setUploadErrors((prev) => ({
+        ...prev,
+        [fieldName]: "File size should not exceed 1MB"
+      }));
+      return;
+    }
+
+    // Clear any previous error
+    setUploadErrors((prev) => {
+      const newErrors = { ...prev };
+      delete newErrors[fieldName];
+      return newErrors;
+    });
 
     const objectUrl = URL.createObjectURL(file);
     objectUrlsRef.current.push(objectUrl);
@@ -346,68 +365,90 @@ export default function AddStaff4({
       delete updated[fieldName];
       return updated;
     });
+
+    // Clear any upload error for this field
+    setUploadErrors((prev) => {
+      const updated = { ...prev };
+      delete updated[fieldName];
+      return updated;
+    });
   };
 
   const FileInput = ({ label, fieldName, accept = "*", required = false }) => (
-    <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-      <Box
-        component="label"
-        sx={{
-          border: `1px dashed ${
-            errors[fieldName]
-              ? "error.main"
-              : isDarkMode
-              ? theme.palette.grey[600]
-              : theme.palette.grey[400]
-          }`,
-          borderRadius: "6px",
-          p: 1,
-          flexGrow: 1,
-          display: "flex",
-          alignItems: "center",
-          gap: 1,
-          cursor: "pointer",
-          bgcolor: isDarkMode ? theme.palette.grey[800] : theme.palette.background.paper,
-          "&:hover": {
-            borderColor: theme.palette.primary.main
-          }
-        }}
-      >
-        {fileNames[fieldName] ? (
+    <Box>
+      <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+        <Box
+          component="label"
+          sx={{
+            border: `1px dashed ${
+              errors[fieldName] || uploadErrors[fieldName]
+                ? "error.main"
+                : isDarkMode
+                ? theme.palette.grey[600]
+                : theme.palette.grey[400]
+            }`,
+            borderRadius: "6px",
+            p: 1,
+            flexGrow: 1,
+            display: "flex",
+            alignItems: "center",
+            gap: 1,
+            cursor: "pointer",
+            bgcolor: isDarkMode ? theme.palette.grey[800] : theme.palette.background.paper,
+            "&:hover": {
+              borderColor: theme.palette.primary.main
+            }
+          }}
+        >
+          {fileNames[fieldName] ? (
+            <>
+              {files[fieldName]?.type === "application/pdf" ? (
+                <PdfIcon fontSize="small" color="error" />
+              ) : (
+                <ImageIcon fontSize="small" color="primary" />
+              )}
+              <Typography variant="body2" noWrap>
+                {fileNames[fieldName]}
+              </Typography>
+            </>
+          ) : (
+            <>
+              <InsertDriveFileIcon fontSize="small" />
+              <Typography variant="body2" noWrap>
+                {label}
+              </Typography>
+            </>
+          )}
+          <input
+            type="file"
+            accept={accept}
+            onChange={(e) => handleFileChange(fieldName, e)}
+            hidden
+          />
+        </Box>
+        {fileNames[fieldName] && (
           <>
-            {files[fieldName]?.type === "application/pdf" ? (
-              <PdfIcon fontSize="small" color="error" />
-            ) : (
-              <ImageIcon fontSize="small" color="primary" />
-            )}
-            <Typography variant="body2" noWrap>
-              {fileNames[fieldName]}
-            </Typography>
-          </>
-        ) : (
-          <>
-            <InsertDriveFileIcon fontSize="small" />
-            <Typography variant="body2" noWrap>
-              {label}
-            </Typography>
+            <IconButton size="small" onClick={() => handlePreviewFile(fieldName)}>
+              <PreviewIcon fontSize="small" color="primary" />
+            </IconButton>
+            <IconButton size="small" onClick={() => handleRemoveFile(fieldName)}>
+              <DeleteIcon fontSize="small" color="error" />
+            </IconButton>
           </>
         )}
-        <input
-          type="file"
-          accept={accept}
-          onChange={(e) => handleFileChange(fieldName, e)}
-          hidden
-        />
       </Box>
-      {fileNames[fieldName] && (
-        <>
-          <IconButton size="small" onClick={() => handlePreviewFile(fieldName)}>
-            <PreviewIcon fontSize="small" color="primary" />
-          </IconButton>
-          <IconButton size="small" onClick={() => handleRemoveFile(fieldName)}>
-            <DeleteIcon fontSize="small" color="error" />
-          </IconButton>
-        </>
+      {(errors[fieldName] || uploadErrors[fieldName]) && (
+        <Typography
+          variant="caption"
+          color="error"
+          sx={{
+            mt: 0.5,
+            display: "block",
+            fontSize: "0.75rem"
+          }}
+        >
+          {uploadErrors[fieldName] || `${label.split(" ")[0]} is required`}
+        </Typography>
       )}
     </Box>
   );
