@@ -11,7 +11,7 @@ import {
   Snackbar,
   Alert
 } from "@mui/material";
-import React from "react";
+import React, { useEffect, useState } from "react";
 import Addstaff1 from "./AddStaff1";
 import Addstaff4 from "./AddStaff4";
 import Addstaff2 from "./AddStaff2";
@@ -41,6 +41,13 @@ export default function StepperForm() {
       return {};
     }
   });
+
+  useEffect(() => {
+    return () => {
+      // Cleanup when component unmounts
+      sessionStorage.removeItem("staffFormData");
+    };
+  }, []);
 
   // Update the useEffect for storing form data:
   React.useEffect(() => {
@@ -106,11 +113,34 @@ export default function StepperForm() {
 
   const handleReset = () => {
     setActiveStep(0);
-    setFormData({});
+    setPreviewMode(false);
+    setFormData({
+      basicInfo: null,
+      addressInfo: null,
+      experiences: [],
+      documents: null,
+      payrollInfo: null,
+      leaveAllocation: null,
+      bankInfo: null,
+      educationLevel: "",
+      sections: [],
+      fileNames: {},
+      files: {},
+      ugYears: 3,
+      selectedImage: null,
+      role: "",
+      joiningDate: "",
+      sameAsAddress: false
+    });
+
+    // Clear session storage
     sessionStorage.removeItem("staffFormData");
+
+    // Clear IndexedDB
+    clearIndexedDB();
+
     showSuccess("Form has been reset");
   };
-
 
   const handleBackFromPreview = (shouldReset = false) => {
     if (shouldReset) {
@@ -174,7 +204,17 @@ export default function StepperForm() {
     // Here you would typically send the formData to your API
     console.log("Form submitted:", formData);
     showSuccess("Staff member added successfully!");
+
+    // Clear all data after successful submission
     handleReset();
+
+    // Additionally clear IndexedDB
+    clearIndexedDB();
+
+    // Reset the form to initial state
+    setActiveStep(0);
+    setPreviewMode(false);
+    setFormData({});
   };
 
   const showError = (message) => {

@@ -45,6 +45,7 @@ export default function Addstaff1({
   const [role, setRole] = useState(formData.role || "");
   const [joiningDate, setJoiningDate] = useState(formData.joiningDate || "");
   const [sameAsAddress, setSameAsAddress] = useState(formData.sameAsAddress || false);
+  const [uploadError, setUploadError] = useState(null);
 
   const [basicInfo, setBasicInfo] = useState(
     formData.basicInfo || {
@@ -256,6 +257,9 @@ export default function Addstaff1({
       fatherDob: !basicInfo.fatherDob,
       motherContact: !basicInfo.motherContact,
       motherDob: !basicInfo.motherDob,
+      bloodGroup: !basicInfo.bloodGroup,
+      category: !basicInfo.category,
+      religion: !basicInfo.religion,
 
       // Current Address Fields
       currentFullAddress: !addressInfo.currentFullAddress,
@@ -300,6 +304,9 @@ export default function Addstaff1({
       !newErrors.fatherName &&
       !newErrors.motherName &&
       !newErrors.maritalStatus &&
+      !newErrors.bloodGroup &&
+      !newErrors.category &&
+      !newErrors.religion &&
       !newErrors.currentFullAddress &&
       !newErrors.currentPinCode &&
       !newErrors.permanentFullAddress &&
@@ -438,11 +445,18 @@ export default function Addstaff1({
 
   const handleImageChange = async (e) => {
     const file = e.target.files[0];
+    setUploadError(null);
     if (file && file.type.startsWith("image/")) {
+      if (file.size > 200 * 1024) {
+        setUploadError("File size should not exceed 200KB");
+        return;
+      }
+
       if (selectedImage) {
         URL.revokeObjectURL(selectedImage);
         objectUrlsRef.current = objectUrlsRef.current.filter((url) => url !== selectedImage);
       }
+
       const imageUrl = URL.createObjectURL(file);
       setSelectedImage(imageUrl);
 
@@ -626,7 +640,10 @@ export default function Addstaff1({
       field === "fatherContact" ||
       field === "fatherDob" ||
       field === "motherContact" ||
-      field === "motherDob"
+      field === "motherDob" ||
+      field === "bloodGroup" ||
+      field === "category" ||
+      field === "religion"
     ) {
       setErrors((prev) => ({ ...prev, [field]: !basicInfo[field] }));
     } else if (field === "fatherName" || field === "motherName" || field === "maritalStatus") {
@@ -1836,7 +1853,7 @@ export default function Addstaff1({
                       lineHeight: 1.5
                     }}
                   >
-                    {selectedImage ? "Photo selected" : "Upload Photo"}
+                    {selectedImage ? "Photo selected" : "Upload Photo (Max 200KB)"}
                   </Typography>
                   <input
                     id="file-upload"
@@ -1868,6 +1885,11 @@ export default function Addstaff1({
                   </Box>
                 )}
               </Box>
+              {uploadError && (
+                <Alert severity="error" sx={{ mt: 1 }}>
+                  {uploadError}
+                </Alert>
+              )}
             </Grid>
           </Grid>
         </Grid>
