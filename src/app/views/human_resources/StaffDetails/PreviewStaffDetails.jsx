@@ -232,58 +232,77 @@ export default function PreviewStaffDetails({ formData, onSubmit, onBack }) {
       formDataToSend.append("esic_no", formData.payrollInfo?.esicNo || "");
       formDataToSend.append("tax_region", formData.payrollInfo?.taxRegion || "");
 
-     const eduDetailsToSend = formData.eduDetails ? formData.eduDetails.map(edu => {
-      const baseEdu = {
-        qualification: edu.qualification,
-        board: edu.board || edu.institution || '',
-        year: edu.year || '',
-        percentage: edu.percentage || '',
-        course: edu.course || '',
-        institution: edu.institution || ''
-      };
+      // 8. EDUCATION - FIXED VERSION
+      const eduDetailsToSend = [];
 
-      // Add document references based on qualification level
-      switch(edu.qualification) {
-        case '10th':
-          return {
-            ...baseEdu,
-            marksheet: formData.files?.tenthMarksheet ? true : false,
-            certificate: formData.files?.tenthCertificate ? true : false
-          };
-        case '12th':
-          return {
-            ...baseEdu,
-            marksheet: formData.files?.twelfthMarksheet ? true : false,
-            certificate: formData.files?.twelfthCertificate ? true : false
-          };
-        case 'UG':
-          return {
-            ...baseEdu,
-            duration: edu.duration || 3,
-            marksheets: formData.files?.ugYear1 ? [...Array(formData.ugYears || 3)].map((_, i) => 
-              formData.files?.[`ugYear${i+1}`] ? true : false
-            ) : []
-          };
-        case 'PG':
-          return {
-            ...baseEdu,
-            duration: 2,
-            marksheets: formData.files?.pgMarksheet ? [true] : []
-          };
-        case 'PhD':
-          return {
-            ...baseEdu,
-            subject: edu.subject || '',
-            thesis: edu.thesis || '',
-            certificate: formData.files?.phdCertificate ? true : false
-          };
-        default:
-          return baseEdu;
+      // Add 10th details if exists
+      if (formData.tenthBoard) {
+        eduDetailsToSend.push({
+          qualification: "10th",
+          board: formData.tenthBoard,
+          year: formData.tenthYear,
+          percentage: formData.tenthPercentage,
+          marksheet: !!formData.files?.tenthMarksheet,
+          certificate: !!formData.files?.tenthCertificate
+        });
       }
-    }) : [];
 
-    // Stringify the education data
-    formDataToSend.append("eduDetails", JSON.stringify(eduDetailsToSend));
+      // Add 12th details if exists
+      if (formData.twelfthBoard) {
+        eduDetailsToSend.push({
+          qualification: "12th",
+          board: formData.twelfthBoard,
+          year: formData.twelfthYear,
+          percentage: formData.twelfthPercentage,
+          marksheet: !!formData.files?.twelfthMarksheet,
+          certificate: !!formData.files?.twelfthCertificate
+        });
+      }
+
+      // Add UG details if exists
+      if (formData.ugCollegeName) {
+        const ugMarksheets = [];
+        for (let i = 1; i <= (formData.ugYears || 3); i++) {
+          if (formData.files?.[`ugYear${i}`]) {
+            ugMarksheets.push(true);
+          }
+        }
+
+        eduDetailsToSend.push({
+          qualification: "UG",
+          institution: formData.ugCollegeName,
+          course: formData.ugCourse,
+          percentage: formData.ugPercentage,
+          duration: formData.ugYears || 3,
+          marksheets: ugMarksheets
+        });
+      }
+
+      // Add PG details if exists
+      if (formData.pgCollegeName) {
+        eduDetailsToSend.push({
+          qualification: "PG",
+          institution: formData.pgCollegeName,
+          course: formData.pgCourse,
+          percentage: formData.pgPercentage,
+          duration: 2,
+          marksheets: formData.files?.pgMarksheet ? [true] : []
+        });
+      }
+
+      // Add PhD details if exists
+      if (formData.phdCollegeName) {
+        eduDetailsToSend.push({
+          qualification: "PhD",
+          institution: formData.phdCollegeName,
+          subject: formData.phdSubject,
+          thesis: formData.phdThesisTitle,
+          certificate: !!formData.files?.phdCertificate
+        });
+      }
+
+      console.log("Final Education Data:", eduDetailsToSend);
+      formDataToSend.append("educationDetails", JSON.stringify(eduDetailsToSend));
 
       // 9. DOCUMENT DETAILS (as JSON string)
       formDataToSend.append("documents", JSON.stringify(formData.documents || []));
