@@ -299,6 +299,12 @@ export default function PreviewStaffDetails({ formData, onSubmit, onBack }) {
               : [])
           ],
 
+          // DOCUMENT DETAILS (ADDED THIS SECTION)
+          aadhar_no: formData.documents?.aadhaarCard || null,
+          pan_no: formData.documents?.panCard || null,
+          passport_no: formData.documents?.passport || null,
+          driving_license_no: formData.documents?.drivingLicense || null,
+
           // 9. DOCUMENTS DETAILS
           documents: [
             {
