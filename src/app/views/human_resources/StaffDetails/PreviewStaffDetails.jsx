@@ -1429,7 +1429,7 @@ export default function PreviewStaffDetails({ formData, onSubmit, onBack }) {
         </Grid>
 
         {/* Leave Allocation */}
-        <Paper variant="outlined" sx={{ p: 2, borderRadius: 2, mt: 3 }}>
+        {/* <Paper variant="outlined" sx={{ p: 2, borderRadius: 2, mt: 3 }}>
           <Typography variant="subtitle2" sx={{ mb: 2, color: "text.secondary" }}>
             Leave Allocation
           </Typography>
@@ -1487,7 +1487,7 @@ export default function PreviewStaffDetails({ formData, onSubmit, onBack }) {
               </Grid>
             ))}
           </Grid>
-        </Paper>
+        </Paper> */}
       </CardContent>
     </Card>
   );

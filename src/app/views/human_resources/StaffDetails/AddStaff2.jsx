@@ -36,14 +36,14 @@ export default function AddStaff2({
     }
   );
 
-  const [leaveAllocation, setLeaveAllocation] = useState(
-    formData.leaveAllocation || {
-      medicalLeave: "",
-      casualLeave: "",
-      maternityLeave: "",
-      sickLeave: ""
-    }
-  );
+  // const [leaveAllocation, setLeaveAllocation] = useState(
+  //   formData.leaveAllocation || {
+  //     medicalLeave: "",
+  //     casualLeave: "",
+  //     maternityLeave: "",
+  //     sickLeave: ""
+  //   }
+  // );
 
   const [bankInfo, setBankInfo] = useState(
     formData.bankInfo || {
@@ -68,10 +68,10 @@ export default function AddStaff2({
     bankName: false,
     ifscCode: false,
     accountType: false,
-    medicalLeave: false,
-    casualLeave: false,
-    maternityLeave: false,
-    sickLeave: false,
+    // medicalLeave: false,
+    // casualLeave: false,
+    // maternityLeave: false,
+    // sickLeave: false,
     branchName: false
   });
 
@@ -90,10 +90,10 @@ export default function AddStaff2({
       bankName: !bankInfo.bankName,
       ifscCode: !bankInfo.ifscCode,
       accountType: !bankInfo.accountType,
-      medicalLeave: !leaveAllocation.medicalLeave,
-      casualLeave: !leaveAllocation.casualLeave,
-      maternityLeave: !leaveAllocation.maternityLeave,
-      sickLeave: !leaveAllocation.sickLeave,
+      // medicalLeave: !leaveAllocation.medicalLeave,
+      // casualLeave: !leaveAllocation.casualLeave,
+      // maternityLeave: !leaveAllocation.maternityLeave,
+      // sickLeave: !leaveAllocation.sickLeave,
       branchName: !bankInfo.branchName
     };
 
@@ -112,10 +112,10 @@ export default function AddStaff2({
     setFormData((prev) => ({
       ...prev,
       payrollInfo,
-      leaveAllocation,
+      // leaveAllocation,
       bankInfo
     }));
-  }, [payrollInfo, leaveAllocation, bankInfo]);
+  }, [payrollInfo, bankInfo]);
 
   // Validate on mount and when dependencies change
   useEffect(() => {
@@ -172,12 +172,12 @@ export default function AddStaff2({
     }
   };
 
-  const handleLeaveChange = (field, value) => {
-    setLeaveAllocation((prev) => ({
-      ...prev,
-      [field]: value
-    }));
-  };
+  // const handleLeaveChange = (field, value) => {
+  //   setLeaveAllocation((prev) => ({
+  //     ...prev,
+  //     [field]: value
+  //   }));
+  // };
 
   const handleBankInfoChange = (field, value) => {
     setBankInfo((prev) => ({
@@ -208,12 +208,12 @@ export default function AddStaff2({
         workShift: "",
         workLocation: ""
       });
-      setLeaveAllocation({
-        medicalLeave: "",
-        casualLeave: "",
-        maternityLeave: "",
-        sickLeave: ""
-      });
+      // setLeaveAllocation({
+      //   medicalLeave: "",
+      //   casualLeave: "",
+      //   maternityLeave: "",
+      //   sickLeave: ""
+      // });
       setBankInfo({
         accountHolderName: "",
         accountNumber: "",
@@ -233,10 +233,10 @@ export default function AddStaff2({
         bankName: false,
         ifscCode: false,
         accountType: false,
-        medicalLeave: false,
-        casualLeave: false,
-        maternityLeave: false,
-        sickLeave: false,
+        // medicalLeave: false,
+        // casualLeave: false,
+        // maternityLeave: false,
+        // sickLeave: false,
         branchName: false
       });
     }
@@ -381,8 +381,8 @@ export default function AddStaff2({
       />
 
       {/* Leaves Section */}
-      <Box mb={3}>
-        <Typography
+      {/* <Box mb={3}> */}
+        {/* <Typography
           variant="subtitle1"
           sx={{
             fontWeight: 500,
@@ -391,11 +391,11 @@ export default function AddStaff2({
           }}
         >
           Leave Allocation
-        </Typography>
+        </Typography> */}
 
-        <Grid container spacing={1.5}>
+        {/* <Grid container spacing={1.5}> */}
           {/* Medical Leave */}
-          <Grid item xs={12} sm={3}>
+          {/* <Grid item xs={12} sm={3}>
             <TextField
               label="Medical Leave"
               placeholder="Days"
@@ -411,10 +411,10 @@ export default function AddStaff2({
               error={errors.medicalLeave}
               helperText={errors.medicalLeave ? "Medical leave days required" : ""}
             />
-          </Grid>
+          </Grid> */}
 
           {/* Casual Leave */}
-          <Grid item xs={12} sm={3}>
+          {/* <Grid item xs={12} sm={3}>
             <TextField
               label="Casual Leave"
               placeholder="Days"
@@ -430,10 +430,10 @@ export default function AddStaff2({
               error={errors.casualLeave}
               helperText={errors.casualLeave ? "Casual leave days required" : ""}
             />
-          </Grid>
+          </Grid> */}
 
           {/* Maternity Leave */}
-          <Grid item xs={12} sm={3}>
+          {/* <Grid item xs={12} sm={3}>
             <TextField
               label="Maternity Leave"
               placeholder="Days"
@@ -449,10 +449,10 @@ export default function AddStaff2({
               error={errors.maternityLeave}
               helperText={errors.maternityLeave ? "Maternity leave days required" : ""}
             />
-          </Grid>
+          </Grid> */}
 
           {/* Sick Leave */}
-          <Grid item xs={12} sm={3}>
+          {/* <Grid item xs={12} sm={3}>
             <TextField
               label="Sick Leave"
               placeholder="Days"
@@ -468,9 +468,9 @@ export default function AddStaff2({
               error={errors.sickLeave}
               helperText={errors.sickLeave ? "Sick leave days required" : ""}
             />
-          </Grid>
-        </Grid>
-      </Box>
+          </Grid> */}
+        {/* </Grid> */}
+      {/* </Box> */}
 
       <Divider
         sx={{
