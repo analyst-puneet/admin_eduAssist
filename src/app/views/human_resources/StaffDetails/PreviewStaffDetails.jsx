@@ -240,9 +240,9 @@ export default function PreviewStaffDetails({ formData, onSubmit, onBack }) {
               board: formData.tenthBoard,
               percentage: formData.tenthPercentage,
               year: formData.tenthYear,
-              marksheet: formData.fileNames?.tenthMarksheet || null,
-              ...(formData.fileNames?.tenthCertificate && {
-                certificate: formData.fileNames.tenthCertificate
+              marksheet: formData.files?.tenthMarksheet?.name || null,
+              ...(formData.files?.tenthCertificate && {
+                certificate: formData.files.tenthCertificate.name
               })
             },
             // 12th details - compulsory
@@ -251,9 +251,9 @@ export default function PreviewStaffDetails({ formData, onSubmit, onBack }) {
               board: formData.twelfthBoard,
               percentage: formData.twelfthPercentage,
               year: formData.twelfthYear,
-              marksheet: formData.fileNames?.twelfthMarksheet || null,
-              ...(formData.fileNames?.twelfthCertificate && {
-                certificate: formData.fileNames.twelfthCertificate
+              marksheet: formData.files?.twelfthMarksheet?.name || null,
+              ...(formData.files?.twelfthCertificate && {
+                certificate: formData.files.twelfthCertificate.name
               })
             },
             // UG details - only if added by user
@@ -269,20 +269,20 @@ export default function PreviewStaffDetails({ formData, onSubmit, onBack }) {
                       // 3 compulsory marksheets
                       {
                         year: 1,
-                        filename: formData.fileNames?.ugYear1 || null
+                        filename: formData.files?.ugYear1?.name || null
                       },
                       {
                         year: 2,
-                        filename: formData.fileNames?.ugYear2 || null
+                        filename: formData.files?.ugYear2?.name || null
                       },
                       {
                         year: 3,
-                        filename: formData.fileNames?.ugYear3 || null
+                        filename: formData.files?.ugYear3?.name || null
                       },
                       // dynamically added extra marksheets (optional)
                       ...(formData.extraUgMarksheets?.map((fileObj, index) => ({
                         year: 4 + index,
-                        filename: fileObj.filename || null
+                        filename: fileObj.name || null
                       })) || [])
                     ]
                   }
@@ -297,8 +297,8 @@ export default function PreviewStaffDetails({ formData, onSubmit, onBack }) {
                     course: formData.pgCourse,
                     percentage: formData.pgPercentage,
                     marksheets: [
-                      { year: 1, filename: formData.fileNames?.pgMarksheet1 || null },
-                      { year: 2, filename: formData.fileNames?.pgMarksheet2 || null }
+                      { year: 1, filename: formData.files?.pgMarksheet1?.name || null },
+                      { year: 2, filename: formData.files?.pgMarksheet2?.name || null }
                     ]
                   }
                 ]
@@ -311,7 +311,7 @@ export default function PreviewStaffDetails({ formData, onSubmit, onBack }) {
                     institution: formData.phdInstitute,
                     subject: formData.phdSubject,
                     thesis: formData.phdThesis,
-                    certificate: formData.fileNames?.phdCertificate || null
+                    certificate: formData.files?.phdCertificate?.name || null
                   }
                 ]
               : [])
@@ -325,11 +325,11 @@ export default function PreviewStaffDetails({ formData, onSubmit, onBack }) {
               files: [
                 {
                   name: "Aadhar Front",
-                  filename: formData.files?.aadharFront || null
+                  filePath: formData.files?.aadharFront?.name || null
                 },
                 {
                   name: "Aadhar Back",
-                  filename: formData.files?.aadharBack || null
+                  filePath: formData.files?.aadharBack?.name || null
                 }
               ]
             },
@@ -339,7 +339,7 @@ export default function PreviewStaffDetails({ formData, onSubmit, onBack }) {
               files: [
                 {
                   name: "PAN Front",
-                  filename: formData.files?.panCard || null
+                  filePath: formData.files?.panCard?.name || null
                 }
               ]
             },
@@ -362,17 +362,17 @@ export default function PreviewStaffDetails({ formData, onSubmit, onBack }) {
               : []),
             {
               document5: "Resume",
-              resume: formData.files?.resume || null
+              resume: formData.files?.resume?.name || null
             },
             {
               document6: "Joining Letter",
-              joiningLetter: formData.files?.joiningLetter || null
+              joiningLetter: formData.files?.joiningLetter?.name || null
             },
             ...(formData.files?.offerLetter
               ? [
                   {
                     document7: "Offer Letter",
-                    offerLetter: formData.files.offerLetter
+                    offerLetter: formData.files?.offerLetter?.name
                   }
                 ]
               : []),
@@ -380,7 +380,7 @@ export default function PreviewStaffDetails({ formData, onSubmit, onBack }) {
               ? [
                   {
                     document8: "Other Documents",
-                    otherDocuments: formData.files.otherDocuments
+                    otherDocuments: formData.files?.otherDocuments?.name
                   }
                 ]
               : [])
@@ -431,9 +431,14 @@ export default function PreviewStaffDetails({ formData, onSubmit, onBack }) {
         }
         console.log("formData.files are", formData.files);
         const response = await axios.post(
+<<<<<<< HEAD
           `${BASE_URL}/api/user_details/create`,
             submissionData
           ,
+=======
+          "http://localhost:5000/api/user_details/create",
+          submissionData,
+>>>>>>> b52a4d71c62ee57229e732fd11ca8694bd97363a
           {
             headers: {
             "Content-Type": "multipart/form-data",
