@@ -232,23 +232,62 @@ export default function PreviewStaffDetails({ formData, onSubmit, onBack }) {
       formDataToSend.append("esic_no", formData.payrollInfo?.esicNo || "");
       formDataToSend.append("tax_region", formData.payrollInfo?.taxRegion || "");
 
-      // 8. EDUCATION DETAILS (as JSON string)
-      const eduDetailsToSend = formData.eduDetails
-        ? formData.eduDetails.map((edu) => ({
-            qualification: edu.qualification,
-            board: edu.board,
-            year: edu.year,
-            percentage: edu.percentage,
-            course: edu.course,
-            institution: edu.institution
-          }))
-        : [];
+     const eduDetailsToSend = formData.eduDetails ? formData.eduDetails.map(edu => {
+      const baseEdu = {
+        qualification: edu.qualification,
+        board: edu.board || edu.institution || '',
+        year: edu.year || '',
+        percentage: edu.percentage || '',
+        course: edu.course || '',
+        institution: edu.institution || ''
+      };
 
-      formDataToSend.append("eduDetails", JSON.stringify(eduDetailsToSend));
+      // Add document references based on qualification level
+      switch(edu.qualification) {
+        case '10th':
+          return {
+            ...baseEdu,
+            marksheet: formData.files?.tenthMarksheet ? true : false,
+            certificate: formData.files?.tenthCertificate ? true : false
+          };
+        case '12th':
+          return {
+            ...baseEdu,
+            marksheet: formData.files?.twelfthMarksheet ? true : false,
+            certificate: formData.files?.twelfthCertificate ? true : false
+          };
+        case 'UG':
+          return {
+            ...baseEdu,
+            duration: edu.duration || 3,
+            marksheets: formData.files?.ugYear1 ? [...Array(formData.ugYears || 3)].map((_, i) => 
+              formData.files?.[`ugYear${i+1}`] ? true : false
+            ) : []
+          };
+        case 'PG':
+          return {
+            ...baseEdu,
+            duration: 2,
+            marksheets: formData.files?.pgMarksheet ? [true] : []
+          };
+        case 'PhD':
+          return {
+            ...baseEdu,
+            subject: edu.subject || '',
+            thesis: edu.thesis || '',
+            certificate: formData.files?.phdCertificate ? true : false
+          };
+        default:
+          return baseEdu;
+      }
+    }) : [];
+
+    // Stringify the education data
+    formDataToSend.append("eduDetails", JSON.stringify(eduDetailsToSend));
 
       // 9. DOCUMENT DETAILS (as JSON string)
       formDataToSend.append("documents", JSON.stringify(formData.documents || []));
-      formDataToSend.append("aadhar_no", formData.documents?.aadharCard || "");
+      formDataToSend.append("aadhar_no", formData.documents?.aadhaarCard || "");
       formDataToSend.append("pan_no", formData.documents?.panCard || "");
       formDataToSend.append("passport_no", formData.documents?.passport || "");
       formDataToSend.append("driving_license_no", formData.documents?.drivingLicense || "");
