@@ -431,14 +431,8 @@ export default function PreviewStaffDetails({ formData, onSubmit, onBack }) {
         }
         console.log("formData.files are", formData.files);
         const response = await axios.post(
-<<<<<<< HEAD
-          `${BASE_URL}/api/user_details/create`,
-            submissionData
-          ,
-=======
           "http://localhost:5000/api/user_details/create",
           submissionData,
->>>>>>> b52a4d71c62ee57229e732fd11ca8694bd97363a
           {
             headers: {
             "Content-Type": "multipart/form-data",
