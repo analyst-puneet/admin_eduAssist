@@ -113,7 +113,6 @@ export default function PreviewStaffDetails({ formData, onSubmit, onBack }) {
 
   const handleSubmit = async () => {
     try {
-      // Confirmation dialog
       const result = await Swal.fire({
         title: "Are you sure?",
         text: "You're about to submit the staff details",
@@ -125,307 +124,182 @@ export default function PreviewStaffDetails({ formData, onSubmit, onBack }) {
         cancelButtonText: "No, cancel"
       });
 
-      if (result.isConfirmed) {
-        // Prepare data - HAR FIELD KO ALAG SE HANDLE KARENGE
-        const submissionData = {
-          // 1. BASIC INFO
-          user_id: formData.basicInfo?.staffId || "",
-          first_name: formData.basicInfo?.firstName || "",
-          middle_name: formData.basicInfo?.middleName || null,
-          last_name: formData.basicInfo?.lastName || "",
-          full_name: `${formData.basicInfo?.firstName || ""} ${
-            formData.basicInfo?.lastName || ""
-          }`.trim(),
-          email: formData.basicInfo?.email || "",
-          alt_email: formData.basicInfo?.alternateEmail || null,
-          contact_no_1: formData.basicInfo?.phone || "",
-          contact_no_2: formData.basicInfo?.emergencyContact || null,
+      if (!result.isConfirmed) return;
 
-          // 2. FAMILY INFO
-          father_name: `${formData.basicInfo?.fatherTitle || ""} ${
-            formData.basicInfo?.fatherName || ""
-          }`.trim(),
-          father_contact_no: formData.basicInfo?.fatherContact || null,
-          father_dob: formData.basicInfo?.fatherDob || null,
-          father_email: formData.basicInfo?.fatherEmail || null,
-          mother_name: `${formData.basicInfo?.motherTitle || ""} ${
-            formData.basicInfo?.motherName || ""
-          }`.trim(),
-          mother_contact_no: formData.basicInfo?.motherContact || null,
-          mother_dob: formData.basicInfo?.motherDob || null,
-          mother_email: formData.basicInfo?.motherEmail || null,
-          guardian_name: formData.basicInfo?.guardianName || null,
-          guardian_contact_no: formData.basicInfo?.guardianContact || null,
-          guardian_dob: formData.basicInfo?.guardianDob || null,
-          guardian_email: formData.basicInfo?.guardianEmail || null,
-          guardian_relation: formData.basicInfo?.guardianRelation || null,
+      const formDataToSend = new FormData();
 
-          // 3. ADDRESS INFO
-          current_address: formData.addressInfo?.currentFullAddress || "",
-          current_city: formData.addressInfo?.currentCity || "",
-          current_state: formData.addressInfo?.currentState || "",
-          current_country: formData.addressInfo?.currentCountry || "",
-          current_pincode: formData.addressInfo?.currentPinCode || "",
-          permanent_address: formData.sameAsAddress
-            ? formData.addressInfo?.currentFullAddress
-            : formData.addressInfo?.permanentFullAddress || "",
-          permanent_city: formData.sameAsAddress
-            ? formData.addressInfo?.currentCity
-            : formData.addressInfo?.permanentCity || "",
-          permanent_state: formData.sameAsAddress
-            ? formData.addressInfo?.currentState
-            : formData.addressInfo?.permanentState || "",
-          permanent_pincode: formData.sameAsAddress
-            ? formData.addressInfo?.currentPinCode
-            : formData.addressInfo?.permanentPinCode || "",
-          permanent_country: formData.sameAsAddress
-            ? formData.addressInfo?.currentCountry
-            : formData.addressInfo?.permanentCountry || "",
+      // 1. USER DETAILS
+      formDataToSend.append("first_name", formData.basicInfo?.firstName || "");
+      formDataToSend.append("middle_name", formData.basicInfo?.middleName || "");
+      formDataToSend.append("last_name", formData.basicInfo?.lastName || "");
+      formDataToSend.append(
+        "full_name",
+        `${formData.basicInfo?.firstName || ""} ${formData.basicInfo?.lastName || ""}`.trim()
+      );
+      formDataToSend.append("email", formData.basicInfo?.email || "");
+      formDataToSend.append("alt_email", formData.basicInfo?.alternateEmail || "");
+      formDataToSend.append("contact_no_1", formData.basicInfo?.phone || "");
+      formDataToSend.append("contact_no_2", formData.basicInfo?.emergencyContact || "");
 
-          // 4. PERSONAL DETAILS
-          gender: formData.basicInfo?.gender || "",
-          dob: formData.basicInfo?.dob || "",
-          blood_group: formData.basicInfo?.bloodGroup || null,
-          marital_status: formData.basicInfo?.maritalStatus || null,
-          spouse_name: formData.basicInfo?.spouseName || null,
-          spouse_dob: formData.basicInfo?.spouseDob || null,
-          no_of_children: formData.basicInfo?.noOfChildren || null,
-          category: formData.basicInfo?.category || "",
-          religion: formData.basicInfo?.religion || "",
+      // 2. FAMILY DETAILS
+      formDataToSend.append(
+        "father_name",
+        `${formData.basicInfo?.fatherTitle || ""} ${formData.basicInfo?.fatherName || ""}`.trim()
+      );
+      formDataToSend.append("father_contact_no", formData.basicInfo?.fatherContact || "");
+      formDataToSend.append("father_dob", formData.basicInfo?.fatherDob || "");
+      formDataToSend.append("father_email", formData.basicInfo?.fatherEmail || "");
+      formDataToSend.append(
+        "mother_name",
+        `${formData.basicInfo?.motherTitle || ""} ${formData.basicInfo?.motherName || ""}`.trim()
+      );
+      formDataToSend.append("mother_contact_no", formData.basicInfo?.motherContact || "");
+      formDataToSend.append("mother_dob", formData.basicInfo?.motherDob || "");
+      formDataToSend.append("mother_email", formData.basicInfo?.motherEmail || "");
+      formDataToSend.append("guardian_name", formData.basicInfo?.guardianName || "");
+      formDataToSend.append("guardian_contact_no", formData.basicInfo?.guardianContact || "");
+      formDataToSend.append("guardian_dob", formData.basicInfo?.guardianDob || "");
+      formDataToSend.append("guardian_email", formData.basicInfo?.guardianEmail || "");
+      formDataToSend.append("guardian_relation", formData.basicInfo?.guardianRelation || "");
 
-          // 5. EMPLOYMENT DETAILS
-          date_of_joining: formData.joiningDate || "",
-          employee_type: formData.role || null,
-          employee_code: formData.basicInfo?.staffId || null,
-          designation_id: formData.basicInfo?.designationId || null,
-          date_of_resignation: formData.basicInfo?.resignationDate || null,
-          leaving_date: formData.basicInfo?.leavingDate || null,
-          department_id: formData.basicInfo?.departmentId || null,
+      // 3. ADDRESS
+      formDataToSend.append("current_address", formData.addressInfo?.currentFullAddress || "");
+      formDataToSend.append("current_city", formData.addressInfo?.currentCity || "");
+      formDataToSend.append("current_state", formData.addressInfo?.currentState || "");
+      formDataToSend.append("current_country", formData.addressInfo?.currentCountry || "");
+      formDataToSend.append("current_pincode", formData.addressInfo?.currentPinCode || "");
 
-          // 6. BANK DETAILS
-          bank_name: formData.bankInfo?.bankName || null,
-          bank_acc_no: formData.bankInfo?.accountNumber || null,
-          ifsc_code: formData.bankInfo?.ifscCode || null,
-          branch_address: formData.bankInfo?.branchName || null,
+      formDataToSend.append(
+        "permanent_address",
+        formData.sameAsAddress
+          ? formData.addressInfo?.currentFullAddress
+          : formData.addressInfo?.permanentFullAddress || ""
+      );
+      formDataToSend.append(
+        "permanent_city",
+        formData.sameAsAddress
+          ? formData.addressInfo?.currentCity
+          : formData.addressInfo?.permanentCity || ""
+      );
+      formDataToSend.append(
+        "permanent_state",
+        formData.sameAsAddress
+          ? formData.addressInfo?.currentState
+          : formData.addressInfo?.permanentState || ""
+      );
+      formDataToSend.append(
+        "permanent_country",
+        formData.sameAsAddress
+          ? formData.addressInfo?.currentCountry
+          : formData.addressInfo?.permanentCountry || ""
+      );
+      formDataToSend.append(
+        "permanent_pincode",
+        formData.sameAsAddress
+          ? formData.addressInfo?.currentPinCode
+          : formData.addressInfo?.permanentPinCode || ""
+      );
 
-          // 7. PAYROLL INFORMATION
-          UAN_no: formData.payrollInfo?.uanNo || null,
-          PF_no: formData.payrollInfo?.epfNo || null,
-          esic_no: formData.payrollInfo?.esicNo || null,
-          tax_region: formData.payrollInfo?.taxRegion || null,
+      // 4. PERSONAL DETAILS
+      formDataToSend.append("gender", formData.basicInfo?.gender || "");
+      formDataToSend.append("dob", formData.basicInfo?.dob || "");
+      formDataToSend.append("blood_group", formData.basicInfo?.bloodGroup || "");
+      formDataToSend.append("marital_status", formData.basicInfo?.maritalStatus || "");
+      formDataToSend.append("spouse_name", formData.basicInfo?.spouseName || "");
+      formDataToSend.append("spouse_dob", formData.basicInfo?.spouseDob || "");
+      formDataToSend.append("no_of_children", formData.basicInfo?.noOfChildren || "");
+      formDataToSend.append("category", formData.basicInfo?.category || "");
+      formDataToSend.append("religion", formData.basicInfo?.religion || "");
 
-          // 8. EDUCATION DETAILS
-          eduDetails: [
-            // 10th details - compulsory
-            {
-              qualification: "10th",
-              board: formData.tenthBoard,
-              percentage: formData.tenthPercentage,
-              year: formData.tenthYear,
-              marksheet: formData.files?.tenthMarksheet?.name || null,
-              ...(formData.files?.tenthCertificate && {
-                certificate: formData.files.tenthCertificate.name
-              })
-            },
-            // 12th details - compulsory
-            {
-              qualification: "12th",
-              board: formData.twelfthBoard,
-              percentage: formData.twelfthPercentage,
-              year: formData.twelfthYear,
-              marksheet: formData.files?.twelfthMarksheet?.name || null,
-              ...(formData.files?.twelfthCertificate && {
-                certificate: formData.files.twelfthCertificate.name
-              })
-            },
-            // UG details - only if added by user
-            ...(formData.sections?.includes("UG")
-              ? [
-                  {
-                    qualification: "UG",
-                    institution: formData.ugCollegeName,
-                    course: formData.ugCourse,
-                    percentage: formData.ugPercentage,
-                    duration: formData.ugYears,
-                    marksheets: [
-                      // 3 compulsory marksheets
-                      {
-                        year: 1,
-                        filename: formData.files?.ugYear1?.name || null
-                      },
-                      {
-                        year: 2,
-                        filename: formData.files?.ugYear2?.name || null
-                      },
-                      {
-                        year: 3,
-                        filename: formData.files?.ugYear3?.name || null
-                      },
-                      // dynamically added extra marksheets (optional)
-                      ...(formData.extraUgMarksheets?.map((fileObj, index) => ({
-                        year: 4 + index,
-                        filename: fileObj.name || null
-                      })) || [])
-                    ]
-                  }
-                ]
-              : []),
-            // PG details - only if added by user
-            ...(formData.sections?.includes("PG")
-              ? [
-                  {
-                    qualification: "PG",
-                    institution: formData.pgCollegeName,
-                    course: formData.pgCourse,
-                    percentage: formData.pgPercentage,
-                    marksheets: [
-                      { year: 1, filename: formData.files?.pgMarksheet1?.name || null },
-                      { year: 2, filename: formData.files?.pgMarksheet2?.name || null }
-                    ]
-                  }
-                ]
-              : []),
-            // PhD details - only if added by user
-            ...(formData.sections?.includes("PhD")
-              ? [
-                  {
-                    qualification: "PhD",
-                    institution: formData.phdInstitute,
-                    subject: formData.phdSubject,
-                    thesis: formData.phdThesis,
-                    certificate: formData.files?.phdCertificate?.name || null
-                  }
-                ]
-              : [])
-          ],
+      // 5. EMPLOYMENT DETAILS
+      formDataToSend.append("date_of_joining", formData.joiningDate || "");
+      formDataToSend.append("employee_type", formData.role || "");
+      formDataToSend.append("employee_code", formData.basicInfo?.staffId || "");
+      formDataToSend.append("designation_id", formData.basicInfo?.designationId || "");
+      formDataToSend.append("date_of_resignation", formData.basicInfo?.resignationDate || "");
+      formDataToSend.append("leaving_date", formData.basicInfo?.leavingDate || "");
+      formDataToSend.append("department_id", formData.basicInfo?.departmentId || "");
 
-          // DOCUMENT DETAILS (ADDED THIS SECTION)
-          aadhar_no: formData.documents?.aadhaarCard || null,
-          pan_no: formData.documents?.panCard || null,
-          passport_no: formData.documents?.passport || null,
-          driving_license_no: formData.documents?.drivingLicense || null,
+      // 6. BANK
+      formDataToSend.append("bank_name", formData.bankInfo?.bankName || "");
+      formDataToSend.append("bank_acc_no", formData.bankInfo?.accountNumber || "");
+      formDataToSend.append("ifsc_code", formData.bankInfo?.ifscCode || "");
+      formDataToSend.append("branch_address", formData.bankInfo?.branchName || "");
 
-          // 9. DOCUMENTS DETAILS
-          documents: [
-            {
-              document1: "Aadhar",
-              aadharNo: formData.documents?.aadhaarCard || null,
-              files: [
-                {
-                  name: "Aadhar Front",
-                  filePath: formData.files?.aadharFront?.name || null
-                },
-                {
-                  name: "Aadhar Back",
-                  filePath: formData.files?.aadharBack?.name || null
-                }
-              ]
-            },
-            {
-              document2: "PAN Card",
-              panNo: formData.documents?.panCard || null,
-              files: [
-                {
-                  name: "PAN Front",
-                  filePath: formData.files?.panCard?.name || null
-                }
-              ]
-            },
-            ...(formData.documents?.drivingLicense
-              ? [
-                  {
-                    document3: "Driving License",
-                    drivingLicenseNo: formData.documents.drivingLicense
-                  }
-                ]
-              : []),
+      // 7. PAYROLL
+      formDataToSend.append("UAN_no", formData.payrollInfo?.uanNo || "");
+      formDataToSend.append("PF_no", formData.payrollInfo?.epfNo || "");
+      formDataToSend.append("esic_no", formData.payrollInfo?.esicNo || "");
+      formDataToSend.append("tax_region", formData.payrollInfo?.taxRegion || "");
 
-            ...(formData.documents?.passport
-              ? [
-                  {
-                    document4: "Passport",
-                    passportNo: formData.documents.passport
-                  }
-                ]
-              : []),
-            {
-              document5: "Resume",
-              resume: formData.files?.resume?.name || null
-            },
-            {
-              document6: "Joining Letter",
-              joiningLetter: formData.files?.joiningLetter?.name || null
-            },
-            ...(formData.files?.offerLetter
-              ? [
-                  {
-                    document7: "Offer Letter",
-                    offerLetter: formData.files?.offerLetter?.name
-                  }
-                ]
-              : []),
-            ...(formData.files?.otherDocuments
-              ? [
-                  {
-                    document8: "Other Documents",
-                    otherDocuments: formData.files?.otherDocuments?.name
-                  }
-                ]
-              : [])
-          ],
+      // 8. EDUCATION DETAILS (as JSON string)
+      const eduDetailsToSend = formData.eduDetails
+        ? formData.eduDetails.map((edu) => ({
+            qualification: edu.qualification,
+            board: edu.board,
+            year: edu.year,
+            percentage: edu.percentage,
+            course: edu.course,
+            institution: edu.institution
+          }))
+        : [];
 
-          // 10. SYSTEM FIELDS
-          profile_photo_path: formData.selectedImage || null,
-          house_id: null, // Form mein nahi hai
-          created_by: null, // Form mein nahi hai
-          updated_by: null, // Form mein nahi hai
-          deactivated: false, // Hardcoded
-          deleted_on: null, // Form mein nahi hai
-          status: "Active", // Hardcoded
-          createdAt: null, // Form mein nahi hai
-          updatedAt: null // Form mein nahi hai
-        };
+      formDataToSend.append("eduDetails", JSON.stringify(eduDetailsToSend));
 
-        // Debug log
-        console.log("Final Submission Data:", submissionData);
+      // 9. DOCUMENT DETAILS (as JSON string)
+      formDataToSend.append("documents", JSON.stringify(formData.documents || []));
+      formDataToSend.append("aadhar_no", formData.documents?.aadharCard || "");
+      formDataToSend.append("pan_no", formData.documents?.panCard || "");
+      formDataToSend.append("passport_no", formData.documents?.passport || "");
+      formDataToSend.append("driving_license_no", formData.documents?.drivingLicense || "");
 
-        console.log("Education Details to be submitted:", submissionData.eduDetails);
+      // 10. Append all uploaded files (actual Blob/File objects)
+      Object.keys(formData.files).forEach((key) => {
+        const val = formData.files[key];
+        if (Array.isArray(val)) {
+          val.forEach((file) => formDataToSend.append(key, file));
+        } else if (val) {
+          formDataToSend.append(key, val);
+        }
+      });
 
-        console.log("Documents to be submitted:", submissionData.documents);
+      // 11. SYSTEM FIELDS
+      formDataToSend.append("profile_photo_path", formData.selectedImage || "");
+      formDataToSend.append("house_id", "");
+      formDataToSend.append("created_by", "");
+      formDataToSend.append("updated_by", "");
+      formDataToSend.append("deactivated", "false");
+      formDataToSend.append("deleted_on", "");
+      formDataToSend.append("status", "Active");
+      formDataToSend.append("createdAt", "");
+      formDataToSend.append("updatedAt", "");
 
-        // API Call
-        const response = await axios.post(
-          "http://localhost:5000/api/user_details/create",
-          submissionData,
-          {
-            withCredentials: true,
-            headers: { "Content-Type": "application/json" }
+      // 12. Submit
+      const response = await axios.post(
+        "http://localhost:5000/api/user_details/create",
+        formDataToSend,
+        {
+          withCredentials: true,
+          headers: {
+            // DO NOT manually set 'Content-Type' here; let browser handle it
           }
-        );
+        }
+      );
 
-        // Response mein bhi check karo
-        console.log("API Response:", response.data);
+      console.log("Submitted:", response.data);
 
-        // Success message
-        await Swal.fire({
-          title: "Success!",
-          text: "Staff details submitted successfully",
-          icon: "success",
-          confirmButtonText: "OK",
-          confirmButtonColor: theme.palette.primary.main
-        });
+      await Swal.fire({
+        title: "Success!",
+        text: "Staff details submitted successfully",
+        icon: "success",
+        confirmButtonText: "OK",
+        confirmButtonColor: theme.palette.primary.main
+      });
 
-        // Redirect
-        navigate("/human_resources/staff-details");
-      }
+      navigate("/human_resources/staff-details");
     } catch (error) {
       console.error("Submission error:", error);
-      let errorMessage = "Failed to submit data";
-
-      if (error.response?.data?.message) {
-        errorMessage = error.response.data.message;
-      }
-
+      const errorMessage = error.response?.data?.message || "Failed to submit staff details";
       await Swal.fire({
         title: "Error!",
         text: errorMessage,
