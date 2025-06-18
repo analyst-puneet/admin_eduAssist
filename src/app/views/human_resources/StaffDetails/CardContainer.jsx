@@ -2,7 +2,7 @@ import { Box, Grid, CircularProgress, Alert, Button } from "@mui/material";
 import UserCard from "./UserCard";
 import { useState, useEffect } from "react";
 import axios from "axios";
-
+import { BASE_URL } from "../../../../main";
 const CardContainer = () => {
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -11,7 +11,7 @@ const CardContainer = () => {
   useEffect(() => {
     const fetchUsers = async () => {
       try {
-        const response = await axios.get("http://localhost:5000/api/user_details", {
+        const response = await axios.get(`${BASE_URL}/api/user_details`, {
           withCredentials: true
         });
 

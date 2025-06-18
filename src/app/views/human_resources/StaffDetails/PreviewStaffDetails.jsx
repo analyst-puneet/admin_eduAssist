@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import Swal from "sweetalert2";
 import { useNavigate } from "react-router-dom";
+import { BASE_URL } from "../../../../main";
 import {
   Box,
   Typography,
@@ -71,7 +72,7 @@ import {
   AlternateEmail
 } from "@mui/icons-material";
 
-import { BASE_URL } from "../../../../main";
+// import { BASE_URL } from "../../../../main";
 import axios from "axios";
 
 export default function PreviewStaffDetails({ formData, onSubmit, onBack }) {
@@ -334,7 +335,8 @@ export default function PreviewStaffDetails({ formData, onSubmit, onBack }) {
 
       // 12. Submit
       const response = await axios.post(
-        "http://localhost:5000/api/user_details/create",
+        // "http://localhost:5000/api/user_details/create",
+        `${BASE_URL}/api/user_details/create`,
         formDataToSend,
         {
           withCredentials: true,
