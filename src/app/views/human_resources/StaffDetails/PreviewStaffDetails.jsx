@@ -323,7 +323,26 @@ export default function PreviewStaffDetails({ formData, onSubmit, onBack }) {
       });
 
       // 11. SYSTEM FIELDS
-      formDataToSend.append("profile_photo_path", formData.selectedImage || "");
+      // Profile Photo
+      if (
+        formData.selectedImage &&
+        typeof formData.selectedImage === "string" &&
+        formData.selectedImage.startsWith("blob:")
+      ) {
+        try {
+          const blob = await fetch(formData.selectedImage).then((res) => res.blob());
+          const ext = blob.type.split("/")[1] || "jpg"; // e.g., "image/png" → "png"
+          const file = new File([blob], `profilePhoto.${ext}`, { type: blob.type });
+          formDataToSend.append("profilePhoto", file); // ✅ Proper File object appended
+          console.log("✅ Converted blob to File and appended to FormData");
+        } catch (err) {
+          console.error("❌ Error converting blob to file:", err);
+        }
+      } else if (formData.selectedImage instanceof File) {
+        formDataToSend.append("profilePhoto", formData.selectedImage);
+        console.log("✅ Direct File appended to FormData");
+      }
+
       formDataToSend.append("house_id", "");
       formDataToSend.append("created_by", "");
       formDataToSend.append("updated_by", "");

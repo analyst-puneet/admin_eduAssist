@@ -3,6 +3,7 @@ import { Edit, Visibility } from "@mui/icons-material";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useTheme } from "@mui/material";
+import { BASE_URL } from "../../../../main";
 
 const UserCard = ({ name, id, phone, location, roles, img, department, designation }) => {
   const [isHovered, setIsHovered] = useState(false);
@@ -120,7 +121,7 @@ const UserCard = ({ name, id, phone, location, roles, img, department, designati
         {img ? (
           <Box
             component="img"
-            src={img}
+            src={img ? `${BASE_URL}/${img}` : "/default-user.png"}
             alt={name}
             sx={{ width: "100%", height: "100%", objectFit: "cover" }}
           />
