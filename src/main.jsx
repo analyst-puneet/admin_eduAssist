@@ -4,7 +4,8 @@ import { BrowserRouter } from "react-router-dom";
 import { AuthProvider } from "app/contexts/AuthContext";
 import App from "./app/App";
 import "perfect-scrollbar/css/perfect-scrollbar.css";
-export const BASE_URL = "http://localhost:5000";
+// export const BASE_URL = "http://localhost:5000";
+export const BASE_URL = "https://backend-aufx.onrender.com";
 // const BASE_URL = "https://backend-aufx.onrender.com";
 // export const BASE_URL = "http://localhost:5000";
 // if (window.location.host == "localhost:5173") {
