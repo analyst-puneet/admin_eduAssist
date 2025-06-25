@@ -44,7 +44,7 @@ export default function Analytics() {
     <Fragment>
       <ContentBox className="analytics">
         <Grid container spacing={3}>
-          <Grid size={{ md: 8, xs: 12 }}>
+          <Grid item md={8} xs={12}>
             <StatCards />
             <TopSellingTable />
             <StatCards2 />
@@ -53,7 +53,7 @@ export default function Analytics() {
             <RowCards />
           </Grid>
 
-          <Grid size={{ md: 4, xs: 12 }}>
+          <Grid item md={4} xs={12}>
             <Card sx={{ px: 3, py: 2, mb: 3 }}>
               <Title>Traffic Sources</Title>
               <SubTitle>Last 30 days</SubTitle>

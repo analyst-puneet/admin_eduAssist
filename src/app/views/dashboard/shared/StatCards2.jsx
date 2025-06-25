@@ -44,6 +44,7 @@ const IconBox = styled("div")(() => ({
   overflow: "hidden",
   borderRadius: "300px ",
   justifyContent: "center",
+  alignItems: "center",
   "& .icon": { fontSize: "14px" }
 }));
 
@@ -53,46 +54,43 @@ export default function StatCards2() {
 
   return (
     <Grid container spacing={3} sx={{ mb: 3 }}>
-      <Grid size={{ md: 6, xs: 12 }}>
+      <Grid item md={6} xs={12}>
         <Card elevation={3} sx={{ p: 2 }}>
           <ContentBox>
             <FabIcon size="medium" sx={{ background: "rgba(9, 182, 109, 0.15)" }}>
               <TrendingUp color="success" />
             </FabIcon>
-
-            <H3 color="#08ad6c">Active Users</H3>
+            <H3 sx={{ color: "#08ad6c" }}>Active Users</H3>
           </ContentBox>
 
           <ContentBox sx={{ pt: 2 }}>
             <H1>10.8k</H1>
-
             <IconBox sx={{ backgroundColor: "success.main" }}>
               <ExpandLess className="icon" />
             </IconBox>
-
-            <Span color="#08ad6c">(+21%)</Span>
+            <Span sx={{ color: "#08ad6c" }}>(+21%)</Span>
           </ContentBox>
         </Card>
       </Grid>
 
-      <Grid size={{ md: 6, xs: 12 }}>
+      <Grid item md={6} xs={12}>
         <Card elevation={3} sx={{ p: 2 }}>
           <ContentBox>
-            <FabIcon size="medium" sx={{ backgroundColor: bgError, overflow: "hidden" }}>
+            <FabIcon
+              size="medium"
+              sx={{ backgroundColor: bgError, overflow: "hidden" }}
+            >
               <StarOutline color="error" />
             </FabIcon>
-
-            <H3 color="error.main">Transactions</H3>
+            <H3 sx={{ color: "error.main" }}>Transactions</H3>
           </ContentBox>
 
           <ContentBox sx={{ pt: 2 }}>
             <H1>$2.8M</H1>
-
             <IconBox sx={{ backgroundColor: "error.main" }}>
               <ExpandLess className="icon" />
             </IconBox>
-
-            <Span color="error.main">(+21%)</Span>
+            <Span sx={{ color: "error.main" }}>(+21%)</Span>
           </ContentBox>
         </Card>
       </Grid>

@@ -1,5 +1,4 @@
 import { Fragment } from "react";
-
 import Box from "@mui/material/Box";
 import Fab from "@mui/material/Fab";
 import Card from "@mui/material/Card";
@@ -12,9 +11,8 @@ import MoreVert from "@mui/icons-material/MoreVert";
 import DateRange from "@mui/icons-material/DateRange";
 import StarOutline from "@mui/icons-material/StarOutline";
 import format from "date-fns/format";
-import { Span } from "app/components/Typography";
+import { Span } from "app/components/Typography"; // if Span is a styled 'span'
 
-// STYLED COMPONENTS
 const ProjectName = styled(Span)(({ theme }) => ({
   marginLeft: 24,
   fontWeight: "500",
@@ -25,7 +23,6 @@ const StyledFabStar = styled(Fab)(({ theme }) => ({
   marginLeft: 0,
   boxShadow: "none",
   background: "#08ad6c !important",
-  backgroundColor: "rgba(9, 182, 109, 1) !important",
   [theme.breakpoints.down("sm")]: { display: "none" }
 }));
 
@@ -38,8 +35,10 @@ const StyledFab = styled(Fab)(({ theme }) => ({
 }));
 
 const StyledAvatar = styled(Avatar)(() => ({
-  width: "32px !important",
-  height: "32px !important"
+  width: 32,
+  height: 32,
+  border: "2px solid #fff",
+  boxShadow: "0 0 3px rgba(0,0,0,0.2)"
 }));
 
 export default function RowCards() {
@@ -47,7 +46,7 @@ export default function RowCards() {
     <Fragment key={id}>
       <Card sx={{ py: 1, px: 2 }} className="project-card">
         <Grid container alignItems="center">
-          <Grid size={{ md: 5, xs: 7 }}>
+          <Grid item md={5} xs={7}>
             <Box display="flex" alignItems="center">
               <Checkbox />
 
@@ -65,20 +64,22 @@ export default function RowCards() {
             </Box>
           </Grid>
 
-          <Grid size={{ md: 3, xs: 4 }}>
-            <Box color="text.secondary">{format(new Date().getTime(), "MM/dd/yyyy hh:mma")}</Box>
-          </Grid>
-
-          <Grid size={3} sx={{ display: { xs: "none", sm: "block" } }}>
-            <Box display="flex" position="relative" marginLeft="-0.875rem !important">
-              <StyledAvatar src="/assets/images/face-4.jpg" />
-              <StyledAvatar src="/assets/images/face-4.jpg" />
-              <StyledAvatar src="/assets/images/face-4.jpg" />
-              <StyledAvatar sx={{ fontSize: "14px" }}>+3</StyledAvatar>
+          <Grid item md={3} xs={4}>
+            <Box sx={{ color: "text.secondary" }}>
+              {format(new Date().getTime(), "MM/dd/yyyy hh:mma")}
             </Box>
           </Grid>
 
-          <Grid size={1}>
+          <Grid item md={3} sx={{ display: { xs: "none", sm: "block" } }}>
+            <Box display="flex" position="relative" sx={{ ml: "-14px" }}>
+              <StyledAvatar src="/assets/images/face-4.jpg" sx={{ ml: "14px" }} />
+              <StyledAvatar src="/assets/images/face-4.jpg" sx={{ ml: "-10px" }} />
+              <StyledAvatar src="/assets/images/face-4.jpg" sx={{ ml: "-10px" }} />
+              <StyledAvatar sx={{ fontSize: "14px", ml: "-10px" }}>+3</StyledAvatar>
+            </Box>
+          </Grid>
+
+          <Grid item md={1}>
             <Box display="flex" justifyContent="flex-end">
               <IconButton>
                 <MoreVert />

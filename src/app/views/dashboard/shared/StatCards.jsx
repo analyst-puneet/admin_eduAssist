@@ -9,7 +9,7 @@ import Group from "@mui/icons-material/Group";
 import AttachMoney from "@mui/icons-material/AttachMoney";
 import ShoppingCart from "@mui/icons-material/ShoppingCart";
 import ArrowRightAlt from "@mui/icons-material/ArrowRightAlt";
-import { Small } from "app/components/Typography";
+import Typography from "@mui/material/Typography";
 
 // STYLED COMPONENTS
 const StyledCard = styled(Card)(({ theme }) => ({
@@ -17,24 +17,27 @@ const StyledCard = styled(Card)(({ theme }) => ({
   flexWrap: "wrap",
   alignItems: "center",
   justifyContent: "space-between",
-  padding: "24px !important",
+  padding: "24px",
   background: theme.palette.background.paper,
-  [theme.breakpoints.down("sm")]: { padding: "16px !important" }
+  [theme.breakpoints.down("sm")]: { padding: "16px" }
 }));
 
 const ContentBox = styled(Box)(({ theme }) => ({
   display: "flex",
   flexWrap: "wrap",
   alignItems: "center",
-  "& small": { color: theme.palette.text.secondary },
-  "& .icon": { opacity: 0.6, fontSize: "44px", color: theme.palette.primary.main }
+  "& .icon": {
+    opacity: 0.6,
+    fontSize: "44px",
+    color: theme.palette.primary.main
+  }
 }));
 
 const Heading = styled("h6")(({ theme }) => ({
   margin: 0,
   marginTop: "4px",
   fontSize: "14px",
-  fontWeight: "500",
+  fontWeight: 500,
   color: theme.palette.primary.main
 }));
 
@@ -49,13 +52,14 @@ export default function StatCards() {
   return (
     <Grid container spacing={3} sx={{ mb: "24px" }}>
       {cardList.map(({ amount, Icon, name }) => (
-        <Grid size={{ md: 6, xs: 12 }} key={name}>
+        <Grid item md={6} xs={12} key={name}>
           <StyledCard elevation={6}>
             <ContentBox>
               <Icon className="icon" />
-
-              <Box ml="12px">
-                <Small>{name}</Small>
+              <Box sx={{ ml: 1.5 }}>
+                <Typography variant="caption" color="textSecondary">
+                  {name}
+                </Typography>
                 <Heading>{amount}</Heading>
               </Box>
             </ContentBox>
